@@ -1,0 +1,74 @@
+.navigation {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border-bottom: 1px solid var(--border-color);
+  z-index: 1000;
+  height: 64px;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--primary-green);
+  text-decoration: none;
+}
+
+.navItems {
+  display: flex;
+  gap: 32px;
+}
+
+.navItem {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-weight: 500;
+  padding: 8px 0;
+  transition: color 0.2s ease;
+  position: relative;
+}
+
+.navItem:hover {
+  color: var(--primary-green);
+}
+
+.navItem.active {
+  color: var(--primary-green);
+}
+
+.navItem.active::after {
+  content: "";
+  position: absolute;
+  bottom: -17px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--primary-green);
+}
+
+.authButtons {
+  display: flex;
+  gap: 12px;
+}
+
+@media (max-width: 768px) {
+  .navItems {
+    display: none;
+  }
+
+  .container {
+    padding: 0 16px;
+  }
+}
