@@ -7,7 +7,13 @@ interface SummaryCardProps {
 }
 
 export function SummaryCard({ summary }: SummaryCardProps) {
+  // Add safety checks for undefined summary or missing properties
+  if (!summary) {
+    return null
+  }
+
   const formatDate = (dateString: string) => {
+    if (!dateString) return "N/A"
     return new Date(dateString).toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
@@ -27,32 +33,39 @@ export function SummaryCard({ summary }: SummaryCardProps) {
     }
   }
 
+  // Provide default values for potentially undefined properties
+  const groupName = summary.groupName || "Unknown Group"
+  const title = summary.title || "Untitled Summary"
+  const content = summary.content || "No content available"
+  const type = summary.type || "weekly"
+  const period = summary.period || { start: "", end: "" }
+
   return (
     <div className={styles.card}>
       <div className={styles.header}>
         <div className={styles.avatar}>
           <Image
             src="/placeholder.svg?height=60&width=60"
-            alt={`${summary.groupName} avatar`}
+            alt={`${groupName} avatar`}
             width={60}
             height={60}
             className={styles.avatarImage}
           />
         </div>
         <div className={styles.groupInfo}>
-          <h3 className={styles.groupName}>{summary.groupName}</h3>
-          <span className={styles.summaryType}>{getTypeLabel(summary.type)}</span>
+          <h3 className={styles.groupName}>{groupName}</h3>
+          <span className={styles.summaryType}>{getTypeLabel(type)}</span>
         </div>
       </div>
 
       <div className={styles.content}>
-        <h4 className={styles.summaryTitle}>{summary.title}</h4>
-        <p className={styles.summaryContent}>{summary.content}</p>
+        <h4 className={styles.summaryTitle}>{title}</h4>
+        <p className={styles.summaryContent}>{content}</p>
       </div>
 
       <div className={styles.footer}>
         <span className={styles.period}>
-          {formatDate(summary.period.start)} - {formatDate(summary.period.end)}
+          {formatDate(period.start)} - {formatDate(period.end)}
         </span>
         <button className={styles.viewButton}>View Details</button>
       </div>

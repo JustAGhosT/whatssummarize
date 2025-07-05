@@ -1,13 +1,15 @@
 .card {
   background: white;
   border-radius: 12px;
-  border: 1px solid var(--border-color);
+  border: 1px solid #e5e7eb;
   padding: 20px;
   transition: all 0.2s ease;
+  cursor: pointer;
 }
 
 .card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: #00d084;
+  box-shadow: 0 4px 12px rgba(0, 208, 132, 0.1);
   transform: translateY(-2px);
 }
 
@@ -35,8 +37,8 @@
 .groupName {
   font-size: 16px;
   font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 4px;
+  color: #111827;
+  margin: 0 0 4px 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -44,10 +46,11 @@
 
 .summaryType {
   font-size: 12px;
-  color: var(--text-secondary);
-  background: var(--primary-green-light);
+  color: #6b7280;
+  background: #f3f4f6;
   padding: 2px 8px;
   border-radius: 12px;
+  font-weight: 500;
 }
 
 .content {
@@ -57,17 +60,18 @@
 .summaryTitle {
   font-size: 14px;
   font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 8px;
+  color: #111827;
+  margin: 0 0 8px 0;
   line-height: 1.4;
 }
 
 .summaryContent {
   font-size: 13px;
-  color: var(--text-secondary);
+  color: #6b7280;
   line-height: 1.5;
+  margin: 0;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -76,20 +80,21 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: 16px;
-  border-top: 1px solid var(--border-color);
+  padding-top: 12px;
+  border-top: 1px solid #f3f4f6;
 }
 
 .period {
-  font-size: 12px;
-  color: var(--text-secondary);
+  font-size: 11px;
+  color: #9ca3af;
+  font-weight: 500;
 }
 
 .viewButton {
   background: none;
   border: none;
-  color: var(--primary-green);
-  font-size: 13px;
+  color: #00d084;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   padding: 4px 0;
@@ -97,6 +102,24 @@
 }
 
 .viewButton:hover {
-  color: var(--primary-green-hover);
+  color: #00b572;
   text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .card {
+    padding: 16px;
+  }
+
+  .groupName {
+    font-size: 15px;
+  }
+
+  .summaryTitle {
+    font-size: 13px;
+  }
+
+  .summaryContent {
+    font-size: 12px;
+  }
 }
