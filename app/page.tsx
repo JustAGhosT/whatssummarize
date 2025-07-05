@@ -1,7 +1,7 @@
 "use client"
 
-import { SummaryCard } from "../src/components/common/summary-card/index"
+import { ThemeProvider } from "../components/theme-provider"
 
 export default function SyntheticV0PageForDeployment() {
-  return <SummaryCard />
+  return <ThemeProvider />
 }

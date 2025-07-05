@@ -3,85 +3,86 @@
 import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useAuth } from "../../../contexts/auth-context"
-import { LoginModal } from "../../auth/login-modal"
-import { SignupModal } from "../../auth/signup-modal"
-import { UserDropdown } from "../../common/user-dropdown"
 import styles from "./navigation.module.css"
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: "📊" },
-  { href: "/customize", label: "Customize", icon: "⚙️" },
   { href: "/groups", label: "Groups", icon: "👥" },
+  { href: "/personal", label: "Personal", icon: "👤" },
+  { href: "/customize", label: "Customize", icon: "⚙️" },
   { href: "/distribution", label: "Distribution", icon: "📤" },
   { href: "/notifications", label: "Notifications", icon: "🔔" },
   { href: "/admin", label: "Admin", icon: "🛠️" },
 ]
 
 export function Navigation() {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const pathname = usePathname()
-  const { isAuthenticated } = useAuth()
-  const [showLoginModal, setShowLoginModal] = useState(false)
-  const [showSignupModal, setShowSignupModal] = useState(false)
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen)
+  }
 
   return (
-    <>
-      <nav className={styles.nav}>
-        <div className={styles.container}>
-          <div className={styles.brand}>
-            <Link href="/" className={styles.logo}>
-              <span className={styles.logoIcon}>💬</span>
-              <span className={styles.logoText}>WhatsApp Summarizer</span>
-            </Link>
-          </div>
-
-          <div className={styles.menu}>
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`${styles.menuItem} ${pathname === item.href ? styles.active : ""}`}
-              >
-                <span className={styles.menuIcon}>{item.icon}</span>
-                <span className={styles.menuLabel}>{item.label}</span>
-              </Link>
-            ))}
-          </div>
-
-          <div className={styles.actions}>
-            {isAuthenticated ? (
-              <UserDropdown />
-            ) : (
-              <div className={styles.authButtons}>
-                <button onClick={() => setShowLoginModal(true)} className={styles.loginBtn}>
-                  Login
-                </button>
-                <button onClick={() => setShowSignupModal(true)} className={styles.signupBtn}>
-                  Sign Up
-                </button>
-              </div>
-            )}
-          </div>
+    <nav className={styles.nav}>
+      <div className={styles.container}>
+        {/* Logo */}
+        <div className={styles.brand}>
+          <Link href="/" className={styles.logo}>
+            <div className={styles.logoIcon}>💬</div>
+            <span className={styles.logoText}>WhatsApp Summarizer</span>
+          </Link>
         </div>
-      </nav>
 
-      <LoginModal
-        isOpen={showLoginModal}
-        onClose={() => setShowLoginModal(false)}
-        onSwitchToSignup={() => {
-          setShowLoginModal(false)
-          setShowSignupModal(true)
-        }}
-      />
+        {/* Desktop Navigation */}
+        <div className={styles.desktopNav}>
+          <ul className={styles.navList}>
+            {navItems.map((item) => (
+              <li key={item.href}>
+                <Link href={item.href} className={`${styles.navLink} ${pathname === item.href ? styles.active : ""}`}>
+                  <span className={styles.navIcon}>{item.icon}</span>
+                  <span className={styles.navLabel}>{item.label}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
 
-      <SignupModal
-        isOpen={showSignupModal}
-        onClose={() => setShowSignupModal(false)}
-        onSwitchToLogin={() => {
-          setShowSignupModal(false)
-          setShowLoginModal(true)
-        }}
-      />
-    </>
+        {/* Actions */}
+        <div className={styles.actions}>
+          {/* Mobile menu button */}
+          <button
+            className={styles.mobileMenuButton}
+            onClick={toggleMobileMenu}
+            aria-label="Toggle mobile menu"
+            aria-expanded={isMobileMenuOpen}
+          >
+            <span className={`${styles.hamburger} ${isMobileMenuOpen ? styles.open : ""}`}>
+              <span></span>
+              <span></span>
+              <span></span>
+            </span>
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Navigation */}
+      <div className={`${styles.mobileNav} ${isMobileMenuOpen ? styles.mobileNavOpen : ""}`}>
+        <ul className={styles.mobileNavList}>
+          {navItems.map((item) => (
+            <li key={item.href}>
+              <Link
+                href={item.href}
+                className={`${styles.mobileNavLink} ${pathname === item.href ? styles.mobileActive : ""}`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <span className={styles.navIcon}>{item.icon}</span>
+                <span className={styles.navLabel}>{item.label}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </nav>
   )
 }

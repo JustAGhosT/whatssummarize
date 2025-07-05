@@ -6,30 +6,43 @@
 .trigger {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.375rem;
-  background: white;
-  color: #374151;
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: all 0.2s;
-  min-width: 150px;
   justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: #ffffff;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #495057;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 160px;
 }
 
 .trigger:hover {
-  border-color: #9ca3af;
-  background: #f9fafb;
+  border-color: #adb5bd;
+  background: #f8f9fa;
 }
 
-.arrow {
+.trigger:focus {
+  outline: none;
+  border-color: #25d366;
+  box-shadow: 0 0 0 3px rgba(37, 211, 102, 0.1);
+}
+
+.triggerText {
+  flex: 1;
+  text-align: left;
+}
+
+.triggerIcon {
   font-size: 0.75rem;
-  transition: transform 0.2s;
+  color: #6c757d;
+  transition: transform 0.2s ease;
 }
 
-.arrowUp {
+.triggerIconOpen {
   transform: rotate(180deg);
 }
 
@@ -38,42 +51,111 @@
   top: 100%;
   left: 0;
   right: 0;
-  z-index: 10;
-  background: white;
-  border: 1px solid #d1d5db;
-  border-radius: 0.375rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  background: #ffffff;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   margin-top: 0.25rem;
+  padding: 0.5rem 0;
+  max-height: 200px;
+  overflow-y: auto;
 }
 
 .option {
   display: block;
   width: 100%;
   padding: 0.75rem 1rem;
-  border: none;
   background: none;
-  color: #374151;
+  border: none;
   font-size: 0.875rem;
+  font-weight: 500;
+  color: #495057;
   text-align: left;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
 }
 
 .option:hover {
-  background: #f3f4f6;
+  background: #f8f9fa;
+  color: #2c3e50;
 }
 
-.option.selected {
-  background: #3b82f6;
-  color: white;
+.option:focus {
+  outline: none;
+  background: #e9ecef;
+  color: #2c3e50;
 }
 
-.option:first-child {
-  border-top-left-radius: 0.375rem;
-  border-top-right-radius: 0.375rem;
+.optionSelected {
+  background: rgba(37, 211, 102, 0.1);
+  color: #25d366;
+  font-weight: 600;
 }
 
-.option:last-child {
-  border-bottom-left-radius: 0.375rem;
-  border-bottom-right-radius: 0.375rem;
+.optionSelected:hover {
+  background: rgba(37, 211, 102, 0.15);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .trigger {
+    padding: 0.625rem 0.75rem;
+    font-size: 0.8125rem;
+    min-width: 140px;
+  }
+
+  .option {
+    padding: 0.625rem 0.75rem;
+    font-size: 0.8125rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .trigger {
+    padding: 0.5rem 0.625rem;
+    font-size: 0.8125rem;
+    min-width: 120px;
+  }
+
+  .option {
+    padding: 0.5rem 0.625rem;
+    font-size: 0.8125rem;
+  }
+}
+
+/* Animation for menu appearance */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.menu {
+  animation: slideDown 0.2s ease-out;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .trigger {
+    border: 2px solid #6c757d;
+  }
+
+  .trigger:focus {
+    border-color: #25d366;
+  }
+
+  .menu {
+    border: 2px solid #6c757d;
+  }
+
+  .option:hover,
+  .option:focus {
+    border: 1px solid #25d366;
+  }
 }

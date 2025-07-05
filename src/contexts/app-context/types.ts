@@ -1,85 +1,71 @@
-export interface User {
-  id: string
-  name: string
-  email: string
-  avatar?: string
-}
-
-export interface WhatsAppGroup {
-  id: string
-  name: string
-  description?: string
-  memberCount: number
-  isActive: boolean
-  lastActivity: string
-}
-
 export interface Summary {
   id: string
-  groupName: string
   title: string
+  type: "daily" | "weekly" | "monthly"
   content: string
   createdAt: string
-  type: "weekly" | "missed" | "topic-based"
-  status: "active" | "archived"
+  updatedAt: string
+  isArchived: boolean
+  groupName?: string
+  participants?: number
+  messageCount?: number
 }
 
-export interface Preferences {
-  summaryTypes: {
-    weeklyDigest: boolean
-    missedMessages: boolean
-    topicBased: boolean
-  }
-  schedule: {
-    frequency: "daily" | "weekly" | "monthly"
-    time: string
-  }
-  keywords: string[]
-}
-
-export interface DistributionChannel {
+export interface PersonalSummary {
   id: string
-  type: "email" | "whatsapp" | "slack" | "teams"
+  userId: string
+  weekStart: string
+  weekEnd: string
+  status: "draft" | "generated" | "shared"
+  messageCount: number
+  topGroups: Array<{
+    name: string
+    messageCount: number
+  }>
+  activityScore: number
+  sharedChannels: string[]
+  generatedAt?: string
+  sharedAt?: string
+  content?: string
+}
+
+export interface ShareChannel {
+  id: string
   name: string
-  config: Record<string, any>
-  isEnabled: boolean
+  type: "email" | "whatsapp" | "slack" | "teams" | "telegram"
+  icon: string
+  enabled: boolean
 }
-
-export interface Notification {
-  id: string
-  type: "summary-ready" | "while-away" | "scheduled-digest"
-  title: string
-  message: string
-  isRead: boolean
-  createdAt: string
-}
-
-export interface AppState {
-  user: User | null
-  groups: WhatsAppGroup[]
-  summaries: Summary[]
-  preferences: Preferences
-  distributionChannels: DistributionChannel[]
-  notifications: Notification[]
-  isLoading: boolean
-  error: string | null
-}
-
-export type AppAction =
-  | { type: "SET_LOADING"; payload: boolean }
-  | { type: "SET_ERROR"; payload: string | null }
-  | { type: "SET_GROUPS"; payload: WhatsAppGroup[] }
-  | { type: "SET_SUMMARIES"; payload: Summary[] }
-  | { type: "UPDATE_PREFERENCES"; payload: Partial<Preferences> }
-  | { type: "ADD_DISTRIBUTION_CHANNEL"; payload: DistributionChannel }
-  | { type: "SET_DISTRIBUTION_CHANNELS"; payload: DistributionChannel[] }
-  | { type: "ADD_NOTIFICATION"; payload: Notification }
 
 export interface AppContextType {
+  // Summaries
   summaries: Summary[]
-  loading: boolean
-  error: string | null
-  addSummary: (summary: Omit<Summary, "id" | "createdAt">) => void
-  deleteSummary: (id: string) => void
+  setSummaries: (summaries: Summary[]) => void
+  addSummary: (summary: Omit<Summary, "id" | "createdAt" | "updatedAt">) => void
   updateSummary: (id: string, updates: Partial<Summary>) => void
+  deleteSummary: (id: string) => void
+  archiveSummary: (id: string) => void
+
+  // Personal Summaries
+  personalSummaries: PersonalSummary[]
+  setPersonalSummaries: (summaries: PersonalSummary[]) => void
+  generatePersonalSummary: (weekStart: string, weekEnd: string) => Promise<PersonalSummary>
+  sharePersonalSummary: (id: string, channels: string[]) => Promise<void>
+
+  // Share Channels
+  shareChannels: ShareChannel[]
+  setShareChannels: (channels: ShareChannel[]) => void
+  updateShareChannel: (id: string, updates: Partial<ShareChannel>) => void
+
+  // Filters
+  filter: string
+  setFilter: (filter: string) => void
+
+  // Loading states
+  isLoading: boolean
+  setIsLoading: (loading: boolean) => void
+
+  // Error handling
+  error: string | null
+  setError: (error: string | null) => void
 }
