@@ -1,5 +1,5 @@
-import { GroupsView } from "../../components/features/groups"
+import { Groups } from "../../components/features/groups"
 
 export default function GroupsPage() {
-  return <GroupsView />
+  return <Groups />
 }

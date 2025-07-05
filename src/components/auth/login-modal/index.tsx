@@ -14,75 +14,75 @@ interface LoginModalProps {
 }
 
 export function LoginModal({ isOpen, onClose, onSwitchToSignup }: LoginModalProps) {
-  const { state, login, clearError } = useAuth()
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  })
+  const { login, isLoading, error, clearError } = useAuth()
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    await login(formData.email, formData.password)
-    if (!state.error) {
+    try {
+      await login(email, password)
       onClose()
-      setFormData({ email: "", password: "" })
+      setEmail("")
+      setPassword("")
+    } catch (err) {
+      // Error is handled by context
     }
   }
 
   const handleClose = () => {
     onClose()
     clearError()
-    setFormData({ email: "", password: "" })
+    setEmail("")
+    setPassword("")
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title="Log In">
-      <div className={styles.modalContent}>
-        <form onSubmit={handleSubmit} className={styles.form}>
-          {state.error && <div className={styles.error}>{state.error}</div>}
+    <Modal isOpen={isOpen} onClose={handleClose} title="Login">
+      <form onSubmit={handleSubmit} className={styles.form}>
+        {error && <div className={styles.error}>{error}</div>}
 
-          <div className={styles.formGroup}>
-            <label htmlFor="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              className="input-field"
-              value={formData.email}
-              onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
-              required
-              disabled={state.isLoading}
-            />
-          </div>
+        <div className={styles.field}>
+          <label htmlFor="email" className={styles.label}>
+            Email
+          </label>
+          <input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className={styles.input}
+            required
+            disabled={isLoading}
+          />
+        </div>
 
-          <div className={styles.formGroup}>
-            <label htmlFor="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              className="input-field"
-              value={formData.password}
-              onChange={(e) => setFormData((prev) => ({ ...prev, password: e.target.value }))}
-              required
-              disabled={state.isLoading}
-            />
-          </div>
+        <div className={styles.field}>
+          <label htmlFor="password" className={styles.label}>
+            Password
+          </label>
+          <input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className={styles.input}
+            required
+            disabled={isLoading}
+          />
+        </div>
 
-          <div className={styles.actions}>
-            <button type="submit" className="btn-primary" disabled={state.isLoading} style={{ width: "100%" }}>
-              {state.isLoading ? "Logging in..." : "Log In"}
-            </button>
-          </div>
-        </form>
+        <button type="submit" className={styles.submitBtn} disabled={isLoading}>
+          {isLoading ? "Logging in..." : "Login"}
+        </button>
 
         <div className={styles.footer}>
-          <p>
-            Don't have an account?{" "}
-            <button type="button" className={styles.switchButton} onClick={onSwitchToSignup} disabled={state.isLoading}>
-              Sign up
-            </button>
-          </p>
+          <span>Don't have an account?</span>
+          <button type="button" onClick={onSwitchToSignup} className={styles.switchBtn}>
+            Sign up
+          </button>
         </div>
-      </div>
+      </form>
     </Modal>
   )
 }

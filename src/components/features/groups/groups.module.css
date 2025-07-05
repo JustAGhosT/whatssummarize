@@ -1,86 +1,236 @@
-.groups {
-  padding: 32px 0;
-}
-
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 2rem 1rem;
 }
 
 .header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 32px;
+  margin-bottom: 2rem;
 }
 
 .title {
-  font-size: 32px;
+  font-size: 2.5rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: #1f2937;
+  margin: 0 0 0.5rem 0;
 }
 
-.sectionTitle {
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 16px;
+.subtitle {
+  font-size: 1.125rem;
+  color: #6b7280;
+  margin: 0;
 }
 
-.emptyState {
-  text-align: center;
-  padding: 40px 20px;
-  color: var(--text-secondary);
-}
-
-.filterSection {
+.controls {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: #f9fafb;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
 }
 
-.filterGroup {
+.filters {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  gap: 0.5rem;
 }
 
-.filterGroup label {
-  font-size: 14px;
+.filterBtn {
+  padding: 0.5rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  background: white;
+  color: #374151;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filterBtn:hover {
+  background: #f3f4f6;
+}
+
+.filterBtn.active {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+.addBtn {
+  padding: 0.5rem 1rem;
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
   font-weight: 500;
-  color: var(--text-primary);
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
 
-.activityResults {
-  min-height: 200px;
+.addBtn:hover {
+  background: #059669;
+}
+
+.groupsList {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-.emptyMessage {
-  color: var(--text-secondary);
-  font-style: italic;
+.groupCard {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  transition: all 0.2s;
+}
+
+.groupCard:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.groupCard.inactive {
+  opacity: 0.7;
+  background: #f9fafb;
+}
+
+.groupHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.groupInfo {
+  flex: 1;
+}
+
+.groupName {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 0.5rem 0;
+}
+
+.groupDescription {
+  color: #6b7280;
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.groupActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.statusBtn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.activeBtn {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.activeBtn:hover {
+  background: #a7f3d0;
+}
+
+.inactiveBtn {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.inactiveBtn:hover {
+  background: #fde68a;
+}
+
+.groupStats {
+  display: flex;
+  gap: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #f3f4f6;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.statLabel {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.statValue {
+  font-size: 0.875rem;
+  color: #374151;
+  font-weight: 500;
+}
+
+.empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  background: #f9fafb;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+}
+
+.emptyIcon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.emptyTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 0.5rem 0;
+}
+
+.emptyText {
+  font-size: 1rem;
+  color: #6b7280;
+  margin: 0;
 }
 
 @media (max-width: 768px) {
   .container {
-    padding: 0 16px;
+    padding: 1rem;
   }
 
-  .header {
-    flex-direction: column;
-    gap: 16px;
-    align-items: flex-start;
+  .title {
+    font-size: 2rem;
   }
 
-  .filterSection {
+  .controls {
     flex-direction: column;
-    gap: 16px;
-    align-items: flex-start;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .filters {
+    justify-content: center;
+  }
+
+  .groupHeader {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .groupStats {
+    flex-direction: column;
+    gap: 1rem;
   }
 }

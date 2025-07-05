@@ -1,5 +1,5 @@
-import { DistributionView } from "../../components/features/distribution"
+import { Distribution } from "../../components/features/distribution"
 
 export default function DistributionPage() {
-  return <DistributionView />
+  return <Distribution />
 }

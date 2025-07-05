@@ -14,118 +14,119 @@ interface SignupModalProps {
 }
 
 export function SignupModal({ isOpen, onClose, onSwitchToLogin }: SignupModalProps) {
-  const { state, signup, clearError } = useAuth()
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-  })
-  const [validationError, setValidationError] = useState("")
+  const { signup, isLoading, error, clearError } = useAuth()
+  const [name, setName] = useState("")
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setValidationError("")
 
-    if (formData.password !== formData.confirmPassword) {
-      setValidationError("Passwords do not match")
+    if (password !== confirmPassword) {
       return
     }
 
-    if (formData.password.length < 6) {
-      setValidationError("Password must be at least 6 characters")
-      return
-    }
-
-    await signup(formData.name, formData.email, formData.password)
-    if (!state.error) {
+    try {
+      await signup(name, email, password)
       onClose()
-      setFormData({ name: "", email: "", password: "", confirmPassword: "" })
+      setName("")
+      setEmail("")
+      setPassword("")
+      setConfirmPassword("")
+    } catch (err) {
+      // Error is handled by context
     }
   }
 
   const handleClose = () => {
     onClose()
     clearError()
-    setValidationError("")
-    setFormData({ name: "", email: "", password: "", confirmPassword: "" })
+    setName("")
+    setEmail("")
+    setPassword("")
+    setConfirmPassword("")
   }
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose} title="Sign Up">
-      <div className={styles.modalContent}>
-        <form onSubmit={handleSubmit} className={styles.form}>
-          {(state.error || validationError) && <div className={styles.error}>{state.error || validationError}</div>}
+      <form onSubmit={handleSubmit} className={styles.form}>
+        {error && <div className={styles.error}>{error}</div>}
 
-          <div className={styles.formGroup}>
-            <label htmlFor="name">Full Name</label>
-            <input
-              type="text"
-              id="name"
-              className="input-field"
-              value={formData.name}
-              onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-              required
-              disabled={state.isLoading}
-            />
-          </div>
+        <div className={styles.field}>
+          <label htmlFor="name" className={styles.label}>
+            Full Name
+          </label>
+          <input
+            id="name"
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className={styles.input}
+            required
+            disabled={isLoading}
+          />
+        </div>
 
-          <div className={styles.formGroup}>
-            <label htmlFor="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              className="input-field"
-              value={formData.email}
-              onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
-              required
-              disabled={state.isLoading}
-            />
-          </div>
+        <div className={styles.field}>
+          <label htmlFor="email" className={styles.label}>
+            Email
+          </label>
+          <input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className={styles.input}
+            required
+            disabled={isLoading}
+          />
+        </div>
 
-          <div className={styles.formGroup}>
-            <label htmlFor="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              className="input-field"
-              value={formData.password}
-              onChange={(e) => setFormData((prev) => ({ ...prev, password: e.target.value }))}
-              required
-              disabled={state.isLoading}
-              minLength={6}
-            />
-          </div>
+        <div className={styles.field}>
+          <label htmlFor="password" className={styles.label}>
+            Password
+          </label>
+          <input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className={styles.input}
+            required
+            disabled={isLoading}
+          />
+        </div>
 
-          <div className={styles.formGroup}>
-            <label htmlFor="confirmPassword">Confirm Password</label>
-            <input
-              type="password"
-              id="confirmPassword"
-              className="input-field"
-              value={formData.confirmPassword}
-              onChange={(e) => setFormData((prev) => ({ ...prev, confirmPassword: e.target.value }))}
-              required
-              disabled={state.isLoading}
-            />
-          </div>
+        <div className={styles.field}>
+          <label htmlFor="confirmPassword" className={styles.label}>
+            Confirm Password
+          </label>
+          <input
+            id="confirmPassword"
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            className={styles.input}
+            required
+            disabled={isLoading}
+          />
+          {password !== confirmPassword && confirmPassword && (
+            <span className={styles.fieldError}>Passwords do not match</span>
+          )}
+        </div>
 
-          <div className={styles.actions}>
-            <button type="submit" className="btn-primary" disabled={state.isLoading} style={{ width: "100%" }}>
-              {state.isLoading ? "Creating account..." : "Sign Up"}
-            </button>
-          </div>
-        </form>
+        <button type="submit" className={styles.submitBtn} disabled={isLoading || password !== confirmPassword}>
+          {isLoading ? "Creating account..." : "Sign Up"}
+        </button>
 
         <div className={styles.footer}>
-          <p>
-            Already have an account?{" "}
-            <button type="button" className={styles.switchButton} onClick={onSwitchToLogin} disabled={state.isLoading}>
-              Log in
-            </button>
-          </p>
+          <span>Already have an account?</span>
+          <button type="button" onClick={onSwitchToLogin} className={styles.switchBtn}>
+            Login
+          </button>
         </div>
-      </div>
+      </form>
     </Modal>
   )
 }

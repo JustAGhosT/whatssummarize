@@ -1,5 +1,5 @@
-import { CustomizeView } from "../../components/features/customize"
+import { Customize } from "../../components/features/customize"
 
 export default function CustomizePage() {
-  return <CustomizeView />
+  return <Customize />
 }

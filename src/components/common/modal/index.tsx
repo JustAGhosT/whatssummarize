@@ -14,16 +14,22 @@ interface ModalProps {
 
 export function Modal({ isOpen, onClose, title, children }: ModalProps) {
   useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose()
+      }
+    }
+
     if (isOpen) {
+      document.addEventListener("keydown", handleEscape)
       document.body.style.overflow = "hidden"
-    } else {
-      document.body.style.overflow = "unset"
     }
 
     return () => {
+      document.removeEventListener("keydown", handleEscape)
       document.body.style.overflow = "unset"
     }
-  }, [isOpen])
+  }, [isOpen, onClose])
 
   if (!isOpen) return null
 
@@ -32,8 +38,8 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
           <h2 className={styles.title}>{title}</h2>
-          <button className={styles.closeButton} onClick={onClose}>
-            ×
+          <button onClick={onClose} className={styles.closeBtn}>
+            ✕
           </button>
         </div>
         <div className={styles.content}>{children}</div>

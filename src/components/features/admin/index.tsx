@@ -1,163 +1,156 @@
 "use client"
 
 import { useState } from "react"
-import { useAppContext } from "../../../contexts/app-context"
 import styles from "./admin.module.css"
 
-export function AdminView() {
-  const { state } = useAppContext()
-  const [activityFilters, setActivityFilters] = useState({
-    startDate: "",
-    endDate: "",
-    activityType: "all",
-    group: "all",
-  })
+interface SystemStats {
+  totalUsers: number
+  activeSummaries: number
+  totalGroups: number
+  systemUptime: string
+}
 
-  const [reportFilters, setReportFilters] = useState({
-    startDate: "",
-    endDate: "",
-    group: "all",
-  })
+const mockStats: SystemStats = {
+  totalUsers: 1247,
+  activeSummaries: 3892,
+  totalGroups: 567,
+  systemUptime: "99.9%",
+}
 
-  const handleFilterActivity = () => {
-    // Implement activity filtering logic
-    console.log("Filtering activity with:", activityFilters)
-  }
+export function Admin() {
+  const [activeTab, setActiveTab] = useState<"overview" | "users" | "settings" | "logs">("overview")
+  const [stats] = useState<SystemStats>(mockStats)
 
-  const handleExportReport = () => {
-    // Implement report export logic
-    console.log("Exporting report with:", reportFilters)
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case "overview":
+        return (
+          <div className={styles.overview}>
+            <div className={styles.statsGrid}>
+              <div className={styles.statCard}>
+                <div className={styles.statIcon}>👥</div>
+                <div className={styles.statInfo}>
+                  <h3 className={styles.statValue}>{stats.totalUsers.toLocaleString()}</h3>
+                  <p className={styles.statLabel}>Total Users</p>
+                </div>
+              </div>
+              <div className={styles.statCard}>
+                <div className={styles.statIcon}>📝</div>
+                <div className={styles.statInfo}>
+                  <h3 className={styles.statValue}>{stats.activeSummaries.toLocaleString()}</h3>
+                  <p className={styles.statLabel}>Active Summaries</p>
+                </div>
+              </div>
+              <div className={styles.statCard}>
+                <div className={styles.statIcon}>💬</div>
+                <div className={styles.statInfo}>
+                  <h3 className={styles.statValue}>{stats.totalGroups.toLocaleString()}</h3>
+                  <p className={styles.statLabel}>Total Groups</p>
+                </div>
+              </div>
+              <div className={styles.statCard}>
+                <div className={styles.statIcon}>⚡</div>
+                <div className={styles.statInfo}>
+                  <h3 className={styles.statValue}>{stats.systemUptime}</h3>
+                  <p className={styles.statLabel}>System Uptime</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+      case "users":
+        return (
+          <div className={styles.users}>
+            <div className={styles.usersList}>
+              <div className={styles.userItem}>
+                <div className={styles.userInfo}>
+                  <img src="/placeholder-user.jpg" alt="User" className={styles.userAvatar} />
+                  <div>
+                    <h4 className={styles.userName}>John Doe</h4>
+                    <p className={styles.userEmail}>john@example.com</p>
+                  </div>
+                </div>
+                <div className={styles.userActions}>
+                  <button className={styles.actionBtn}>Edit</button>
+                  <button className={styles.actionBtn}>Disable</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+      case "settings":
+        return (
+          <div className={styles.settings}>
+            <div className={styles.settingGroup}>
+              <h3 className={styles.settingTitle}>System Configuration</h3>
+              <div className={styles.settingItem}>
+                <label className={styles.settingLabel}>Max Summaries Per User</label>
+                <input type="number" defaultValue="10" className={styles.settingInput} />
+              </div>
+              <div className={styles.settingItem}>
+                <label className={styles.settingLabel}>Summary Retention (days)</label>
+                <input type="number" defaultValue="30" className={styles.settingInput} />
+              </div>
+            </div>
+          </div>
+        )
+      case "logs":
+        return (
+          <div className={styles.logs}>
+            <div className={styles.logsList}>
+              <div className={styles.logItem}>
+                <span className={styles.logTime}>2024-01-15 10:30:00</span>
+                <span className={styles.logLevel}>INFO</span>
+                <span className={styles.logMessage}>User john@example.com created new summary</span>
+              </div>
+              <div className={styles.logItem}>
+                <span className={styles.logTime}>2024-01-15 10:25:00</span>
+                <span className={styles.logLevel}>ERROR</span>
+                <span className={styles.logMessage}>Failed to send email notification</span>
+              </div>
+            </div>
+          </div>
+        )
+      default:
+        return null
+    }
   }
 
   return (
-    <div className={styles.admin}>
-      <div className={styles.container}>
-        <div className={styles.header}>
-          <div>
-            <h1 className={styles.title}>Admin Controls</h1>
-            <p className={styles.subtitle}>
-              Manage your connected groups and monitor user activity across all your WhatsApp communities.
-            </p>
-          </div>
-        </div>
-
-        {/* User Activity Tracking */}
-        <div className="card" style={{ padding: "24px", marginBottom: "24px" }}>
-          <h2 className={styles.sectionTitle}>User Activity Tracking</h2>
-
-          <div className={styles.filterGrid}>
-            <div className={styles.filterGroup}>
-              <label>Start Date</label>
-              <input
-                type="date"
-                className="input-field"
-                value={activityFilters.startDate}
-                onChange={(e) => setActivityFilters((prev) => ({ ...prev, startDate: e.target.value }))}
-              />
-            </div>
-
-            <div className={styles.filterGroup}>
-              <label>End Date</label>
-              <input
-                type="date"
-                className="input-field"
-                value={activityFilters.endDate}
-                onChange={(e) => setActivityFilters((prev) => ({ ...prev, endDate: e.target.value }))}
-              />
-            </div>
-
-            <div className={styles.filterGroup}>
-              <label>Activity Type</label>
-              <select
-                className="select-field"
-                value={activityFilters.activityType}
-                onChange={(e) => setActivityFilters((prev) => ({ ...prev, activityType: e.target.value }))}
-              >
-                <option value="all">All Activity Types</option>
-                <option value="messages">Messages</option>
-                <option value="reactions">Reactions</option>
-                <option value="joins">Group Joins</option>
-              </select>
-            </div>
-
-            <div className={styles.filterGroup}>
-              <label>Group</label>
-              <select
-                className="select-field"
-                value={activityFilters.group}
-                onChange={(e) => setActivityFilters((prev) => ({ ...prev, group: e.target.value }))}
-              >
-                <option value="all">All Groups</option>
-                <option value="group1">Family Chat</option>
-                <option value="group2">Work Team</option>
-              </select>
-            </div>
-          </div>
-
-          <button className="btn-primary" onClick={handleFilterActivity}>
-            Filter Activity
-          </button>
-
-          <div className={styles.activityResults}>
-            <h3>Activity Results</h3>
-            <div className={styles.emptyResults}>
-              <p>No activity data available for the selected filters.</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Connected Groups Management */}
-        <div className="card" style={{ padding: "24px", marginBottom: "24px" }}>
-          <h2 className={styles.sectionTitle}>Connected Groups Management</h2>
-          <div className={styles.emptyState}>
-            <p>No connected groups to manage. Connect groups from the Groups page to see management options here.</p>
-          </div>
-        </div>
-
-        {/* Export Activity Reports */}
-        <div className="card" style={{ padding: "24px" }}>
-          <h2 className={styles.sectionTitle}>Export Activity Reports</h2>
-
-          <div className={styles.exportGrid}>
-            <div className={styles.filterGroup}>
-              <label>Report Start Date</label>
-              <input
-                type="date"
-                className="input-field"
-                value={reportFilters.startDate}
-                onChange={(e) => setReportFilters((prev) => ({ ...prev, startDate: e.target.value }))}
-              />
-            </div>
-
-            <div className={styles.filterGroup}>
-              <label>Report End Date</label>
-              <input
-                type="date"
-                className="input-field"
-                value={reportFilters.endDate}
-                onChange={(e) => setReportFilters((prev) => ({ ...prev, endDate: e.target.value }))}
-              />
-            </div>
-
-            <div className={styles.filterGroup}>
-              <label>Select Group</label>
-              <select
-                className="select-field"
-                value={reportFilters.group}
-                onChange={(e) => setReportFilters((prev) => ({ ...prev, group: e.target.value }))}
-              >
-                <option value="all">All Groups</option>
-                <option value="group1">Family Chat</option>
-                <option value="group2">Work Team</option>
-              </select>
-            </div>
-          </div>
-
-          <button className="btn-primary" onClick={handleExportReport}>
-            Export Activity Report
-          </button>
-        </div>
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <h1 className={styles.title}>Admin Dashboard</h1>
+        <p className={styles.subtitle}>System administration and monitoring</p>
       </div>
+
+      <div className={styles.tabs}>
+        <button
+          onClick={() => setActiveTab("overview")}
+          className={`${styles.tab} ${activeTab === "overview" ? styles.active : ""}`}
+        >
+          Overview
+        </button>
+        <button
+          onClick={() => setActiveTab("users")}
+          className={`${styles.tab} ${activeTab === "users" ? styles.active : ""}`}
+        >
+          Users
+        </button>
+        <button
+          onClick={() => setActiveTab("settings")}
+          className={`${styles.tab} ${activeTab === "settings" ? styles.active : ""}`}
+        >
+          Settings
+        </button>
+        <button
+          onClick={() => setActiveTab("logs")}
+          className={`${styles.tab} ${activeTab === "logs" ? styles.active : ""}`}
+        >
+          Logs
+        </button>
+      </div>
+
+      <div className={styles.content}>{renderTabContent()}</div>
     </div>
   )
 }

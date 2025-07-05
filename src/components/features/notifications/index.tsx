@@ -1,136 +1,188 @@
 "use client"
 
 import { useState } from "react"
-import { useAppContext } from "../../../contexts/app-context"
 import styles from "./notifications.module.css"
 
-export function NotificationsView() {
-  const { state, dispatch } = useAppContext()
-  const [showAddForm, setShowAddForm] = useState(false)
+interface Notification {
+  id: string
+  type: "summary-ready" | "while-away" | "scheduled-digest"
+  title: string
+  message: string
+  isRead: boolean
+  createdAt: string
+}
 
-  const notificationTypes = [
-    {
-      id: "summary-ready",
-      title: "Summary Ready",
-      description: "Get notified when your AI-generated summaries are ready to view",
-      icon: "✅",
-    },
-    {
-      id: "while-away",
-      title: "While You Were Away",
-      description: "Catch up on messages you missed while offline",
-      icon: "🕐",
-    },
-    {
-      id: "scheduled-digest",
-      title: "Scheduled Digest",
-      description: "Regular summaries delivered on your preferred schedule",
-      icon: "📅",
-    },
-  ]
+const mockNotifications: Notification[] = [
+  {
+    id: "1",
+    type: "summary-ready",
+    title: "New Summary Available",
+    message: "Your weekly summary for Family Group is ready to view.",
+    isRead: false,
+    createdAt: "2024-01-15T10:30:00Z",
+  },
+  {
+    id: "2",
+    type: "while-away",
+    title: "Messages While Away",
+    message: "You have 15 new messages in Work Team that need summarizing.",
+    isRead: false,
+    createdAt: "2024-01-14T15:45:00Z",
+  },
+  {
+    id: "3",
+    type: "scheduled-digest",
+    title: "Daily Digest",
+    message: "Your daily digest has been sent to your email.",
+    isRead: true,
+    createdAt: "2024-01-13T09:00:00Z",
+  },
+]
+
+export function Notifications() {
+  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications)
+  const [filter, setFilter] = useState<"all" | "unread" | "read">("all")
+
+  const filteredNotifications = notifications.filter((notification) => {
+    if (filter === "all") return true
+    if (filter === "unread") return !notification.isRead
+    if (filter === "read") return notification.isRead
+    return true
+  })
+
+  const markAsRead = (id: string) => {
+    setNotifications((prev) =>
+      prev.map((notification) => (notification.id === id ? { ...notification, isRead: true } : notification)),
+    )
+  }
+
+  const markAllAsRead = () => {
+    setNotifications((prev) => prev.map((notification) => ({ ...notification, isRead: true })))
+  }
+
+  const deleteNotification = (id: string) => {
+    setNotifications((prev) => prev.filter((notification) => notification.id !== id))
+  }
+
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case "summary-ready":
+        return "📝"
+      case "while-away":
+        return "🔔"
+      case "scheduled-digest":
+        return "📅"
+      default:
+        return "ℹ️"
+    }
+  }
+
+  const getNotificationColor = (type: string) => {
+    switch (type) {
+      case "summary-ready":
+        return styles.summaryReady
+      case "while-away":
+        return styles.whileAway
+      case "scheduled-digest":
+        return styles.scheduledDigest
+      default:
+        return styles.default
+    }
+  }
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    })
+  }
+
+  const unreadCount = notifications.filter((n) => !n.isRead).length
 
   return (
-    <div className={styles.notifications}>
-      <div className={styles.container}>
-        <div className={styles.header}>
-          <div>
-            <h1 className={styles.title}>Notification Settings</h1>
-            <p className={styles.subtitle}>Configure when and how you receive notifications from WhatsSummarize</p>
-          </div>
-        </div>
-
-        <div className="card" style={{ padding: "24px", marginBottom: "24px" }}>
-          <div className={styles.sectionHeader}>
-            <h2>Active Notifications</h2>
-            <button className="btn-primary" onClick={() => setShowAddForm(true)}>
-              + Add New Notification
-            </button>
-          </div>
-
-          <div className={styles.emptyState}>
-            <p>No active notifications configured.</p>
-          </div>
-        </div>
-
-        <div className="card" style={{ padding: "24px" }}>
-          <h2 className={styles.sectionTitle}>Notification Types</h2>
-
-          <div className={styles.notificationTypes}>
-            {notificationTypes.map((type) => (
-              <div key={type.id} className={styles.notificationType}>
-                <div className={styles.typeIcon}>{type.icon}</div>
-                <div className={styles.typeContent}>
-                  <h3 className={styles.typeTitle}>{type.title}</h3>
-                  <p className={styles.typeDescription}>{type.description}</p>
-                </div>
-                <div className={styles.typeActions}>
-                  <label className={styles.toggle}>
-                    <input type="checkbox" />
-                    <span className={styles.slider}></span>
-                  </label>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Footer */}
-        <footer className={styles.footer}>
-          <div className={styles.footerContent}>
-            <div className={styles.footerBrand}>
-              <h3>WhatsSummarize</h3>
-              <p>Streamline your WhatsApp group communication with intelligent automation and AI-powered summaries.</p>
-            </div>
-
-            <div className={styles.footerLinks}>
-              <div className={styles.linkGroup}>
-                <h4>Product</h4>
-                <ul>
-                  <li>
-                    <a href="/dashboard">Dashboard</a>
-                  </li>
-                  <li>
-                    <a href="/groups">Connect Groups</a>
-                  </li>
-                  <li>
-                    <a href="/customize">Customize</a>
-                  </li>
-                </ul>
-              </div>
-
-              <div className={styles.linkGroup}>
-                <h4>Settings</h4>
-                <ul>
-                  <li>
-                    <a href="/distribution">Distribution</a>
-                  </li>
-                  <li>
-                    <a href="/notifications">Notifications</a>
-                  </li>
-                  <li>
-                    <a href="/admin">Admin Controls</a>
-                  </li>
-                </ul>
-              </div>
-
-              <div className={styles.linkGroup}>
-                <h4>Support</h4>
-                <ul>
-                  <li>
-                    <a href="/help">Help Center</a>
-                  </li>
-                  <li>
-                    <a href="/contact">Contact Us</a>
-                  </li>
-                  <li>
-                    <a href="/privacy">Privacy Policy</a>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </footer>
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <h1 className={styles.title}>Notifications</h1>
+        <p className={styles.subtitle}>Stay updated with your summary activities</p>
       </div>
+
+      <div className={styles.controls}>
+        <div className={styles.filters}>
+          <button
+            onClick={() => setFilter("all")}
+            className={`${styles.filterBtn} ${filter === "all" ? styles.active : ""}`}
+          >
+            All ({notifications.length})
+          </button>
+          <button
+            onClick={() => setFilter("unread")}
+            className={`${styles.filterBtn} ${filter === "unread" ? styles.active : ""}`}
+          >
+            Unread ({unreadCount})
+          </button>
+          <button
+            onClick={() => setFilter("read")}
+            className={`${styles.filterBtn} ${filter === "read" ? styles.active : ""}`}
+          >
+            Read ({notifications.length - unreadCount})
+          </button>
+        </div>
+        {unreadCount > 0 && (
+          <button onClick={markAllAsRead} className={styles.markAllBtn}>
+            Mark All as Read
+          </button>
+        )}
+      </div>
+
+      <div className={styles.notificationsList}>
+        {filteredNotifications.map((notification) => (
+          <div
+            key={notification.id}
+            className={`${styles.notificationCard} ${!notification.isRead ? styles.unread : ""}`}
+          >
+            <div className={styles.notificationHeader}>
+              <div className={styles.notificationInfo}>
+                <div className={styles.notificationIcon}>
+                  <span className={`${styles.icon} ${getNotificationColor(notification.type)}`}>
+                    {getNotificationIcon(notification.type)}
+                  </span>
+                  <div>
+                    <h3 className={styles.notificationTitle}>{notification.title}</h3>
+                    <p className={styles.notificationType}>{notification.type.replace("-", " ").toUpperCase()}</p>
+                  </div>
+                </div>
+              </div>
+              <div className={styles.notificationActions}>
+                {!notification.isRead && (
+                  <button onClick={() => markAsRead(notification.id)} className={styles.readBtn} title="Mark as read">
+                    ✓
+                  </button>
+                )}
+                <button onClick={() => deleteNotification(notification.id)} className={styles.deleteBtn} title="Delete">
+                  🗑️
+                </button>
+              </div>
+            </div>
+            <div className={styles.notificationContent}>
+              <p className={styles.notificationMessage}>{notification.message}</p>
+              <span className={styles.notificationDate}>{formatDate(notification.createdAt)}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {filteredNotifications.length === 0 && (
+        <div className={styles.empty}>
+          <div className={styles.emptyIcon}>🔔</div>
+          <h3 className={styles.emptyTitle}>No notifications</h3>
+          <p className={styles.emptyText}>
+            {filter === "all" ? "You're all caught up! No notifications to show." : `No ${filter} notifications found.`}
+          </p>
+        </div>
+      )}
     </div>
   )
 }

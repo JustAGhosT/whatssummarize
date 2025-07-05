@@ -1,5 +1,5 @@
-import { NotificationsView } from "../../components/features/notifications"
+import { Notifications } from "../../components/features/notifications"
 
 export default function NotificationsPage() {
-  return <NotificationsView />
+  return <Notifications />
 }
