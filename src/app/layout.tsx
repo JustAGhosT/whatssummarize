@@ -6,7 +6,7 @@ import { Navigation } from "@/components/layouts/navigation"
 import { EnhancedBackground } from "@/components/common/enhanced-background"
 import { AuthProvider } from "@/contexts/auth-context"
 import { AppProvider } from "@/contexts/app-context"
-import { ThemeProvider } from "@/contexts/theme-context"
+import { ThemeProvider } from "next-themes"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -21,9 +21,14 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <ThemeProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem={false}
+          disableTransitionOnChange
+        >
           <AuthProvider>
             <AppProvider>
               <EnhancedBackground />

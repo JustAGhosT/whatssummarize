@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef } from "react"
-import { useTheme } from "../../../contexts/theme-context"
+import { useTheme } from "next-themes"
 import styles from "./enhanced-background.module.css"
 
 interface Particle {

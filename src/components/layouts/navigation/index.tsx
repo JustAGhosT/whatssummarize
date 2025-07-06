@@ -23,7 +23,7 @@ import {
   LogOut,
   UserCog,
 } from "lucide-react"
-import { useTheme } from "../../../contexts/theme-context"
+import { useTheme } from "next-themes"
 import { useAuth } from "../../../contexts/auth-context"
 import { SearchBar } from "../../common/search-bar"
 import { NotificationBell } from "../../common/notification-bell"
@@ -31,7 +31,7 @@ import styles from "./navigation.module.css"
 
 export function Navigation() {
   const pathname = usePathname()
-  const { theme, toggleTheme } = useTheme()
+  const { theme, setTheme } = useTheme()
   const { user, logout } = useAuth()
   const [moreDropdownOpen, setMoreDropdownOpen] = useState(false)
   const [userDropdownOpen, setUserDropdownOpen] = useState(false)
@@ -182,7 +182,7 @@ export function Navigation() {
             {/* Theme Toggle */}
             <button
               className={styles.iconButton}
-              onClick={toggleTheme}
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
               title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
             >
               {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}

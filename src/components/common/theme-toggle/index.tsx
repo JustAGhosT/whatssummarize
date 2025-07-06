@@ -1,12 +1,12 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useTheme } from "../../../contexts/theme-context"
+import { useTheme } from "next-themes"
 import styles from "./theme-toggle.module.css"
 
 export function ThemeToggle() {
   const [mounted, setMounted] = useState(false)
-  const { theme, toggleTheme } = useTheme()
+  const { theme, setTheme } = useTheme()
 
   useEffect(() => {
     setMounted(true)
@@ -20,6 +20,10 @@ export function ThemeToggle() {
         </div>
       </button>
     )
+  }
+
+  const toggleTheme = () => {
+    setTheme(theme === "dark" ? "light" : "dark")
   }
 
   return (
