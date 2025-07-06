@@ -1,8 +1,18 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import type React from "react"
+
+import { useState, useEffect, useRef } from "react"
 import styles from "./search-bar.module.css"
+
+interface SearchResult {
+  id: string
+  type: "group" | "summary" | "platform"
+  title: string
+  subtitle?: string
+  icon: string
+  url: string
+}
 
 interface SearchBarProps {
   isOpen: boolean
@@ -11,12 +21,47 @@ interface SearchBarProps {
   isMobile?: boolean
 }
 
+const mockResults: SearchResult[] = [
+  {
+    id: "1",
+    type: "group",
+    title: "Family Group",
+    subtitle: "WhatsApp • 12 unread",
+    icon: "👨‍👩‍👧‍👦",
+    url: "/groups/family",
+  },
+  {
+    id: "2",
+    type: "summary",
+    title: "Weekly Summary - Jan 8-14",
+    subtitle: "Personal Summary",
+    icon: "📊",
+    url: "/personal/summary/1",
+  },
+  {
+    id: "3",
+    type: "platform",
+    title: "Slack Integration",
+    subtitle: "Work Team #general",
+    icon: "💼",
+    url: "/distribution/slack",
+  },
+  {
+    id: "4",
+    type: "group",
+    title: "Work Communications",
+    subtitle: "Cross-platform group • 23 unread",
+    icon: "💼",
+    url: "/cross-platform-groups/work",
+  },
+]
+
 export function SearchBar({ isOpen, onToggle, onClose, isMobile = false }: SearchBarProps) {
   const [query, setQuery] = useState("")
-  const [results, setResults] = useState<any[]>([])
-  const [isLoading, setIsLoading] = useState(false)
+  const [results, setResults] = useState<SearchResult[]>([])
+  const [selectedIndex, setSelectedIndex] = useState(-1)
   const inputRef = useRef<HTMLInputElement>(null)
-  const router = useRouter()
+  const resultsRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (isOpen && inputRef.current) {
@@ -25,42 +70,55 @@ export function SearchBar({ isOpen, onToggle, onClose, isMobile = false }: Searc
   }, [isOpen])
 
   useEffect(() => {
-    if (query.length > 2) {
-      setIsLoading(true)
-      // Simulate search API call
-      const timer = setTimeout(() => {
-        setResults([
-          { type: "summary", title: "Family Group Chat", date: "2024-01-15", id: "1" },
-          { type: "summary", title: "Work Team Discussion", date: "2024-01-14", id: "2" },
-          { type: "page", title: "Dashboard", path: "/", icon: "🏠" },
-          { type: "page", title: "Groups", path: "/groups", icon: "👥" },
-        ])
-        setIsLoading(false)
-      }, 300)
-      return () => clearTimeout(timer)
+    if (query.trim()) {
+      const filtered = mockResults.filter(
+        (result) =>
+          result.title.toLowerCase().includes(query.toLowerCase()) ||
+          result.subtitle?.toLowerCase().includes(query.toLowerCase()),
+      )
+      setResults(filtered)
+      setSelectedIndex(-1)
     } else {
       setResults([])
+      setSelectedIndex(-1)
     }
   }, [query])
 
-  const handleResultClick = (result: any) => {
-    if (result.type === "page") {
-      router.push(result.path)
-    } else {
-      router.push(`/summary/${result.id}`)
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Escape") {
+      onClose()
+      return
     }
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault()
+      setSelectedIndex((prev) => Math.min(prev + 1, results.length - 1))
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault()
+      setSelectedIndex((prev) => Math.max(prev - 1, -1))
+    } else if (e.key === "Enter" && selectedIndex >= 0) {
+      e.preventDefault()
+      const result = results[selectedIndex]
+      if (result) {
+        window.location.href = result.url
+        onClose()
+      }
+    }
+  }
+
+  const handleResultClick = (result: SearchResult) => {
+    window.location.href = result.url
     onClose()
-    setQuery("")
   }
 
   if (isMobile) {
     return (
-      <div className={styles.mobileSearchContainer}>
-        <div className={styles.searchInputContainer}>
+      <div className={styles.mobileSearch}>
+        <div className={styles.mobileSearchInput}>
           <svg
             className={styles.searchIcon}
-            width="20"
-            height="20"
+            width="16"
+            height="16"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -72,40 +130,33 @@ export function SearchBar({ isOpen, onToggle, onClose, isMobile = false }: Searc
           <input
             ref={inputRef}
             type="text"
-            placeholder="Search summaries, groups..."
+            placeholder="Search chats, summaries..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className={styles.searchInput}
+            onKeyDown={handleKeyDown}
+            className={styles.input}
           />
           {query && (
-            <button onClick={() => setQuery("")} className={styles.clearButton}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </svg>
+            <button onClick={() => setQuery("")} className={styles.clearBtn}>
+              ✕
             </button>
           )}
         </div>
-
-        {(results.length > 0 || isLoading) && (
-          <div className={styles.searchResults}>
-            {isLoading ? (
-              <div className={styles.loadingState}>
-                <div className={styles.spinner}></div>
-                <span>Searching...</span>
+        {results.length > 0 && (
+          <div className={styles.results} ref={resultsRef}>
+            {results.map((result, index) => (
+              <div
+                key={result.id}
+                className={`${styles.resultItem} ${index === selectedIndex ? styles.selected : ""}`}
+                onClick={() => handleResultClick(result)}
+              >
+                <span className={styles.resultIcon}>{result.icon}</span>
+                <div className={styles.resultContent}>
+                  <div className={styles.resultTitle}>{result.title}</div>
+                  {result.subtitle && <div className={styles.resultSubtitle}>{result.subtitle}</div>}
+                </div>
               </div>
-            ) : (
-              results.map((result, index) => (
-                <button key={index} className={styles.searchResult} onClick={() => handleResultClick(result)}>
-                  <div className={styles.resultIcon}>{result.type === "page" ? result.icon : "📄"}</div>
-                  <div className={styles.resultContent}>
-                    <div className={styles.resultTitle}>{result.title}</div>
-                    {result.date && <div className={styles.resultMeta}>{result.date}</div>}
-                  </div>
-                  <div className={styles.resultType}>{result.type === "page" ? "Page" : "Summary"}</div>
-                </button>
-              ))
-            )}
+            ))}
           </div>
         )}
       </div>
@@ -114,92 +165,94 @@ export function SearchBar({ isOpen, onToggle, onClose, isMobile = false }: Searc
 
   return (
     <div className={styles.searchContainer}>
-      <button
-        className={`${styles.searchTrigger} ${isOpen ? styles.active : ""}`}
-        onClick={onToggle}
-        title="Search (Ctrl+K)"
-      >
-        <svg
-          className={styles.searchIcon}
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-        >
-          <circle cx="11" cy="11" r="8"></circle>
-          <path d="m21 21-4.35-4.35"></path>
-        </svg>
-        <span className={styles.searchPlaceholder}>Search...</span>
-        <div className={styles.searchShortcut}>⌘K</div>
-      </button>
+      <div className={`${styles.searchBar} ${isOpen ? styles.open : ""}`}>
+        <button onClick={onToggle} className={styles.searchTrigger} title="Search (Ctrl+K)">
+          <svg
+            className={styles.searchIcon}
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.35-4.35"></path>
+          </svg>
+          <span className={styles.searchPlaceholder}>Search...</span>
+          <span className={styles.searchShortcut}>⌘K</span>
+        </button>
 
-      {isOpen && (
-        <div className={styles.searchModal}>
-          <div className={styles.searchModalOverlay} onClick={onClose} />
-          <div className={styles.searchModalContent}>
-            <div className={styles.searchInputContainer}>
-              <svg
-                className={styles.searchIcon}
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <circle cx="11" cy="11" r="8"></circle>
-                <path d="m21 21-4.35-4.35"></path>
-              </svg>
-              <input
-                ref={inputRef}
-                type="text"
-                placeholder="Search summaries, groups, pages..."
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                className={styles.searchInput}
-              />
-              <button onClick={onClose} className={styles.closeButton} title="Close (Esc)">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
+        {isOpen && (
+          <div className={styles.searchModal}>
+            <div className={styles.searchModalOverlay} onClick={onClose} />
+            <div className={styles.searchModalContent}>
+              <div className={styles.searchInput}>
+                <svg
+                  className={styles.searchIcon}
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <path d="m21 21-4.35-4.35"></path>
                 </svg>
-              </button>
-            </div>
-
-            {(results.length > 0 || isLoading) && (
-              <div className={styles.searchResults}>
-                {isLoading ? (
-                  <div className={styles.loadingState}>
-                    <div className={styles.spinner}></div>
-                    <span>Searching...</span>
-                  </div>
-                ) : (
-                  results.map((result, index) => (
-                    <button key={index} className={styles.searchResult} onClick={() => handleResultClick(result)}>
-                      <div className={styles.resultIcon}>{result.type === "page" ? result.icon : "📄"}</div>
-                      <div className={styles.resultContent}>
-                        <div className={styles.resultTitle}>{result.title}</div>
-                        {result.date && <div className={styles.resultMeta}>{result.date}</div>}
-                      </div>
-                      <div className={styles.resultType}>{result.type === "page" ? "Page" : "Summary"}</div>
-                    </button>
-                  ))
+                <input
+                  ref={inputRef}
+                  type="text"
+                  placeholder="Search chats, summaries, platforms..."
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  className={styles.input}
+                />
+                {query && (
+                  <button onClick={() => setQuery("")} className={styles.clearBtn}>
+                    ✕
+                  </button>
                 )}
               </div>
-            )}
 
-            {query.length > 0 && results.length === 0 && !isLoading && (
-              <div className={styles.noResults}>
-                <div className={styles.noResultsIcon}>🔍</div>
-                <div className={styles.noResultsText}>No results found</div>
-                <div className={styles.noResultsSubtext}>Try a different search term</div>
+              {results.length > 0 && (
+                <div className={styles.results} ref={resultsRef}>
+                  {results.map((result, index) => (
+                    <div
+                      key={result.id}
+                      className={`${styles.resultItem} ${index === selectedIndex ? styles.selected : ""}`}
+                      onClick={() => handleResultClick(result)}
+                    >
+                      <span className={styles.resultIcon}>{result.icon}</span>
+                      <div className={styles.resultContent}>
+                        <div className={styles.resultTitle}>{result.title}</div>
+                        {result.subtitle && <div className={styles.resultSubtitle}>{result.subtitle}</div>}
+                      </div>
+                      <div className={styles.resultType}>{result.type}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {query && results.length === 0 && (
+                <div className={styles.noResults}>
+                  <div className={styles.noResultsIcon}>🔍</div>
+                  <div className={styles.noResultsText}>No results found</div>
+                </div>
+              )}
+
+              <div className={styles.searchFooter}>
+                <div className={styles.searchTips}>
+                  <span className={styles.tip}>↑↓ Navigate</span>
+                  <span className={styles.tip}>↵ Select</span>
+                  <span className={styles.tip}>Esc Close</span>
+                </div>
               </div>
-            )}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }

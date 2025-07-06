@@ -1,50 +1,63 @@
 "use client"
 
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react"
-import type { Theme, ThemeContextType } from "./types"
+import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
+import type { ThemeContextType, Theme } from "./types"
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
-export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("light")
+interface ThemeProviderProps {
+  children: ReactNode
+}
+
+export function ThemeProvider({ children }: ThemeProviderProps) {
+  const [theme, setTheme] = useState<Theme>("light")
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     setMounted(true)
 
-    // Get theme from localStorage or system preference
-    const savedTheme = localStorage.getItem("whatsapp-summarizer-theme") as Theme
+    // Check for saved theme preference or default to system preference
+    const savedTheme = localStorage.getItem("theme") as Theme
     const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
-    const initialTheme = savedTheme || systemTheme
 
-    setThemeState(initialTheme)
-    document.documentElement.setAttribute("data-theme", initialTheme)
-    document.documentElement.classList.toggle("dark", initialTheme === "dark")
+    const initialTheme = savedTheme || systemTheme
+    setTheme(initialTheme)
+    applyTheme(initialTheme)
   }, [])
 
-  const setTheme = (newTheme: Theme) => {
-    setThemeState(newTheme)
-    localStorage.setItem("whatsapp-summarizer-theme", newTheme)
-    document.documentElement.setAttribute("data-theme", newTheme)
-    document.documentElement.classList.toggle("dark", newTheme === "dark")
+  const applyTheme = (newTheme: Theme) => {
+    const root = document.documentElement
+
+    if (newTheme === "dark") {
+      root.classList.add("dark")
+      root.setAttribute("data-theme", "dark")
+    } else {
+      root.classList.remove("dark")
+      root.setAttribute("data-theme", "light")
+    }
   }
 
   const toggleTheme = () => {
     const newTheme = theme === "light" ? "dark" : "light"
     setTheme(newTheme)
+    applyTheme(newTheme)
+    localStorage.setItem("theme", newTheme)
+  }
+
+  const setThemeMode = (newTheme: Theme) => {
+    setTheme(newTheme)
+    applyTheme(newTheme)
+    localStorage.setItem("theme", newTheme)
   }
 
   const value: ThemeContextType = {
     theme,
     toggleTheme,
-    setTheme,
+    setTheme: setThemeMode,
+    mounted,
   }
 
-  return (
-    <ThemeContext.Provider value={value}>
-      {mounted ? children : <div className="loading-placeholder">{children}</div>}
-    </ThemeContext.Provider>
-  )
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
 }
 
 export function useTheme() {

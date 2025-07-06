@@ -4,47 +4,55 @@ import { usePathname } from "next/navigation"
 import Link from "next/link"
 import styles from "./breadcrumb.module.css"
 
-const pathLabels: Record<string, string> = {
-  "/": "Dashboard",
-  "/groups": "Groups",
-  "/personal": "Personal",
-  "/customize": "Customize",
-  "/distribution": "Distribution",
-  "/notifications": "Notifications",
-  "/admin": "Admin Panel",
-  "/settings": "Settings",
-  "/profile": "Profile",
+interface BreadcrumbItem {
+  label: string
+  href?: string
+  icon?: string
 }
 
-const pathIcons: Record<string, string> = {
-  "/": "🏠",
-  "/groups": "👥",
-  "/personal": "👤",
-  "/customize": "🎨",
-  "/distribution": "📤",
-  "/notifications": "🔔",
-  "/admin": "🛠️",
-  "/settings": "⚙️",
-  "/profile": "👤",
+const routeMap: Record<string, BreadcrumbItem[]> = {
+  "/": [{ label: "Dashboard", icon: "🏠" }],
+  "/groups": [
+    { label: "Dashboard", href: "/", icon: "🏠" },
+    { label: "Groups", icon: "👥" },
+  ],
+  "/personal": [
+    { label: "Dashboard", href: "/", icon: "🏠" },
+    { label: "Personal", icon: "👤" },
+  ],
+  "/distribution": [
+    { label: "Dashboard", href: "/", icon: "🏠" },
+    { label: "Distribution", icon: "📤" },
+  ],
+  "/cross-platform-groups": [
+    { label: "Dashboard", href: "/", icon: "🏠" },
+    { label: "Cross-Platform Groups", icon: "🔗" },
+  ],
+  "/customize": [
+    { label: "Dashboard", href: "/", icon: "🏠" },
+    { label: "Customize", icon: "🎨" },
+  ],
+  "/notifications": [
+    { label: "Dashboard", href: "/", icon: "🏠" },
+    { label: "Notifications", icon: "🔔" },
+  ],
+  "/admin": [
+    { label: "Dashboard", href: "/", icon: "🏠" },
+    { label: "Admin", icon: "⚙️" },
+  ],
 }
 
 export function Breadcrumb() {
   const pathname = usePathname()
 
   // Don't show breadcrumb on homepage
-  if (pathname === "/") return null
+  if (pathname === "/") {
+    return null
+  }
 
-  const pathSegments = pathname.split("/").filter(Boolean)
-  const breadcrumbItems = [
-    { path: "/", label: "Dashboard", icon: "🏠" },
-    ...pathSegments.map((segment, index) => {
-      const path = "/" + pathSegments.slice(0, index + 1).join("/")
-      return {
-        path,
-        label: pathLabels[path] || segment.charAt(0).toUpperCase() + segment.slice(1),
-        icon: pathIcons[path] || "📄",
-      }
-    }),
+  const breadcrumbItems = routeMap[pathname] || [
+    { label: "Dashboard", href: "/", icon: "🏠" },
+    { label: "Page", icon: "📄" },
   ]
 
   return (
@@ -53,30 +61,24 @@ export function Breadcrumb() {
         <nav className={styles.nav} aria-label="Breadcrumb">
           <ol className={styles.list}>
             {breadcrumbItems.map((item, index) => (
-              <li key={item.path} className={styles.item}>
-                {index < breadcrumbItems.length - 1 ? (
-                  <Link href={item.path} className={styles.link}>
-                    <span className={styles.icon}>{item.icon}</span>
+              <li key={index} className={styles.item}>
+                {item.href ? (
+                  <Link href={item.href} className={styles.link}>
+                    {item.icon && <span className={styles.icon}>{item.icon}</span>}
                     <span className={styles.label}>{item.label}</span>
                   </Link>
                 ) : (
                   <span className={styles.current}>
-                    <span className={styles.icon}>{item.icon}</span>
+                    {item.icon && <span className={styles.icon}>{item.icon}</span>}
                     <span className={styles.label}>{item.label}</span>
                   </span>
                 )}
                 {index < breadcrumbItems.length - 1 && (
-                  <svg
-                    className={styles.separator}
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <polyline points="9,18 15,12 9,6"></polyline>
-                  </svg>
+                  <span className={styles.separator}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polyline points="9,18 15,12 9,6"></polyline>
+                    </svg>
+                  </span>
                 )}
               </li>
             ))}

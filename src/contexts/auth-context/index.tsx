@@ -1,32 +1,68 @@
 "use client"
 
-import { createContext, useContext, useState, type ReactNode } from "react"
+import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
 import type { AuthContextType, User } from "./types"
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-const mockUser: User = {
-  id: "1",
-  name: "John Doe",
-  email: "john@example.com",
-  avatar: "/placeholder-user.jpg",
-  role: "user",
+interface AuthProviderProps {
+  children: ReactNode
 }
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(mockUser)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+export function AuthProvider({ children }: AuthProviderProps) {
+  const [user, setUser] = useState<User | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+
+  useEffect(() => {
+    // Simulate checking for existing session
+    const checkAuth = async () => {
+      try {
+        // In a real app, this would check for a valid token/session
+        const savedUser = localStorage.getItem("user")
+        if (savedUser) {
+          const userData = JSON.parse(savedUser)
+          setUser(userData)
+          setIsAuthenticated(true)
+        }
+      } catch (error) {
+        console.error("Auth check failed:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    checkAuth()
+  }, [])
 
   const login = async (email: string, password: string) => {
     setIsLoading(true)
-    setError(null)
     try {
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000))
+
+      const mockUser: User = {
+        id: "1",
+        name: "John Doe",
+        email,
+        avatar: "/placeholder-user.jpg",
+        role: "user",
+        isOnline: true,
+        lastSeen: new Date(),
+        preferences: {
+          theme: "light",
+          notifications: true,
+          language: "en",
+        },
+      }
+
       setUser(mockUser)
-    } catch (err) {
-      setError("Login failed")
+      setIsAuthenticated(true)
+      localStorage.setItem("user", JSON.stringify(mockUser))
+
+      return { success: true }
+    } catch (error) {
+      return { success: false, error: "Login failed" }
     } finally {
       setIsLoading(false)
     }
@@ -34,41 +70,59 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signup = async (name: string, email: string, password: string) => {
     setIsLoading(true)
-    setError(null)
     try {
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000))
-      const newUser: User = {
-        id: Date.now().toString(),
+
+      const mockUser: User = {
+        id: "1",
         name,
         email,
+        avatar: null,
         role: "user",
+        isOnline: true,
+        lastSeen: new Date(),
+        preferences: {
+          theme: "light",
+          notifications: true,
+          language: "en",
+        },
       }
-      setUser(newUser)
-    } catch (err) {
-      setError("Signup failed")
+
+      setUser(mockUser)
+      setIsAuthenticated(true)
+      localStorage.setItem("user", JSON.stringify(mockUser))
+
+      return { success: true }
+    } catch (error) {
+      return { success: false, error: "Signup failed" }
     } finally {
       setIsLoading(false)
     }
   }
 
-  const logout = () => {
+  const logout = async () => {
     setUser(null)
+    setIsAuthenticated(false)
+    localStorage.removeItem("user")
   }
 
-  const clearError = () => {
-    setError(null)
+  const updateUser = (updates: Partial<User>) => {
+    if (user) {
+      const updatedUser = { ...user, ...updates }
+      setUser(updatedUser)
+      localStorage.setItem("user", JSON.stringify(updatedUser))
+    }
   }
 
   const value: AuthContextType = {
     user,
-    isAuthenticated: !!user,
     isLoading,
-    error,
+    isAuthenticated,
     login,
     signup,
     logout,
-    clearError,
+    updateUser,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

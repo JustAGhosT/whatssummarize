@@ -1,50 +1,53 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import {
+  Search,
+  Moon,
+  Sun,
+  User,
+  Settings,
+  ChevronDown,
+  Menu,
+  X,
+  Home,
+  Users,
+  UserCircle,
+  MoreHorizontal,
+  Shuffle,
+  Share2,
+  BellRing,
+  Palette,
+  LogOut,
+  UserCog,
+} from "lucide-react"
+import { useTheme } from "../../../contexts/theme-context"
 import { useAuth } from "../../../contexts/auth-context"
-import { ThemeToggle } from "../../common/theme-toggle"
-import { UserDropdown } from "../../common/user-dropdown"
-import { LoginModal } from "../../auth/login-modal"
-import { SignupModal } from "../../auth/signup-modal"
 import { SearchBar } from "../../common/search-bar"
 import { NotificationBell } from "../../common/notification-bell"
-import { Breadcrumb } from "../../common/breadcrumb"
 import styles from "./navigation.module.css"
 
-const coreNavigationItems = [
-  { href: "/", label: "Dashboard", icon: "🏠", description: "Overview & Analytics", shortcut: "D" },
-  { href: "/groups", label: "Groups", icon: "👥", description: "Group Management", shortcut: "G" },
-  { href: "/personal", label: "Personal", icon: "👤", description: "Personal Summaries", shortcut: "P" },
-]
-
 export function Navigation() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [isLoginOpen, setIsLoginOpen] = useState(false)
-  const [isSignupOpen, setIsSignupOpen] = useState(false)
-  const [isScrolled, setIsScrolled] = useState(false)
-  const [isSearchOpen, setIsSearchOpen] = useState(false)
-  const { user } = useAuth()
   const pathname = usePathname()
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20)
-    }
-
-    window.addEventListener("scroll", handleScroll, { passive: true })
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
+  const { theme, toggleTheme } = useTheme()
+  const { user, logout } = useAuth()
+  const [moreDropdownOpen, setMoreDropdownOpen] = useState(false)
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
+  const moreDropdownRef = useRef<HTMLDivElement>(null)
+  const userDropdownRef = useRef<HTMLDivElement>(null)
 
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.ctrlKey || e.metaKey) {
-        switch (e.key.toLowerCase()) {
+      if (e.metaKey || e.ctrlKey) {
+        switch (e.key) {
           case "k":
             e.preventDefault()
-            setIsSearchOpen(true)
+            setSearchOpen(true)
             break
           case "d":
             e.preventDefault()
@@ -58,12 +61,11 @@ export function Navigation() {
             e.preventDefault()
             window.location.href = "/personal"
             break
+          case "c":
+            e.preventDefault()
+            window.location.href = "/cross-platform-groups"
+            break
         }
-      }
-
-      if (e.key === "Escape") {
-        setIsMenuOpen(false)
-        setIsSearchOpen(false)
       }
     }
 
@@ -71,203 +73,269 @@ export function Navigation() {
     return () => document.removeEventListener("keydown", handleKeyDown)
   }, [])
 
+  // Click outside to close dropdowns
   useEffect(() => {
-    if (isMenuOpen) {
-      document.body.style.overflow = "hidden"
-    } else {
-      document.body.style.overflow = ""
+    const handleClickOutside = (event: MouseEvent) => {
+      if (moreDropdownRef.current && !moreDropdownRef.current.contains(event.target as Node)) {
+        setMoreDropdownOpen(false)
+      }
+      if (userDropdownRef.current && !userDropdownRef.current.contains(event.target as Node)) {
+        setUserDropdownOpen(false)
+      }
     }
 
-    return () => {
-      document.body.style.overflow = ""
-    }
-  }, [isMenuOpen])
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
 
-  const closeMenu = useCallback(() => setIsMenuOpen(false), [])
+  const coreNavItems = [
+    { href: "/", label: "Dashboard", icon: Home, shortcut: "⌘D" },
+    { href: "/groups", label: "Groups", icon: Users, shortcut: "⌘G" },
+    { href: "/personal", label: "Personal", icon: UserCircle, shortcut: "⌘P" },
+  ]
 
-  const isActivePath = (href: string) => {
-    if (href === "/") {
-      return pathname === "/"
-    }
-    return pathname.startsWith(href)
-  }
+  const moreNavItems = [
+    { href: "/cross-platform-groups", label: "Cross-Platform", icon: Shuffle, shortcut: "⌘C" },
+    { href: "/distribution", label: "Distribution", icon: Share2 },
+    { href: "/notifications", label: "Notifications", icon: BellRing },
+    { href: "/customize", label: "Customize", icon: Palette },
+  ]
+
+  const mobileSettingsItems = [
+    { href: "/distribution", label: "Distribution", icon: Share2 },
+    { href: "/notifications", label: "Notifications", icon: BellRing },
+    { href: "/customize", label: "Customize", icon: Palette },
+  ]
 
   return (
     <>
-      <nav className={`${styles.nav} ${isScrolled ? styles.scrolled : ""}`}>
+      <nav className={styles.navigation}>
         <div className={styles.container}>
-          {/* Logo */}
-          <Link href="/" className={styles.logo} onClick={closeMenu}>
-            <div className={styles.logoIcon}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-              </svg>
-            </div>
-            <div className={styles.logoText}>
-              <span className={styles.logoTitle}>WhatsApp</span>
-              <span className={styles.logoSubtitle}>Summarizer</span>
-            </div>
-          </Link>
+          {/* Left Section - Core Features */}
+          <div className={styles.leftSection}>
+            <div className={styles.coreLabel}>CORE FEATURES</div>
 
-          {/* Core Features Navigation */}
-          <div className={styles.coreNav}>
-            <div className={styles.navGroupLabel}>CORE FEATURES</div>
             <div className={styles.navItems}>
-              {coreNavigationItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`${styles.navLink} ${isActivePath(item.href) ? styles.active : ""}`}
-                  title={`${item.description} (Ctrl+${item.shortcut})`}
+              {coreNavItems.map((item) => {
+                const Icon = item.icon
+                const isActive = pathname === item.href
+
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`${styles.navItem} ${isActive ? styles.active : ""}`}
+                  >
+                    <Icon size={16} />
+                    <span>{item.label}</span>
+                    <span className={styles.shortcut}>{item.shortcut}</span>
+                  </Link>
+                )
+              })}
+
+              {/* More Dropdown */}
+              <div className={styles.dropdown} ref={moreDropdownRef}>
+                <button
+                  className={`${styles.navItem} ${styles.moreButton}`}
+                  onClick={() => setMoreDropdownOpen(!moreDropdownOpen)}
                 >
-                  <span className={styles.navIcon}>{item.icon}</span>
-                  <span className={styles.navText}>{item.label}</span>
-                  {isActivePath(item.href) && <div className={styles.activeIndicator} />}
-                  <span className={styles.shortcut}>⌘{item.shortcut}</span>
-                </Link>
-              ))}
+                  <MoreHorizontal size={16} />
+                  <span>More</span>
+                  <ChevronDown size={14} className={`${styles.chevron} ${moreDropdownOpen ? styles.open : ""}`} />
+                </button>
+
+                {moreDropdownOpen && (
+                  <div className={styles.dropdownMenu}>
+                    {moreNavItems.map((item) => {
+                      const Icon = item.icon
+                      const isActive = pathname === item.href
+
+                      return (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          className={`${styles.dropdownItem} ${isActive ? styles.active : ""}`}
+                          onClick={() => setMoreDropdownOpen(false)}
+                        >
+                          <Icon size={16} />
+                          <span>{item.label}</span>
+                          {item.shortcut && <span className={styles.shortcut}>{item.shortcut}</span>}
+                        </Link>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
-          {/* Search Bar */}
-          <div className={styles.searchContainer}>
-            <SearchBar
-              isOpen={isSearchOpen}
-              onToggle={() => setIsSearchOpen(!isSearchOpen)}
-              onClose={() => setIsSearchOpen(false)}
-            />
-          </div>
+          {/* Right Section - User Controls */}
+          <div className={styles.rightSection}>
+            {/* Search */}
+            <button className={styles.iconButton} onClick={() => setSearchOpen(true)} title="Search (⌘K)">
+              <Search size={18} />
+            </button>
 
-          {/* Right Side Actions */}
-          <div className={styles.actions}>
-            {user && <NotificationBell />}
-            <ThemeToggle />
+            {/* Notifications */}
+            <NotificationBell />
 
-            {user ? (
-              <UserDropdown />
-            ) : (
-              <div className={styles.authButtons}>
-                <button className={styles.loginButton} onClick={() => setIsLoginOpen(true)}>
-                  Sign In
-                </button>
-                <button className={styles.signupButton} onClick={() => setIsSignupOpen(true)}>
-                  Sign Up
-                </button>
-              </div>
-            )}
-
-            {/* Mobile Menu Button */}
+            {/* Theme Toggle */}
             <button
-              className={styles.mobileMenuButton}
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              aria-label="Toggle menu"
-              aria-expanded={isMenuOpen}
+              className={styles.iconButton}
+              onClick={toggleTheme}
+              title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
             >
-              <div className={`${styles.hamburger} ${isMenuOpen ? styles.open : ""}`}>
-                <span></span>
-                <span></span>
-                <span></span>
+              {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
+
+            {/* Mobile Settings Hub */}
+            <div className={`${styles.dropdown} ${styles.mobileOnly}`}>
+              <button className={styles.iconButton}>
+                <Settings size={18} />
+              </button>
+              <div className={styles.dropdownMenu}>
+                {mobileSettingsItems.map((item) => {
+                  const Icon = item.icon
+                  return (
+                    <Link key={item.href} href={item.href} className={styles.dropdownItem}>
+                      <Icon size={16} />
+                      <span>{item.label}</span>
+                    </Link>
+                  )
+                })}
               </div>
+            </div>
+
+            {/* User Profile */}
+            <div className={styles.dropdown} ref={userDropdownRef}>
+              <button className={styles.userButton} onClick={() => setUserDropdownOpen(!userDropdownOpen)}>
+                <div className={styles.userAvatar}>
+                  <User size={16} />
+                </div>
+                <div className={styles.userInfo}>
+                  <span className={styles.userName}>{user?.name || "John Doe"}</span>
+                  <span className={styles.userRole}>User</span>
+                </div>
+                <ChevronDown size={14} className={`${styles.chevron} ${userDropdownOpen ? styles.open : ""}`} />
+              </button>
+
+              {userDropdownOpen && (
+                <div className={`${styles.dropdownMenu} ${styles.userDropdownMenu}`}>
+                  <div className={styles.userDropdownHeader}>
+                    <div className={styles.userAvatarLarge}>
+                      <User size={20} />
+                    </div>
+                    <div className={styles.userDetails}>
+                      <div className={styles.userNameLarge}>{user?.name || "John Doe"}</div>
+                      <div className={styles.userEmail}>{user?.email || "john@example.com"}</div>
+                      <div className={styles.userStatus}>
+                        <div className={styles.statusDot}></div>
+                        Offline
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className={styles.dropdownSection}>
+                    <div className={styles.sectionLabel}>PROFILE</div>
+                    <Link href="/profile" className={styles.dropdownItem}>
+                      <UserCircle size={16} />
+                      <span>My Profile</span>
+                    </Link>
+                    <Link href="/settings" className={styles.dropdownItem}>
+                      <UserCog size={16} />
+                      <span>Account Settings</span>
+                    </Link>
+                  </div>
+
+                  <div className={styles.dropdownSection}>
+                    <div className={styles.sectionLabel}>CONFIGURATION</div>
+                    <Link href="/customize" className={styles.dropdownItem}>
+                      <Palette size={16} />
+                      <span>Customize</span>
+                      <span className={styles.itemDescription}>App Settings</span>
+                    </Link>
+                    <Link href="/distribution" className={styles.dropdownItem}>
+                      <Share2 size={16} />
+                      <span>Distribution</span>
+                      <span className={styles.itemDescription}>Share & Export</span>
+                    </Link>
+                    <Link href="/notifications" className={styles.dropdownItem}>
+                      <BellRing size={16} />
+                      <span>Notifications</span>
+                      <span className={styles.itemDescription}>Alert Settings</span>
+                    </Link>
+                  </div>
+
+                  <div className={styles.dropdownDivider}></div>
+
+                  <button className={styles.dropdownItem} onClick={logout}>
+                    <LogOut size={16} />
+                    <span>Sign Out</span>
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Mobile Menu Toggle */}
+            <button
+              className={`${styles.iconButton} ${styles.mobileMenuToggle}`}
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
             </button>
           </div>
         </div>
 
-        {/* Breadcrumb */}
-        <Breadcrumb />
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className={styles.mobileMenu}>
+            <div className={styles.mobileMenuContent}>
+              <div className={styles.mobileSection}>
+                <div className={styles.mobileSectionTitle}>Core Features</div>
+                {coreNavItems.map((item) => {
+                  const Icon = item.icon
+                  const isActive = pathname === item.href
 
-        {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div className={styles.mobileNav} role="dialog" aria-modal="true">
-            <div className={styles.mobileNavOverlay} onClick={closeMenu} />
-            <div className={styles.mobileNavContent}>
-              <div className={styles.mobileNavHeader}>
-                <div className={styles.mobileNavLogo}>
-                  <div className={styles.logoIcon}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                    </svg>
-                  </div>
-                  <span className={styles.logoText}>WhatsApp Summarizer</span>
-                </div>
-                <button className={styles.mobileNavClose} onClick={closeMenu} aria-label="Close menu">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                  </svg>
-                </button>
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={`${styles.mobileMenuItem} ${isActive ? styles.active : ""}`}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <Icon size={18} />
+                      <span>{item.label}</span>
+                    </Link>
+                  )
+                })}
               </div>
 
-              <div className={styles.mobileNavBody}>
-                <div className={styles.mobileSearchContainer}>
-                  <SearchBar isOpen={true} onToggle={() => {}} onClose={closeMenu} isMobile={true} />
-                </div>
+              <div className={styles.mobileSection}>
+                <div className={styles.mobileSectionTitle}>More Features</div>
+                {moreNavItems.map((item) => {
+                  const Icon = item.icon
+                  const isActive = pathname === item.href
 
-                <div className={styles.mobileNavGroup}>
-                  <div className={styles.mobileGroupTitle}>Core Features</div>
-                  <div className={styles.mobileGroupItems}>
-                    {coreNavigationItems.map((item) => (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        className={`${styles.mobileNavLink} ${isActivePath(item.href) ? styles.active : ""}`}
-                        onClick={closeMenu}
-                      >
-                        <span className={styles.navIcon}>{item.icon}</span>
-                        <div className={styles.mobileNavLinkContent}>
-                          <span className={styles.navText}>{item.label}</span>
-                          <span className={styles.navDescription}>{item.description}</span>
-                        </div>
-                        {isActivePath(item.href) && <div className={styles.mobileActiveIndicator} />}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-
-                {!user && (
-                  <div className={styles.mobileAuthSection}>
-                    <button
-                      className={styles.mobileLoginButton}
-                      onClick={() => {
-                        setIsLoginOpen(true)
-                        closeMenu()
-                      }}
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={`${styles.mobileMenuItem} ${isActive ? styles.active : ""}`}
+                      onClick={() => setMobileMenuOpen(false)}
                     >
-                      Sign In
-                    </button>
-                    <button
-                      className={styles.mobileSignupButton}
-                      onClick={() => {
-                        setIsSignupOpen(true)
-                        closeMenu()
-                      }}
-                    >
-                      Sign Up
-                    </button>
-                  </div>
-                )}
+                      <Icon size={18} />
+                      <span>{item.label}</span>
+                    </Link>
+                  )
+                })}
               </div>
             </div>
           </div>
         )}
       </nav>
 
-      {/* Auth Modals */}
-      <LoginModal
-        isOpen={isLoginOpen}
-        onClose={() => setIsLoginOpen(false)}
-        onSwitchToSignup={() => {
-          setIsLoginOpen(false)
-          setIsSignupOpen(true)
-        }}
-      />
-      <SignupModal
-        isOpen={isSignupOpen}
-        onClose={() => setIsSignupOpen(false)}
-        onSwitchToLogin={() => {
-          setIsSignupOpen(false)
-          setIsLoginOpen(true)
-        }}
-      />
+      {/* Search Modal */}
+      {searchOpen && <SearchBar isOpen={searchOpen} onClose={() => setSearchOpen(false)} />}
     </>
   )
 }
