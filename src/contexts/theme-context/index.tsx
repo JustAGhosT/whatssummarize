@@ -19,22 +19,19 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
     setThemeState(initialTheme)
     document.documentElement.setAttribute("data-theme", initialTheme)
+    document.documentElement.classList.toggle("dark", initialTheme === "dark")
   }, [])
 
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme)
     localStorage.setItem("whatsapp-summarizer-theme", newTheme)
     document.documentElement.setAttribute("data-theme", newTheme)
+    document.documentElement.classList.toggle("dark", newTheme === "dark")
   }
 
   const toggleTheme = () => {
     const newTheme = theme === "light" ? "dark" : "light"
     setTheme(newTheme)
-  }
-
-  // Prevent hydration mismatch
-  if (!mounted) {
-    return <div style={{ visibility: "hidden" }}>{children}</div>
   }
 
   const value: ThemeContextType = {
@@ -43,7 +40,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     setTheme,
   }
 
-  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
+  return (
+    <ThemeContext.Provider value={value}>
+      {mounted ? children : <div className="loading-placeholder">{children}</div>}
+    </ThemeContext.Provider>
+  )
 }
 
 export function useTheme() {

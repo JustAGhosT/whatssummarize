@@ -178,7 +178,7 @@ export function Dashboard() {
 
   return (
     <div className={styles.container}>
-      {/* Header Section */}
+      {/* Enhanced Hero Section with Integrated Stats */}
       <div className={styles.heroSection}>
         <div className={styles.heroContent}>
           <div className={styles.heroText}>
@@ -204,74 +204,74 @@ export function Dashboard() {
             </button>
           </div>
         </div>
-      </div>
 
-      {/* Enhanced Statistics Cards */}
-      <div className={styles.statsSection}>
-        <div className={`${styles.statCard} ${styles.totalCard}`}>
-          <div className={styles.statCardHeader}>
-            <div className={styles.statIconWrapper}>
-              <span className={styles.statIcon}>📊</span>
+        {/* Integrated Statistics Cards */}
+        <div className={styles.statsGrid}>
+          <div className={`${styles.statCard} ${styles.totalCard}`}>
+            <div className={styles.statCardHeader}>
+              <div className={styles.statIconWrapper}>
+                <span className={styles.statIcon}>📊</span>
+              </div>
+              <div className={styles.statTrend}>
+                <span className={styles.trendIcon}>📈</span>
+              </div>
             </div>
-            <div className={styles.statTrend}>
-              <span className={styles.trendIcon}>📈</span>
+            <div className={styles.statContent}>
+              <div className={styles.statNumber}>{stats.total}</div>
+              <div className={styles.statLabel}>Total Summaries</div>
+              <div className={styles.statSubtext}>All conversations tracked</div>
             </div>
           </div>
-          <div className={styles.statContent}>
-            <div className={styles.statNumber}>{stats.total}</div>
-            <div className={styles.statLabel}>Total Summaries</div>
-            <div className={styles.statSubtext}>All conversations tracked</div>
-          </div>
-        </div>
 
-        <div className={`${styles.statCard} ${styles.activeCard}`}>
-          <div className={styles.statCardHeader}>
-            <div className={styles.statIconWrapper}>
-              <span className={styles.statIcon}>✅</span>
+          <div className={`${styles.statCard} ${styles.activeCard}`}>
+            <div className={styles.statCardHeader}>
+              <div className={styles.statIconWrapper}>
+                <span className={styles.statIcon}>✅</span>
+              </div>
+              <div className={styles.statBadge}>{stats.activePercentage}%</div>
             </div>
-            <div className={styles.statBadge}>{stats.activePercentage}%</div>
+            <div className={styles.statContent}>
+              <div className={styles.statNumber}>{stats.active}</div>
+              <div className={styles.statLabel}>Active</div>
+              <div className={styles.statSubtext}>Currently being tracked</div>
+            </div>
           </div>
-          <div className={styles.statContent}>
-            <div className={styles.statNumber}>{stats.active}</div>
-            <div className={styles.statLabel}>Active</div>
-            <div className={styles.statSubtext}>Currently being tracked</div>
-          </div>
-        </div>
 
-        <div className={`${styles.statCard} ${styles.archivedCard}`}>
-          <div className={styles.statCardHeader}>
-            <div className={styles.statIconWrapper}>
-              <span className={styles.statIcon}>📦</span>
+          <div className={`${styles.statCard} ${styles.archivedCard}`}>
+            <div className={styles.statCardHeader}>
+              <div className={styles.statIconWrapper}>
+                <span className={styles.statIcon}>📦</span>
+              </div>
+              <div className={styles.statProgress}>
+                <div
+                  className={styles.progressBar}
+                  style={{ width: `${stats.total > 0 ? (stats.archived / stats.total) * 100 : 0}%` }}
+                ></div>
+              </div>
             </div>
-            <div className={styles.statProgress}>
-              <div
-                className={styles.progressBar}
-                style={{ width: `${stats.total > 0 ? (stats.archived / stats.total) * 100 : 0}%` }}
-              ></div>
+            <div className={styles.statContent}>
+              <div className={styles.statNumber}>{stats.archived}</div>
+              <div className={styles.statLabel}>Archived</div>
+              <div className={styles.statSubtext}>Completed summaries</div>
             </div>
           </div>
-          <div className={styles.statContent}>
-            <div className={styles.statNumber}>{stats.archived}</div>
-            <div className={styles.statLabel}>Archived</div>
-            <div className={styles.statSubtext}>Completed summaries</div>
-          </div>
-        </div>
 
-        <div className={`${styles.statCard} ${styles.weeklyCard}`}>
-          <div className={styles.statCardHeader}>
-            <div className={styles.statIconWrapper}>
-              <span className={styles.statIcon}>📅</span>
+          <div className={`${styles.statCard} ${styles.weeklyCard}`}>
+            <div className={styles.statCardHeader}>
+              <div className={styles.statIconWrapper}>
+                <span className={styles.statIcon}>📅</span>
+              </div>
+              <div className={styles.statTrend}>
+                {stats.weeklyTrend > 0 && <span className={styles.trendUp}>↗️ +{stats.weeklyTrend}</span>}
+                {stats.weeklyTrend < 0 && <span className={styles.trendDown}>↘️ {stats.weeklyTrend}</span>}
+                {stats.weeklyTrend === 0 && <span className={styles.trendNeutral}>➡️ 0</span>}
+              </div>
             </div>
-            <div className={styles.statTrend}>
-              {stats.weeklyTrend > 0 && <span className={styles.trendUp}>↗️ +{stats.weeklyTrend}</span>}
-              {stats.weeklyTrend < 0 && <span className={styles.trendDown}>↘️ {stats.weeklyTrend}</span>}
-              {stats.weeklyTrend === 0 && <span className={styles.trendNeutral}>➡️ 0</span>}
+            <div className={styles.statContent}>
+              <div className={styles.statNumber}>{stats.thisWeek}</div>
+              <div className={styles.statLabel}>This Week</div>
+              <div className={styles.statSubtext}>Recent activity</div>
             </div>
-          </div>
-          <div className={styles.statContent}>
-            <div className={styles.statNumber}>{stats.thisWeek}</div>
-            <div className={styles.statLabel}>This Week</div>
-            <div className={styles.statSubtext}>Recent activity</div>
           </div>
         </div>
       </div>

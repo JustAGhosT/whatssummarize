@@ -1,0 +1,96 @@
+.backgroundContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  overflow: hidden;
+}
+
+.canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.gradientLayer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  transition: all var(--motion-duration-slow, 350ms) var(--motion-ease-out-cubic, cubic-bezier(0.215, 0.61, 0.355, 1));
+}
+
+.gradientLayer.light {
+  background: radial-gradient(circle at 20% 80%, rgba(37, 211, 102, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(18, 140, 126, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(37, 211, 102, 0.05) 0%, transparent 50%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.8) 100%);
+}
+
+.gradientLayer.dark {
+  background: radial-gradient(circle at 20% 80%, rgba(37, 211, 102, 0.15) 0%, transparent 60%),
+    radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.12) 0%, transparent 60%),
+    radial-gradient(circle at 40% 40%, rgba(139, 92, 246, 0.08) 0%, transparent 60%),
+    radial-gradient(circle at 60% 70%, rgba(16, 185, 129, 0.1) 0%, transparent 50%),
+    linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.9) 100%);
+}
+
+.noiseOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.03;
+  background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.15) 1px, transparent 0);
+  background-size: 20px 20px;
+  pointer-events: none;
+  animation: noiseMove 20s linear infinite;
+}
+
+@keyframes noiseMove {
+  0% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-5px, 5px);
+  }
+  50% {
+    transform: translate(5px, -5px);
+  }
+  75% {
+    transform: translate(-5px, -5px);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+[data-theme="dark"] .noiseOverlay {
+  opacity: 0.02;
+  background-image: radial-gradient(circle at 1px 1px, rgba(37, 211, 102, 0.1) 1px, transparent 0);
+}
+
+/* Performance optimizations */
+@media (prefers-reduced-motion: reduce) {
+  .noiseOverlay {
+    animation: none;
+  }
+
+  .gradientLayer {
+    transition: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .noiseOverlay {
+    background-size: 15px 15px;
+  }
+}

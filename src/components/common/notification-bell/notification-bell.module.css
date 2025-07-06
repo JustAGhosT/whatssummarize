@@ -1,0 +1,325 @@
+.container {
+  position: relative;
+}
+
+.trigger {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  background: transparent;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 0.75rem;
+  color: var(--color-text-secondary, #666);
+  cursor: pointer;
+  transition: all var(--motion-duration-fast, 150ms) var(--motion-ease-out-quad, cubic-bezier(0.25, 0.46, 0.45, 0.94));
+}
+
+.trigger:hover {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(37, 211, 102, 0.3);
+  color: var(--color-text, #1a1a1a);
+}
+
+.trigger.hasUnread {
+  color: #25d366;
+  border-color: rgba(37, 211, 102, 0.3);
+}
+
+.badge {
+  position: absolute;
+  top: -0.25rem;
+  right: -0.25rem;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ef4444;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 0.625rem;
+  padding: 0 0.25rem;
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  width: 400px;
+  max-height: 500px;
+  background: var(--color-background, white);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 1rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  z-index: 1000;
+  animation: slideInDown var(--motion-duration-normal, 250ms)
+    var(--motion-ease-out-cubic, cubic-bezier(0.215, 0.61, 0.355, 1));
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-text, #1a1a1a);
+  margin: 0;
+}
+
+.markAllRead {
+  background: none;
+  border: none;
+  color: #25d366;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--motion-duration-fast, 150ms) var(--motion-ease-out-quad, cubic-bezier(0.25, 0.46, 0.45, 0.94));
+}
+
+.markAllRead:hover {
+  color: #128c7e;
+}
+
+.notificationList {
+  max-height: 350px;
+  overflow-y: auto;
+}
+
+.notification {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  cursor: pointer;
+  transition: all var(--motion-duration-fast, 150ms) var(--motion-ease-out-quad, cubic-bezier(0.25, 0.46, 0.45, 0.94));
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  position: relative;
+}
+
+.notification:hover {
+  background: rgba(37, 211, 102, 0.04);
+}
+
+.notification:last-child {
+  border-bottom: none;
+}
+
+.notification.unread {
+  background: rgba(37, 211, 102, 0.02);
+}
+
+.notificationIcon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+.notificationContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.notificationTitle {
+  font-weight: 500;
+  color: var(--color-text, #1a1a1a);
+  margin-bottom: 0.25rem;
+  line-height: 1.4;
+}
+
+.notificationMessage {
+  color: var(--color-text-secondary, #666);
+  font-size: 0.875rem;
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+}
+
+.notificationTime {
+  color: var(--color-text-muted, #888);
+  font-size: 0.75rem;
+}
+
+.unreadDot {
+  width: 0.5rem;
+  height: 0.5rem;
+  background: #25d366;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 0.5rem;
+  box-shadow: 0 0 8px rgba(37, 211, 102, 0.4);
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  text-align: center;
+}
+
+.emptyIcon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.emptyText {
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: var(--color-text, #1a1a1a);
+  margin-bottom: 0.5rem;
+}
+
+.emptySubtext {
+  color: var(--color-text-muted, #888);
+}
+
+.footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.viewAll {
+  width: 100%;
+  padding: 0.75rem;
+  background: transparent;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 0.5rem;
+  color: var(--color-text-secondary, #666);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--motion-duration-fast, 150ms) var(--motion-ease-out-quad, cubic-bezier(0.25, 0.46, 0.45, 0.94));
+}
+
+.viewAll:hover {
+  background: rgba(37, 211, 102, 0.04);
+  border-color: rgba(37, 211, 102, 0.3);
+  color: var(--color-text, #1a1a1a);
+}
+
+/* Dark Mode */
+[data-theme="dark"] .trigger {
+  border-color: rgba(51, 65, 85, 0.3);
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .trigger:hover {
+  background: rgba(51, 65, 85, 0.3);
+  border-color: rgba(37, 211, 102, 0.4);
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .trigger.hasUnread {
+  color: #25d366;
+  border-color: rgba(37, 211, 102, 0.4);
+}
+
+[data-theme="dark"] .dropdown {
+  background: rgb(15, 23, 42);
+  border-color: rgba(51, 65, 85, 0.3);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .header {
+  border-bottom-color: rgba(51, 65, 85, 0.3);
+}
+
+[data-theme="dark"] .title {
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .notification {
+  border-bottom-color: rgba(51, 65, 85, 0.2);
+}
+
+[data-theme="dark"] .notification:hover {
+  background: rgba(37, 211, 102, 0.08);
+}
+
+[data-theme="dark"] .notification.unread {
+  background: rgba(37, 211, 102, 0.05);
+}
+
+[data-theme="dark"] .notificationTitle {
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .notificationMessage {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .notificationTime {
+  color: #64748b;
+}
+
+[data-theme="dark"] .emptyText {
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .emptySubtext {
+  color: #64748b;
+}
+
+[data-theme="dark"] .footer {
+  border-top-color: rgba(51, 65, 85, 0.3);
+}
+
+[data-theme="dark"] .viewAll {
+  border-color: rgba(51, 65, 85, 0.3);
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .viewAll:hover {
+  background: rgba(37, 211, 102, 0.08);
+  border-color: rgba(37, 211, 102, 0.4);
+  color: #e2e8f0;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .dropdown {
+    width: 320px;
+    right: -1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .dropdown {
+    width: calc(100vw - 2rem);
+    right: -1rem;
+    left: -1rem;
+  }
+}
