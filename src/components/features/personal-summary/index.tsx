@@ -1,133 +1,312 @@
 "use client"
 
 import { useState } from "react"
-import { useApp } from "@/contexts/app-context"
-import { PersonalSummaryCard } from "@/components/common/personal-summary-card"
-import { ShareModal } from "@/components/common/share-modal"
+import { Search, Grid, List, Plus, Download, TrendingUp, TrendingDown, Minus } from "lucide-react"
+import { PersonalSummaryCard } from "../../common/personal-summary-card"
+import { FilterDropdown } from "../../common/filter-dropdown"
+import { ShareModal } from "../../common/share-modal"
+import { useAppContext } from "../../../contexts/app-context"
 import styles from "./personal-summary.module.css"
 
-export function PersonalSummary() {
-  const { personalSummaries, generatePersonalSummary, sharePersonalSummary, isLoading, error } = useApp()
-
-  const [isGenerating, setIsGenerating] = useState(false)
+export function PersonalSummaryComponent() {
+  const { personalSummaries, topGroups } = useAppContext()
+  const [searchTerm, setSearchTerm] = useState("")
+  const [selectedFilter, setSelectedFilter] = useState("all")
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
+  const [sortBy, setSortBy] = useState("date")
   const [shareModalOpen, setShareModalOpen] = useState(false)
-  const [selectedSummaryId, setSelectedSummaryId] = useState<string | null>(null)
+  const [selectedSummary, setSelectedSummary] = useState(null)
 
-  const handleGenerateWeeklySummary = async () => {
-    setIsGenerating(true)
-    try {
-      const today = new Date()
-      const weekStart = new Date(today.setDate(today.getDate() - today.getDay()))
-      const weekEnd = new Date(today.setDate(today.getDate() - today.getDay() + 6))
+  // Filter and search summaries
+  const filteredSummaries = personalSummaries.filter((summary) => {
+    const matchesSearch =
+      summary.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      summary.contact.toLowerCase().includes(searchTerm.toLowerCase())
 
-      await generatePersonalSummary(weekStart.toISOString().split("T")[0], weekEnd.toISOString().split("T")[0])
-    } catch (err) {
-      console.error("Failed to generate summary:", err)
-    } finally {
-      setIsGenerating(false)
+    const matchesFilter =
+      selectedFilter === "all" ||
+      (selectedFilter === "recent" && new Date(summary.date) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)) ||
+      (selectedFilter === "important" && summary.keyPoints.length > 3) ||
+      (selectedFilter === "archived" && summary.archived)
+
+    return matchesSearch && matchesFilter
+  })
+
+  // Sort summaries
+  const sortedSummaries = [...filteredSummaries].sort((a, b) => {
+    switch (sortBy) {
+      case "date":
+        return new Date(b.date).getTime() - new Date(a.date).getTime()
+      case "contact":
+        return a.contact.localeCompare(b.contact)
+      case "messages":
+        return b.messageCount - a.messageCount
+      default:
+        return 0
     }
-  }
+  })
 
-  const handleShare = (summaryId: string) => {
-    setSelectedSummaryId(summaryId)
+  const handleShare = (summary) => {
+    setSelectedSummary(summary)
     setShareModalOpen(true)
   }
 
-  const handleShareConfirm = async (channels: string[]) => {
-    if (selectedSummaryId) {
-      try {
-        await sharePersonalSummary(selectedSummaryId, channels)
-        setShareModalOpen(false)
-        setSelectedSummaryId(null)
-      } catch (err) {
-        console.error("Failed to share summary:", err)
-      }
-    }
+  const handleExport = () => {
+    console.log("Exporting all summaries...")
   }
 
-  const stats = {
-    total: personalSummaries.length,
-    generated: personalSummaries.filter((s) => s.status === "generated").length,
-    shared: personalSummaries.filter((s) => s.status === "shared").length,
-    draft: personalSummaries.filter((s) => s.status === "draft").length,
+  const calculateTrend = (current, previous) => {
+    if (previous === 0) return 0
+    return ((current - previous) / previous) * 100
   }
+
+  // Calculate stats with proper handling of TopGroup objects
+  const totalSummaries = personalSummaries.length
+  const activeSummaries = personalSummaries.filter((s) => !s.archived).length
+  const archivedSummaries = personalSummaries.filter((s) => s.archived).length
+  const thisWeekSummaries = personalSummaries.filter(
+    (s) => new Date(s.date) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+  ).length
+
+  // Previous week for trend calculation
+  const lastWeekSummaries = personalSummaries.filter((s) => {
+    const date = new Date(s.date)
+    const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+    const twoWeeksAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000)
+    return date <= weekAgo && date > twoWeeksAgo
+  }).length
+
+  const weeklyTrend = calculateTrend(thisWeekSummaries, lastWeekSummaries)
 
   return (
-    <div className={styles.container}>
+    <div className={styles.personalSummary}>
+      {/* Header */}
       <div className={styles.header}>
         <div className={styles.headerContent}>
-          <h1 className={styles.title}>Personal Summaries</h1>
-          <p className={styles.subtitle}>Generate and share personalized weekly activity summaries</p>
+          <div className={styles.titleSection}>
+            <h1 className={styles.title}>Personal Summaries</h1>
+            <p className={styles.subtitle}>Manage your individual conversation summaries</p>
+          </div>
+          <div className={styles.headerActions}>
+            <button className={styles.primaryButton} onClick={() => console.log("New summary")}>
+              <Plus size={18} />
+              New Summary
+            </button>
+            <button className={styles.secondaryButton} onClick={handleExport}>
+              <Download size={18} />
+              Export All
+            </button>
+          </div>
         </div>
-
-        <button
-          className={styles.generateBtn}
-          onClick={handleGenerateWeeklySummary}
-          disabled={isGenerating || isLoading}
-        >
-          {isGenerating ? (
-            <>
-              <span className={styles.spinner}></span>
-              Generating...
-            </>
-          ) : (
-            <>
-              <span className={styles.generateIcon}>✨</span>
-              Generate Weekly Summary
-            </>
-          )}
-        </button>
       </div>
 
-      {error && (
-        <div className={styles.error}>
-          <span className={styles.errorIcon}>⚠️</span>
-          {error}
+      {/* Stats Cards */}
+      <div className={styles.statsGrid}>
+        <div className={`${styles.statCard} ${styles.totalCard}`}>
+          <div className={styles.statIcon}>
+            <div className={styles.iconContainer}>
+              <Grid size={24} />
+            </div>
+          </div>
+          <div className={styles.statContent}>
+            <div className={styles.statNumber}>{totalSummaries}</div>
+            <div className={styles.statLabel}>Total Summaries</div>
+            <div className={styles.statDescription}>All conversations tracked</div>
+          </div>
+          <div className={styles.statProgress}>
+            <div className={styles.progressBar} style={{ width: "100%" }}></div>
+          </div>
+        </div>
+
+        <div className={`${styles.statCard} ${styles.activeCard}`}>
+          <div className={styles.statIcon}>
+            <div className={styles.iconContainer}>
+              <List size={24} />
+            </div>
+          </div>
+          <div className={styles.statContent}>
+            <div className={styles.statNumber}>{activeSummaries}</div>
+            <div className={styles.statLabel}>Active</div>
+            <div className={styles.statDescription}>Currently being tracked</div>
+          </div>
+          <div className={styles.statTrend}>
+            <TrendingUp size={16} />
+            <span>+12%</span>
+          </div>
+          <div className={styles.statProgress}>
+            <div className={styles.progressBar} style={{ width: "75%" }}></div>
+          </div>
+        </div>
+
+        <div className={`${styles.statCard} ${styles.archivedCard}`}>
+          <div className={styles.statIcon}>
+            <div className={styles.iconContainer}>
+              <Download size={24} />
+            </div>
+          </div>
+          <div className={styles.statContent}>
+            <div className={styles.statNumber}>{archivedSummaries}</div>
+            <div className={styles.statLabel}>Archived</div>
+            <div className={styles.statDescription}>Completed summaries</div>
+          </div>
+          <div className={styles.statTrend}>
+            <Minus size={16} />
+            <span>0%</span>
+          </div>
+          <div className={styles.statProgress}>
+            <div className={styles.progressBar} style={{ width: "25%" }}></div>
+          </div>
+        </div>
+
+        <div className={`${styles.statCard} ${styles.weekCard}`}>
+          <div className={styles.statIcon}>
+            <div className={styles.iconContainer}>
+              <TrendingUp size={24} />
+            </div>
+          </div>
+          <div className={styles.statContent}>
+            <div className={styles.statNumber}>{thisWeekSummaries}</div>
+            <div className={styles.statLabel}>This Week</div>
+            <div className={styles.statDescription}>Recent activity</div>
+          </div>
+          <div className={styles.statTrend}>
+            {weeklyTrend >= 0 ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
+            <span>
+              {weeklyTrend >= 0 ? "+" : ""}
+              {weeklyTrend.toFixed(1)}%
+            </span>
+          </div>
+          <div className={styles.statProgress}>
+            <div
+              className={styles.progressBar}
+              style={{ width: `${Math.min(100, (thisWeekSummaries / Math.max(1, totalSummaries)) * 100)}%` }}
+            ></div>
+          </div>
+        </div>
+      </div>
+
+      {/* Top Groups Section */}
+      {topGroups.length > 0 && (
+        <div className={styles.topGroupsSection}>
+          <h2 className={styles.sectionTitle}>Most Active Contacts</h2>
+          <div className={styles.topGroupsList}>
+            {topGroups.map((group, index) => (
+              <div key={`${group.name}-${index}`} className={styles.topGroupItem}>
+                <div className={styles.topGroupRank}>#{index + 1}</div>
+                <div className={styles.topGroupInfo}>
+                  <div className={styles.topGroupName}>{group.name}</div>
+                  <div className={styles.topGroupCount}>{group.messageCount} messages</div>
+                </div>
+                <div className={styles.topGroupBar}>
+                  <div
+                    className={styles.topGroupProgress}
+                    style={{
+                      width: `${(group.messageCount / Math.max(...topGroups.map((g) => g.messageCount))) * 100}%`,
+                    }}
+                  ></div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
-      <div className={styles.stats}>
-        <div className={styles.statCard}>
-          <div className={styles.statValue}>{stats.total}</div>
-          <div className={styles.statLabel}>Total</div>
+      {/* Search and Filter Section */}
+      <div className={styles.searchSection}>
+        <div className={styles.searchContainer}>
+          <div className={styles.searchInputWrapper}>
+            <Search className={styles.searchIcon} size={20} />
+            <input
+              type="text"
+              placeholder="Search summaries..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className={styles.searchInput}
+            />
+          </div>
+
+          <div className={styles.filterControls}>
+            <FilterDropdown
+              value={selectedFilter}
+              onChange={setSelectedFilter}
+              options={[
+                { value: "all", label: "All Summaries" },
+                { value: "recent", label: "Recent" },
+                { value: "important", label: "Important" },
+                { value: "archived", label: "Archived" },
+              ]}
+            />
+
+            <FilterDropdown
+              value={sortBy}
+              onChange={setSortBy}
+              options={[
+                { value: "date", label: "Sort by Date" },
+                { value: "contact", label: "Sort by Contact" },
+                { value: "messages", label: "Sort by Messages" },
+              ]}
+            />
+
+            <div className={styles.viewToggle}>
+              <button
+                className={`${styles.viewButton} ${viewMode === "grid" ? styles.active : ""}`}
+                onClick={() => setViewMode("grid")}
+                aria-label="Grid view"
+              >
+                <Grid size={18} />
+              </button>
+              <button
+                className={`${styles.viewButton} ${viewMode === "list" ? styles.active : ""}`}
+                onClick={() => setViewMode("list")}
+                aria-label="List view"
+              >
+                <List size={18} />
+              </button>
+            </div>
+          </div>
         </div>
-        <div className={styles.statCard}>
-          <div className={styles.statValue}>{stats.generated}</div>
-          <div className={styles.statLabel}>Generated</div>
-        </div>
-        <div className={styles.statCard}>
-          <div className={styles.statValue}>{stats.shared}</div>
-          <div className={styles.statLabel}>Shared</div>
-        </div>
-        <div className={styles.statCard}>
-          <div className={styles.statValue}>{stats.draft}</div>
-          <div className={styles.statLabel}>Draft</div>
+
+        <div className={styles.resultsInfo}>
+          <span className={styles.resultsCount}>
+            {sortedSummaries.length} {sortedSummaries.length === 1 ? "summary" : "summaries"}
+          </span>
         </div>
       </div>
 
-      <div className={styles.summariesGrid}>
-        {personalSummaries.map((summary) => (
-          <PersonalSummaryCard key={summary.id} summary={summary} onShare={() => handleShare(summary.id)} />
-        ))}
+      {/* Summaries Grid/List */}
+      <div className={`${styles.summariesContainer} ${styles[viewMode]}`}>
+        {sortedSummaries.length > 0 ? (
+          sortedSummaries.map((summary) => (
+            <PersonalSummaryCard
+              key={summary.id}
+              summary={summary}
+              viewMode={viewMode}
+              onShare={() => handleShare(summary)}
+            />
+          ))
+        ) : (
+          <div className={styles.emptyState}>
+            <div className={styles.emptyIcon}>
+              <Search size={48} />
+            </div>
+            <h3 className={styles.emptyTitle}>No summaries found</h3>
+            <p className={styles.emptyDescription}>
+              {searchTerm || selectedFilter !== "all"
+                ? "Try adjusting your search or filter criteria"
+                : "Create your first personal summary to get started"}
+            </p>
+            <button className={styles.primaryButton} onClick={() => console.log("New summary")}>
+              <Plus size={18} />
+              Create Summary
+            </button>
+          </div>
+        )}
       </div>
 
-      {personalSummaries.length === 0 && (
-        <div className={styles.emptyState}>
-          <div className={styles.emptyIcon}>📊</div>
-          <h3 className={styles.emptyTitle}>No Personal Summaries Yet</h3>
-          <p className={styles.emptyText}>Generate your first weekly activity summary to get started</p>
-          <button className={styles.emptyBtn} onClick={handleGenerateWeeklySummary} disabled={isGenerating}>
-            Generate Your First Summary
-          </button>
-        </div>
+      {/* Share Modal */}
+      {shareModalOpen && selectedSummary && (
+        <ShareModal isOpen={shareModalOpen} onClose={() => setShareModalOpen(false)} summary={selectedSummary} />
       )}
-
-      <ShareModal
-        isOpen={shareModalOpen}
-        onClose={() => setShareModalOpen(false)}
-        onShare={handleShareConfirm}
-        isLoading={isLoading}
-      />
     </div>
   )
 }

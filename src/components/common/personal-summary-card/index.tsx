@@ -1,7 +1,6 @@
 "use client"
 
-import { useState } from "react"
-import type { PersonalSummary } from "../../../contexts/app-context/types"
+import type { PersonalSummary } from "@/contexts/app-context/types"
 import styles from "./personal-summary-card.module.css"
 
 interface PersonalSummaryCardProps {
@@ -10,8 +9,6 @@ interface PersonalSummaryCardProps {
 }
 
 export function PersonalSummaryCard({ summary, onShare }: PersonalSummaryCardProps) {
-  const [showFullContent, setShowFullContent] = useState(false)
-
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       month: "short",
@@ -20,90 +17,94 @@ export function PersonalSummaryCard({ summary, onShare }: PersonalSummaryCardPro
     })
   }
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: PersonalSummary["status"]) => {
     switch (status) {
-      case "shared":
-        return styles.statusShared
-      case "generated":
-        return styles.statusGenerated
       case "draft":
-        return styles.statusDraft
+        return "#f59e0b"
+      case "generated":
+        return "#10b981"
+      case "shared":
+        return "#3b82f6"
       default:
-        return styles.statusDefault
+        return "#6b7280"
     }
   }
 
-  const getStatusIcon = (status: string) => {
+  const getStatusIcon = (status: PersonalSummary["status"]) => {
     switch (status) {
-      case "shared":
+      case "draft":
+        return "📝"
+      case "generated":
         return "✅"
-      case "generated":
-        return "📋"
-      case "draft":
-        return "✏️"
+      case "shared":
+        return "📤"
       default:
-        return "📄"
+        return "❓"
     }
   }
-
-  const truncatedContent = summary.content.length > 150 ? summary.content.substring(0, 150) + "..." : summary.content
 
   return (
     <div className={styles.card}>
       <div className={styles.header}>
-        <div className={styles.headerLeft}>
+        <div className={styles.titleSection}>
           <h3 className={styles.title}>{summary.title}</h3>
-          <div className={styles.dateRange}>
-            {formatDate(summary.weekStart)} - {formatDate(summary.weekEnd)}
-          </div>
+          <p className={styles.dateRange}>
+            {formatDate(summary.dateRange.start)} - {formatDate(summary.dateRange.end)}
+          </p>
         </div>
-        <div className={styles.headerRight}>
-          <span className={`${styles.status} ${getStatusColor(summary.status)}`}>
-            {getStatusIcon(summary.status)} {summary.status}
-          </span>
+        <div className={styles.status} style={{ color: getStatusColor(summary.status) }}>
+          <span className={styles.statusIcon}>{getStatusIcon(summary.status)}</span>
+          <span className={styles.statusText}>{summary.status}</span>
         </div>
       </div>
 
       <div className={styles.stats}>
         <div className={styles.statItem}>
-          <span className={styles.statNumber}>{summary.activityCount}</span>
+          <span className={styles.statValue}>{summary.stats.totalMessages}</span>
           <span className={styles.statLabel}>Messages</span>
         </div>
         <div className={styles.statItem}>
-          <span className={styles.statNumber}>{summary.topGroups.length}</span>
+          <span className={styles.statValue}>{summary.stats.activeGroups}</span>
           <span className={styles.statLabel}>Groups</span>
         </div>
         <div className={styles.statItem}>
-          <span className={styles.statNumber}>{summary.sharedChannels.length}</span>
-          <span className={styles.statLabel}>Shared</span>
+          <span className={styles.statValue}>{summary.stats.topGroup}</span>
+          <span className={styles.statLabel}>Top Group</span>
         </div>
       </div>
 
-      <div className={styles.content}>
-        <p className={styles.text}>{showFullContent ? summary.content : truncatedContent}</p>
-        {summary.content.length > 150 && (
-          <button onClick={() => setShowFullContent(!showFullContent)} className={styles.toggleBtn}>
-            {showFullContent ? "Show less" : "Show more"}
-          </button>
-        )}
-      </div>
-
       <div className={styles.topGroups}>
-        <div className={styles.groupsLabel}>Top Groups:</div>
+        <h4 className={styles.sectionTitle}>Top Groups</h4>
         <div className={styles.groupsList}>
-          {summary.topGroups.slice(0, 3).map((group, index) => (
-            <span key={index} className={styles.groupTag}>
-              {group}
-            </span>
+          {summary.topGroups.map((group, index) => (
+            <div key={index} className={styles.groupItem}>
+              <span className={styles.groupName}>{group.name}</span>
+              <span className={styles.groupCount}>{group.messageCount} messages</span>
+            </div>
           ))}
         </div>
       </div>
 
+      <div className={styles.insights}>
+        <h4 className={styles.sectionTitle}>Key Insights</h4>
+        <ul className={styles.insightsList}>
+          {summary.insights.map((insight, index) => (
+            <li key={index} className={styles.insightItem}>
+              {insight}
+            </li>
+          ))}
+        </ul>
+      </div>
+
       <div className={styles.actions}>
-        <button onClick={onShare} className={styles.shareBtn} disabled={summary.status === "draft"}>
-          {summary.status === "shared" ? "Share Again" : "Share"}
+        <button className={styles.viewBtn} type="button">
+          <span className={styles.btnIcon}>👁️</span>
+          View Details
         </button>
-        <div className={styles.createdAt}>Created {formatDate(summary.createdAt)}</div>
+        <button className={styles.shareBtn} onClick={onShare} type="button">
+          <span className={styles.btnIcon}>📤</span>
+          Share
+        </button>
       </div>
     </div>
   )

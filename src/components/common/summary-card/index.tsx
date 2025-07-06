@@ -1,62 +1,96 @@
 "use client"
 
 import { useState } from "react"
-import type { Summary } from "../../../contexts/app-context/types"
+import { useApp } from "@/contexts/app-context"
+import { ShareModal } from "@/components/common/share-modal"
 import styles from "./summary-card.module.css"
+
+interface Summary {
+  id: string
+  title: string
+  content: string
+  type: "daily" | "weekly" | "monthly" | "custom"
+  status?: "draft" | "generated" | "shared"
+  createdAt: string
+  groupName: string
+  messageCount?: number
+  participants?: number
+  keyTopics?: string[]
+  sentiment?: "positive" | "neutral" | "negative"
+  isArchived?: boolean
+}
 
 interface SummaryCardProps {
   summary: Summary
-  onDelete: (id: string) => void
-  onUpdate: (id: string, updates: Partial<Summary>) => void
   viewMode?: "grid" | "list"
+  onDelete?: (id: string) => void
+  onUpdate?: (id: string, updates: Partial<Summary>) => void
 }
 
-export function SummaryCard({ summary, onDelete, onUpdate, viewMode = "grid" }: SummaryCardProps) {
+export function SummaryCard({ summary, viewMode = "grid", onDelete, onUpdate }: SummaryCardProps) {
+  const { isLoading } = useApp()
+  const [shareModalOpen, setShareModalOpen] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const [isSharing, setIsSharing] = useState(false)
+
+  const handleShare = () => {
+    setShareModalOpen(true)
+  }
+
+  const handleShareConfirm = async (channels: string[]) => {
+    setIsSharing(true)
+    try {
+      // Simulate sharing API call
+      await new Promise((resolve) => setTimeout(resolve, 1500))
+
+      // Update summary status to shared if it has onUpdate
+      if (onUpdate) {
+        await onUpdate(summary.id, { status: "shared" })
+      }
+
+      // Close modal after successful share
+      setShareModalOpen(false)
+    } catch (err) {
+      console.error("Failed to share summary:", err)
+    } finally {
+      setIsSharing(false)
+    }
+  }
+
+  const handleShareClose = () => {
+    if (!isSharing) {
+      setShareModalOpen(false)
+    }
+  }
 
   const handleDelete = async () => {
     if (window.confirm("Are you sure you want to delete this summary?")) {
-      setIsLoading(true)
+      setIsDeleting(true)
       try {
-        await onDelete(summary.id)
-      } catch (error) {
-        console.error("Failed to delete summary:", error)
+        if (onDelete) {
+          await onDelete(summary.id)
+        }
+      } catch (err) {
+        console.error("Failed to delete summary:", err)
       } finally {
-        setIsLoading(false)
+        setIsDeleting(false)
       }
     }
   }
 
   const handleArchive = async () => {
-    setIsLoading(true)
-    try {
-      await onUpdate(summary.id, {
-        status: summary.status === "active" ? "archived" : "active",
-      })
-    } catch (error) {
-      console.error("Failed to update summary:", error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: summary.title,
-        text: summary.content,
-        url: window.location.href,
-      })
-    } else {
-      navigator.clipboard.writeText(summary.content)
-      alert("Summary copied to clipboard!")
+    if (onUpdate) {
+      try {
+        await onUpdate(summary.id, { isArchived: !summary.isArchived })
+      } catch (err) {
+        console.error("Failed to archive summary:", err)
+      }
     }
   }
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString("en-US", {
+    return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -65,14 +99,39 @@ export function SummaryCard({ summary, onDelete, onUpdate, viewMode = "grid" }: 
     })
   }
 
+  const getStatusColor = (status?: string) => {
+    switch (status) {
+      case "draft":
+        return "#fbbf24"
+      case "generated":
+        return "#10b981"
+      case "shared":
+        return "#3b82f6"
+      default:
+        return "#6b7280"
+    }
+  }
+
+  const getSentimentEmoji = (sentiment?: string) => {
+    switch (sentiment) {
+      case "positive":
+        return "😊"
+      case "negative":
+        return "😔"
+      case "neutral":
+      default:
+        return "😐"
+    }
+  }
+
   const getTypeIcon = (type: string) => {
     switch (type) {
+      case "daily":
+        return "📝"
       case "weekly":
         return "📅"
       case "monthly":
         return "📊"
-      case "daily":
-        return "📝"
       case "custom":
         return "⚙️"
       default:
@@ -80,109 +139,104 @@ export function SummaryCard({ summary, onDelete, onUpdate, viewMode = "grid" }: 
     }
   }
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "active":
-        return "#25d366"
-      case "archived":
-        return "#6c757d"
-      case "draft":
-        return "#ffc107"
-      default:
-        return "#6c757d"
-    }
-  }
-
-  const cardClassName = `${styles.card} ${styles[viewMode]} ${summary.status === "archived" ? styles.archived : ""}`
+  const cardClassName = `${styles.card} ${styles[viewMode]} ${summary.isArchived ? styles.archived : ""} ${isDeleting ? styles.deleting : ""}`
 
   return (
-    <div className={cardClassName}>
-      {isLoading && (
-        <div className={styles.loadingOverlay}>
-          <div className={styles.spinner}></div>
-        </div>
-      )}
+    <>
+      <div className={cardClassName}>
+        {isDeleting && (
+          <div className={styles.loadingOverlay}>
+            <div className={styles.spinner}></div>
+          </div>
+        )}
 
-      <div className={styles.header}>
-        <div className={styles.titleSection}>
-          <div className={styles.typeIcon}>{getTypeIcon(summary.type)}</div>
-          <div className={styles.titleContent}>
-            <h3 className={styles.title}>{summary.title}</h3>
-            <div className={styles.metadata}>
-              <span className={styles.type}>{summary.type}</span>
-              <span className={styles.separator}>•</span>
-              <span className={styles.date}>{formatDate(summary.createdAt)}</span>
+        <div className={styles.header}>
+          <div className={styles.headerLeft}>
+            <div className={styles.typeIcon}>{getTypeIcon(summary.type)}</div>
+            <div className={styles.titleContent}>
+              <h3 className={styles.title}>{summary.title}</h3>
+              <div className={styles.meta}>
+                <span className={styles.groupName}>{summary.groupName}</span>
+                <span className={styles.separator}>•</span>
+                <span className={styles.date}>{formatDate(summary.createdAt)}</span>
+              </div>
             </div>
           </div>
+          <div className={styles.headerRight}>
+            {summary.status && (
+              <span className={styles.status} style={{ backgroundColor: getStatusColor(summary.status) }}>
+                {summary.status}
+              </span>
+            )}
+          </div>
         </div>
-        <div className={styles.statusBadge} style={{ backgroundColor: getStatusColor(summary.status) }}>
-          {summary.status}
-        </div>
-      </div>
 
-      <div className={styles.content}>
-        <p className={`${styles.summary} ${isExpanded ? styles.expanded : ""}`}>{summary.content}</p>
-        {summary.content.length > 150 && (
-          <button className={styles.expandButton} onClick={() => setIsExpanded(!isExpanded)}>
-            {isExpanded ? "Show Less" : "Show More"}
-          </button>
+        <div className={styles.content}>
+          <p className={`${styles.summary} ${isExpanded ? styles.expanded : ""}`}>{summary.content}</p>
+          {summary.content.length > 150 && (
+            <button className={styles.expandButton} onClick={() => setIsExpanded(!isExpanded)} type="button">
+              {isExpanded ? "Show Less" : "Show More"}
+            </button>
+          )}
+        </div>
+
+        <div className={styles.stats}>
+          <div className={styles.stat}>
+            <span className={styles.statIcon}>💬</span>
+            <span className={styles.statValue}>{summary.messageCount || 0}</span>
+            <span className={styles.statLabel}>messages</span>
+          </div>
+          <div className={styles.stat}>
+            <span className={styles.statIcon}>👥</span>
+            <span className={styles.statValue}>{summary.participants || 0}</span>
+            <span className={styles.statLabel}>participants</span>
+          </div>
+          <div className={styles.stat}>
+            <span className={styles.statIcon}>{getSentimentEmoji(summary.sentiment)}</span>
+            <span className={styles.statLabel}>{summary.sentiment || "neutral"}</span>
+          </div>
+        </div>
+
+        {summary.keyTopics && summary.keyTopics.length > 0 && (
+          <div className={styles.topics}>
+            {summary.keyTopics.slice(0, 3).map((topic, index) => (
+              <span key={index} className={styles.topic}>
+                #{topic}
+              </span>
+            ))}
+            {summary.keyTopics.length > 3 && (
+              <span className={styles.topicMore}>+{summary.keyTopics.length - 3} more</span>
+            )}
+          </div>
         )}
-      </div>
 
-      {summary.tags && summary.tags.length > 0 && (
-        <div className={styles.tags}>
-          {summary.tags.map((tag, index) => (
-            <span key={index} className={styles.tag}>
-              #{tag}
-            </span>
-          ))}
-        </div>
-      )}
-
-      <div className={styles.stats}>
-        <div className={styles.stat}>
-          <span className={styles.statIcon}>💬</span>
-          <span className={styles.statValue}>{summary.messageCount || 0}</span>
-          <span className={styles.statLabel}>Messages</span>
-        </div>
-        <div className={styles.stat}>
-          <span className={styles.statIcon}>👥</span>
-          <span className={styles.statValue}>{summary.participantCount || 0}</span>
-          <span className={styles.statLabel}>People</span>
-        </div>
-        <div className={styles.stat}>
-          <span className={styles.statIcon}>📊</span>
-          <span className={styles.statValue}>{summary.insights?.length || 0}</span>
-          <span className={styles.statLabel}>Insights</span>
+        <div className={styles.actions}>
+          <button className={styles.actionBtn} onClick={handleShare} disabled={isLoading || isSharing} type="button">
+            <span className={styles.actionIcon}>📤</span>
+            {isSharing ? "Sharing..." : "Share"}
+          </button>
+          <button className={styles.actionBtn} onClick={handleArchive} disabled={isLoading} type="button">
+            <span className={styles.actionIcon}>{summary.isArchived ? "📤" : "📦"}</span>
+            {summary.isArchived ? "Restore" : "Archive"}
+          </button>
+          <button
+            className={`${styles.actionBtn} ${styles.deleteBtn}`}
+            onClick={handleDelete}
+            disabled={isDeleting || isLoading}
+            type="button"
+          >
+            <span className={styles.actionIcon}>🗑️</span>
+            {isDeleting ? "Deleting..." : "Delete"}
+          </button>
         </div>
       </div>
 
-      <div className={styles.actions}>
-        <button
-          className={`${styles.actionButton} ${styles.primary}`}
-          onClick={() => window.open(`/summary/${summary.id}`, "_blank")}
-          title="View Full Summary"
-        >
-          <span className={styles.actionIcon}>👁️</span>
-          View
-        </button>
-        <button className={`${styles.actionButton} ${styles.secondary}`} onClick={handleShare} title="Share Summary">
-          <span className={styles.actionIcon}>📤</span>
-          Share
-        </button>
-        <button
-          className={`${styles.actionButton} ${styles.secondary}`}
-          onClick={handleArchive}
-          title={summary.status === "active" ? "Archive" : "Unarchive"}
-        >
-          <span className={styles.actionIcon}>{summary.status === "active" ? "📦" : "📤"}</span>
-          {summary.status === "active" ? "Archive" : "Restore"}
-        </button>
-        <button className={`${styles.actionButton} ${styles.danger}`} onClick={handleDelete} title="Delete Summary">
-          <span className={styles.actionIcon}>🗑️</span>
-          Delete
-        </button>
-      </div>
-    </div>
+      <ShareModal
+        isOpen={shareModalOpen}
+        onClose={handleShareClose}
+        onShare={handleShareConfirm}
+        isLoading={isSharing}
+      />
+    </>
   )
 }

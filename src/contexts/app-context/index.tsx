@@ -1,222 +1,10 @@
 "use client"
 
-import { createContext, useContext, useState, type ReactNode } from "react"
-import type { AppContextType, Summary, PersonalSummary, ShareChannel } from "./types"
+import type React from "react"
+import { createContext, useContext, useState, useEffect } from "react"
+import type { AppContextType, Summary, PersonalSummary } from "./types"
 
 const AppContext = createContext<AppContextType | undefined>(undefined)
-
-const mockSummaries: Summary[] = [
-  {
-    id: "1",
-    title: "Family Group",
-    type: "weekly",
-    content:
-      "Weekly Family Updates: This week the family discussed vacation plans for summer, shared photos from weekend activities, and coordinated schedules for upcoming events.",
-    createdAt: "2024-01-15T10:00:00Z",
-    updatedAt: "2024-01-15T10:00:00Z",
-    isArchived: false,
-    groupName: "Family Group",
-    participants: 8,
-    messageCount: 156,
-  },
-  {
-    id: "2",
-    title: "Work Team",
-    type: "daily",
-    content:
-      "Daily Standup Summary: Team discussed project milestones, resolved blockers, and planned sprint activities.",
-    createdAt: "2024-01-14T09:00:00Z",
-    updatedAt: "2024-01-14T09:00:00Z",
-    isArchived: false,
-    groupName: "Work Team",
-    participants: 12,
-    messageCount: 89,
-  },
-  {
-    id: "3",
-    title: "Friends Chat",
-    type: "weekly",
-    content: "Weekly Friends Update: Planned weekend meetup, shared memes, and discussed upcoming events.",
-    createdAt: "2024-01-13T15:30:00Z",
-    updatedAt: "2024-01-13T15:30:00Z",
-    isArchived: false,
-    groupName: "Friends Chat",
-    participants: 6,
-    messageCount: 234,
-  },
-]
-
-const mockPersonalSummaries: PersonalSummary[] = [
-  {
-    id: "1",
-    userId: "user1",
-    weekStart: "2024-01-08",
-    weekEnd: "2024-01-14",
-    status: "shared",
-    messageCount: 245,
-    topGroups: [
-      { name: "Family Group", messageCount: 89 },
-      { name: "Work Team", messageCount: 67 },
-      { name: "Friends Chat", messageCount: 89 },
-    ],
-    activityScore: 85,
-    sharedChannels: ["email", "whatsapp"],
-    generatedAt: "2024-01-15T10:00:00Z",
-    sharedAt: "2024-01-15T10:30:00Z",
-    content: "Your weekly activity summary shows high engagement across family and work groups.",
-  },
-  {
-    id: "2",
-    userId: "user1",
-    weekStart: "2024-01-01",
-    weekEnd: "2024-01-07",
-    status: "generated",
-    messageCount: 189,
-    topGroups: [
-      { name: "Family Group", messageCount: 67 },
-      { name: "Friends Chat", messageCount: 78 },
-      { name: "Work Team", messageCount: 44 },
-    ],
-    activityScore: 72,
-    sharedChannels: [],
-    generatedAt: "2024-01-08T09:00:00Z",
-  },
-]
-
-const mockShareChannels: ShareChannel[] = [
-  { id: "email", name: "Email", type: "email", icon: "📧", enabled: true },
-  { id: "whatsapp", name: "WhatsApp", type: "whatsapp", icon: "💬", enabled: true },
-  { id: "slack", name: "Slack", type: "slack", icon: "💼", enabled: true },
-  { id: "teams", name: "Microsoft Teams", type: "teams", icon: "👥", enabled: false },
-  { id: "telegram", name: "Telegram", type: "telegram", icon: "✈️", enabled: false },
-]
-
-export function AppProvider({ children }: { children: ReactNode }) {
-  const [summaries, setSummaries] = useState<Summary[]>(mockSummaries)
-  const [personalSummaries, setPersonalSummaries] = useState<PersonalSummary[]>(mockPersonalSummaries)
-  const [shareChannels, setShareChannels] = useState<ShareChannel[]>(mockShareChannels)
-  const [filter, setFilter] = useState("all")
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
-  const addSummary = (summaryData: Omit<Summary, "id" | "createdAt" | "updatedAt">) => {
-    const newSummary: Summary = {
-      ...summaryData,
-      id: Date.now().toString(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    }
-    setSummaries((prev) => [newSummary, ...prev])
-  }
-
-  const updateSummary = (id: string, updates: Partial<Summary>) => {
-    setSummaries((prev) =>
-      prev.map((summary) =>
-        summary.id === id ? { ...summary, ...updates, updatedAt: new Date().toISOString() } : summary,
-      ),
-    )
-  }
-
-  const deleteSummary = (id: string) => {
-    setSummaries((prev) => prev.filter((summary) => summary.id !== id))
-  }
-
-  const archiveSummary = (id: string) => {
-    updateSummary(id, { isArchived: true })
-  }
-
-  const generatePersonalSummary = async (weekStart: string, weekEnd: string): Promise<PersonalSummary> => {
-    setIsLoading(true)
-    setError(null)
-
-    try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-
-      const newSummary: PersonalSummary = {
-        id: Date.now().toString(),
-        userId: "user1",
-        weekStart,
-        weekEnd,
-        status: "generated",
-        messageCount: Math.floor(Math.random() * 300) + 100,
-        topGroups: [
-          { name: "Family Group", messageCount: Math.floor(Math.random() * 100) + 20 },
-          { name: "Work Team", messageCount: Math.floor(Math.random() * 80) + 15 },
-          { name: "Friends Chat", messageCount: Math.floor(Math.random() * 120) + 25 },
-        ],
-        activityScore: Math.floor(Math.random() * 40) + 60,
-        sharedChannels: [],
-        generatedAt: new Date().toISOString(),
-        content: `Your weekly activity summary for ${weekStart} to ${weekEnd} shows active participation across multiple groups.`,
-      }
-
-      setPersonalSummaries((prev) => [newSummary, ...prev])
-      return newSummary
-    } catch (err) {
-      setError("Failed to generate personal summary")
-      throw err
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const sharePersonalSummary = async (id: string, channels: string[]): Promise<void> => {
-    setIsLoading(true)
-    setError(null)
-
-    try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-
-      setPersonalSummaries((prev) =>
-        prev.map((summary) =>
-          summary.id === id
-            ? {
-                ...summary,
-                status: "shared" as const,
-                sharedChannels: channels,
-                sharedAt: new Date().toISOString(),
-              }
-            : summary,
-        ),
-      )
-    } catch (err) {
-      setError("Failed to share personal summary")
-      throw err
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const updateShareChannel = (id: string, updates: Partial<ShareChannel>) => {
-    setShareChannels((prev) => prev.map((channel) => (channel.id === id ? { ...channel, ...updates } : channel)))
-  }
-
-  const value: AppContextType = {
-    summaries,
-    setSummaries,
-    addSummary,
-    updateSummary,
-    deleteSummary,
-    archiveSummary,
-    personalSummaries,
-    setPersonalSummaries,
-    generatePersonalSummary,
-    sharePersonalSummary,
-    shareChannels,
-    setShareChannels,
-    updateShareChannel,
-    filter,
-    setFilter,
-    isLoading,
-    setIsLoading,
-    error,
-    setError,
-  }
-
-  return <AppContext.Provider value={value}>{children}</AppContext.Provider>
-}
 
 export function useApp() {
   const context = useContext(AppContext)
@@ -224,4 +12,245 @@ export function useApp() {
     throw new Error("useApp must be used within an AppProvider")
   }
   return context
+}
+
+export function AppProvider({ children }: { children: React.ReactNode }) {
+  const [summaries, setSummaries] = useState<Summary[]>([])
+  const [personalSummaries, setPersonalSummaries] = useState<PersonalSummary[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  // Mock data initialization
+  useEffect(() => {
+    const mockSummaries: Summary[] = [
+      {
+        id: "1",
+        title: "Family Group",
+        content: "Weekly Family Updates: This week the family discussed vacation plans for summer...",
+        groupName: "Family Group",
+        type: "weekly",
+        createdAt: "2024-01-15T12:00:00Z",
+        isArchived: false,
+        messageCount: 156,
+        participants: 8,
+        dateRange: {
+          start: "2024-01-08",
+          end: "2024-01-14",
+        },
+        keyTopics: ["Vacation Planning", "School Updates", "Weekend Plans"],
+        sentiment: "positive",
+        summary: "The family group had an active week discussing upcoming vacation plans and sharing school updates.",
+      },
+      {
+        id: "2",
+        title: "Work Team",
+        content: "Daily Standup Summary: Team discussed project milestones, resolved blockers...",
+        groupName: "Work Team",
+        type: "daily",
+        createdAt: "2024-01-14T11:00:00Z",
+        isArchived: false,
+        messageCount: 89,
+        participants: 12,
+        dateRange: {
+          start: "2024-01-14",
+          end: "2024-01-14",
+        },
+        keyTopics: ["Project Milestones", "Bug Fixes", "Sprint Planning"],
+        sentiment: "neutral",
+        summary: "Daily standup covered project progress and upcoming sprint planning activities.",
+      },
+      {
+        id: "3",
+        title: "Friends Chat",
+        content: "Weekly Friends Update: Planned weekend meetup at the new restaurant downtown...",
+        groupName: "Friends Chat",
+        type: "weekly",
+        createdAt: "2024-01-13T05:30:00Z",
+        isArchived: false,
+        messageCount: 234,
+        participants: 6,
+        dateRange: {
+          start: "2024-01-07",
+          end: "2024-01-13",
+        },
+        keyTopics: ["Weekend Plans", "Restaurant Reviews", "Movie Discussions"],
+        sentiment: "positive",
+        summary: "Friends planned weekend activities and shared restaurant recommendations.",
+      },
+      {
+        id: "4",
+        title: "Book Club",
+        content: "Monthly Book Discussion: This month we discussed 'The Seven Husbands of Evelyn Hugo'...",
+        groupName: "Book Club",
+        type: "monthly",
+        createdAt: "2024-01-01T10:00:00Z",
+        isArchived: true,
+        messageCount: 67,
+        participants: 15,
+        dateRange: {
+          start: "2024-01-01",
+          end: "2024-01-31",
+        },
+        keyTopics: ["Book Analysis", "Character Discussion", "Next Book Selection"],
+        sentiment: "positive",
+        summary: "Book club members had an engaging discussion about the monthly book selection.",
+      },
+    ]
+
+    const mockPersonalSummaries: PersonalSummary[] = [
+      {
+        id: "p1",
+        title: "Weekly Personal Summary - Jan 8-14",
+        content: "This week you were most active in the Family Group with 45 messages...",
+        dateRange: {
+          start: "2024-01-08",
+          end: "2024-01-14",
+        },
+        createdAt: "2024-01-15T09:00:00Z",
+        status: "generated",
+        stats: {
+          totalMessages: 89,
+          activeGroups: 3,
+          topGroup: "Family Group",
+          messagesByDay: [12, 8, 15, 20, 18, 10, 6],
+        },
+        insights: [
+          "Most active on Thursday with 20 messages",
+          "Family Group was your most engaged conversation",
+          "You initiated 12 new conversation topics this week",
+        ],
+        topGroups: [
+          { name: "Family Group", messageCount: 45 },
+          { name: "Work Team", messageCount: 28 },
+          { name: "Friends Chat", messageCount: 16 },
+        ],
+      },
+      {
+        id: "p2",
+        title: "Weekly Personal Summary - Jan 1-7",
+        content: "This week you were most active in the Work Team with 32 messages...",
+        dateRange: {
+          start: "2024-01-01",
+          end: "2024-01-07",
+        },
+        createdAt: "2024-01-08T09:00:00Z",
+        status: "shared",
+        stats: {
+          totalMessages: 67,
+          activeGroups: 2,
+          topGroup: "Work Team",
+          messagesByDay: [8, 12, 15, 10, 14, 6, 2],
+        },
+        insights: [
+          "Most active on Wednesday with 15 messages",
+          "Work Team dominated your conversations this week",
+          "You shared 8 important updates across groups",
+        ],
+        topGroups: [
+          { name: "Work Team", messageCount: 32 },
+          { name: "Friends Chat", messageCount: 35 },
+        ],
+      },
+    ]
+
+    setSummaries(mockSummaries)
+    setPersonalSummaries(mockPersonalSummaries)
+  }, [])
+
+  const deleteSummary = async (id: string) => {
+    setIsLoading(true)
+    try {
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 500))
+      setSummaries((prev) => prev.filter((summary) => summary.id !== id))
+    } catch (err) {
+      setError("Failed to delete summary")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const updateSummary = async (id: string, updates: Partial<Summary>) => {
+    setIsLoading(true)
+    try {
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 500))
+      setSummaries((prev) => prev.map((summary) => (summary.id === id ? { ...summary, ...updates } : summary)))
+    } catch (err) {
+      setError("Failed to update summary")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const generatePersonalSummary = async (startDate: string, endDate: string) => {
+    setIsLoading(true)
+    try {
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+
+      const newSummary: PersonalSummary = {
+        id: `p${Date.now()}`,
+        title: `Weekly Personal Summary - ${startDate} to ${endDate}`,
+        content: "Generated summary content...",
+        dateRange: {
+          start: startDate,
+          end: endDate,
+        },
+        createdAt: new Date().toISOString(),
+        status: "generated",
+        stats: {
+          totalMessages: Math.floor(Math.random() * 100) + 50,
+          activeGroups: Math.floor(Math.random() * 5) + 2,
+          topGroup: "Family Group",
+          messagesByDay: Array.from({ length: 7 }, () => Math.floor(Math.random() * 20) + 5),
+        },
+        insights: [
+          "Most active day was determined by your messaging patterns",
+          "Your top conversation group showed high engagement",
+          "You initiated several meaningful discussions this week",
+        ],
+        topGroups: [
+          { name: "Family Group", messageCount: Math.floor(Math.random() * 30) + 20 },
+          { name: "Work Team", messageCount: Math.floor(Math.random() * 25) + 15 },
+          { name: "Friends Chat", messageCount: Math.floor(Math.random() * 20) + 10 },
+        ],
+      }
+
+      setPersonalSummaries((prev) => [newSummary, ...prev])
+    } catch (err) {
+      setError("Failed to generate personal summary")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const sharePersonalSummary = async (id: string, channels: string[]) => {
+    setIsLoading(true)
+    try {
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+
+      setPersonalSummaries((prev) =>
+        prev.map((summary) => (summary.id === id ? { ...summary, status: "shared" as const } : summary)),
+      )
+    } catch (err) {
+      setError("Failed to share personal summary")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const value: AppContextType = {
+    summaries,
+    personalSummaries,
+    isLoading,
+    error,
+    deleteSummary,
+    updateSummary,
+    generatePersonalSummary,
+    sharePersonalSummary,
+  }
+
+  return <AppContext.Provider value={value}>{children}</AppContext.Provider>
 }

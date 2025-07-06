@@ -3,25 +3,23 @@
 import { useState, useRef, useEffect } from "react"
 import styles from "./filter-dropdown.module.css"
 
-interface FilterDropdownProps {
+interface FilterOption {
   value: string
-  onChange: (value: string) => void
+  label: string
+  count?: number
 }
 
-const filterOptions = [
-  { value: "all", label: "All Summaries" },
-  { value: "active", label: "Active" },
-  { value: "archived", label: "Archived" },
-  { value: "weekly", label: "Weekly" },
-  { value: "missed", label: "Missed" },
-  { value: "topic-based", label: "Topic-based" },
-]
+interface FilterDropdownProps {
+  options: FilterOption[]
+  value: string
+  onChange: (value: string) => void
+  placeholder?: string
+  className?: string
+}
 
-export function FilterDropdown({ value, onChange }: FilterDropdownProps) {
+export function FilterDropdown({ options, value, onChange, placeholder = "Filter", className }: FilterDropdownProps) {
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
-
-  const selectedOption = filterOptions.find((option) => option.value === value)
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -31,39 +29,45 @@ export function FilterDropdown({ value, onChange }: FilterDropdownProps) {
     }
 
     document.addEventListener("mousedown", handleClickOutside)
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
+    return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
-  const handleSelect = (optionValue: string) => {
-    onChange(optionValue)
-    setIsOpen(false)
-  }
+  const selectedOption = options.find((option) => option.value === value)
 
   return (
-    <div className={styles.dropdown} ref={dropdownRef}>
+    <div className={`${styles.dropdown} ${className || ""}`} ref={dropdownRef}>
       <button
-        className={styles.trigger}
+        className={`${styles.trigger} ${isOpen ? styles.open : ""}`}
         onClick={() => setIsOpen(!isOpen)}
-        aria-expanded={isOpen}
-        aria-haspopup="listbox"
+        type="button"
       >
-        <span className={styles.triggerText}>{selectedOption?.label || "Select filter"}</span>
-        <span className={`${styles.triggerIcon} ${isOpen ? styles.triggerIconOpen : ""}`}>▼</span>
+        <span className={styles.triggerText}>{selectedOption ? selectedOption.label : placeholder}</span>
+        <svg
+          className={`${styles.chevron} ${isOpen ? styles.rotated : ""}`}
+          width="16"
+          height="16"
+          viewBox="0 0 16 16"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
       </button>
 
       {isOpen && (
-        <div className={styles.menu} role="listbox">
-          {filterOptions.map((option) => (
+        <div className={styles.content}>
+          {options.map((option) => (
             <button
               key={option.value}
-              className={`${styles.option} ${option.value === value ? styles.optionSelected : ""}`}
-              onClick={() => handleSelect(option.value)}
-              role="option"
-              aria-selected={option.value === value}
+              className={`${styles.option} ${option.value === value ? styles.selected : ""}`}
+              onClick={() => {
+                onChange(option.value)
+                setIsOpen(false)
+              }}
+              type="button"
             >
-              {option.label}
+              <span className={styles.optionLabel}>{option.label}</span>
+              {option.count !== undefined && <span className={styles.optionCount}>{option.count}</span>}
             </button>
           ))}
         </div>

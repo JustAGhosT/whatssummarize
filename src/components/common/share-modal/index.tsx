@@ -1,12 +1,15 @@
 "use client"
 
+import type React from "react"
+
 import { useState } from "react"
 import styles from "./share-modal.module.css"
 
 interface ShareModalProps {
+  isOpen: boolean
   onClose: () => void
   onShare: (channels: string[]) => void
-  loading?: boolean
+  isLoading?: boolean
 }
 
 const availableChannels = [
@@ -16,8 +19,13 @@ const availableChannels = [
   { id: "teams", name: "Microsoft Teams", icon: "👥", description: "Share to Teams channel" },
 ]
 
-export function ShareModal({ onClose, onShare, loading = false }: ShareModalProps) {
+export function ShareModal({ isOpen, onClose, onShare, isLoading = false }: ShareModalProps) {
   const [selectedChannels, setSelectedChannels] = useState<string[]>([])
+
+  // Don't render if not open
+  if (!isOpen) {
+    return null
+  }
 
   const handleChannelToggle = (channelId: string) => {
     setSelectedChannels((prev) =>
@@ -28,21 +36,36 @@ export function ShareModal({ onClose, onShare, loading = false }: ShareModalProp
   const handleShare = () => {
     if (selectedChannels.length > 0) {
       onShare(selectedChannels)
+      // Reset selected channels after sharing
+      setSelectedChannels([])
+    }
+  }
+
+  const handleClose = () => {
+    // Reset selected channels when closing
+    setSelectedChannels([])
+    onClose()
+  }
+
+  const handleOverlayClick = (e: React.MouseEvent) => {
+    // Only close if clicking the overlay, not the modal content
+    if (e.target === e.currentTarget) {
+      handleClose()
     }
   }
 
   return (
-    <div className={styles.overlay} onClick={onClose}>
+    <div className={styles.overlay} onClick={handleOverlayClick}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
-          <h2 className={styles.title}>Share Personal Summary</h2>
-          <button onClick={onClose} className={styles.closeBtn}>
+          <h2 className={styles.title}>Share Summary</h2>
+          <button onClick={handleClose} className={styles.closeBtn} type="button" aria-label="Close modal">
             ×
           </button>
         </div>
 
         <div className={styles.content}>
-          <p className={styles.description}>Choose where you'd like to share your personal summary:</p>
+          <p className={styles.description}>Choose where you'd like to share this summary:</p>
 
           <div className={styles.channels}>
             {availableChannels.map((channel) => (
@@ -52,6 +75,7 @@ export function ShareModal({ onClose, onShare, loading = false }: ShareModalProp
                   checked={selectedChannels.includes(channel.id)}
                   onChange={() => handleChannelToggle(channel.id)}
                   className={styles.checkbox}
+                  disabled={isLoading}
                 />
                 <div className={styles.channelInfo}>
                   <div className={styles.channelHeader}>
@@ -66,11 +90,16 @@ export function ShareModal({ onClose, onShare, loading = false }: ShareModalProp
         </div>
 
         <div className={styles.actions}>
-          <button onClick={onClose} className={styles.cancelBtn}>
+          <button onClick={handleClose} className={styles.cancelBtn} type="button" disabled={isLoading}>
             Cancel
           </button>
-          <button onClick={handleShare} disabled={selectedChannels.length === 0 || loading} className={styles.shareBtn}>
-            {loading
+          <button
+            onClick={handleShare}
+            disabled={selectedChannels.length === 0 || isLoading}
+            className={styles.shareBtn}
+            type="button"
+          >
+            {isLoading
               ? "Sharing..."
               : `Share to ${selectedChannels.length} channel${selectedChannels.length !== 1 ? "s" : ""}`}
           </button>
