@@ -133,7 +133,11 @@
 
 .type {
   padding: 0.25rem 0.75rem;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+  background: linear-gradient(
+    135deg,
+    var(--color-primary),
+    var(--color-primary-dark)
+  );
   color: white;
   border-radius: 1rem;
   font-size: 0.75rem;
@@ -147,6 +151,32 @@
   font-size: 0.75rem;
   color: var(--color-text-muted);
   font-weight: 500;
+}
+
+/* Status styles */
+.status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  color: white;
+}
+
+.statusDraft {
+  background-color: #fbbf24;
+}
+
+.statusGenerated {
+  background-color: #10b981;
+}
+
+.statusShared {
+  background-color: #3b82f6;
+}
+
+.statusDefault {
+  background-color: #6b7280;
 }
 
 .summary {

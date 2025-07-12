@@ -38,6 +38,7 @@
   border: 1px solid var(--border-color);
   border-radius: 16px;
   padding: 1.5rem;
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   transition: all 0.3s ease;
 }
@@ -204,6 +205,7 @@
   background: var(--card-background);
   border: 1px solid var(--border-color);
   border-radius: 16px;
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
 }
 
@@ -236,6 +238,7 @@
 [data-theme="dark"] .card {
   background: rgba(255, 255, 255, 0.05);
   border-color: rgba(255, 255, 255, 0.1);
+  -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
 }
 

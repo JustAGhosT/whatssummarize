@@ -39,6 +39,7 @@
   border-radius: 16px;
   padding: 1.5rem;
   text-align: center;
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   transition: all 0.3s ease;
 }
@@ -102,6 +103,7 @@
   border: 1px solid var(--border-color);
   border-radius: 16px;
   padding: 1.5rem;
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   transition: all 0.3s ease;
 }
@@ -288,6 +290,7 @@
   padding: 0.5rem 0;
   min-width: 150px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   z-index: 10;
 }
@@ -329,6 +332,7 @@
   text-align: center;
   cursor: pointer;
   transition: all 0.3s ease;
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
 }
 
@@ -449,6 +453,7 @@
 [data-theme="dark"] .quickActionCard {
   background: rgba(255, 255, 255, 0.05);
   border-color: rgba(255, 255, 255, 0.1);
+  -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
 }
 
@@ -475,6 +480,7 @@
 [data-theme="dark"] .actionMenuDropdown {
   background: rgba(0, 0, 0, 0.8);
   border-color: rgba(255, 255, 255, 0.1);
+  -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
 }
 

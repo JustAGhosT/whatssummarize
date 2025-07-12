@@ -17,16 +17,16 @@ export function PersonalSummaryCard({ summary, onShare }: PersonalSummaryCardPro
     })
   }
 
-  const getStatusColor = (status: PersonalSummary["status"]) => {
+  const getStatusClass = (status: PersonalSummary["status"]) => {
     switch (status) {
       case "draft":
-        return "#f59e0b"
+        return styles.statusDraft
       case "generated":
-        return "#10b981"
+        return styles.statusGenerated
       case "shared":
-        return "#3b82f6"
+        return styles.statusShared
       default:
-        return "#6b7280"
+        return styles.statusDefault
     }
   }
 
@@ -52,7 +52,7 @@ export function PersonalSummaryCard({ summary, onShare }: PersonalSummaryCardPro
             {formatDate(summary.dateRange.start)} - {formatDate(summary.dateRange.end)}
           </p>
         </div>
-        <div className={styles.status} style={{ color: getStatusColor(summary.status) }}>
+        <div className={`${styles.status} ${getStatusClass(summary.status)}`}>
           <span className={styles.statusIcon}>{getStatusIcon(summary.status)}</span>
           <span className={styles.statusText}>{summary.status}</span>
         </div>

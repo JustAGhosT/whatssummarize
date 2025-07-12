@@ -3,7 +3,7 @@
 import { useState } from "react"
 import styles from "./customize.module.css"
 
-export function Customize() {
+function Customize() {
   const [preferences, setPreferences] = useState({
     summaryTypes: {
       weeklyDigest: true,
@@ -98,8 +98,9 @@ export function Customize() {
           <h2 className={styles.sectionTitle}>Schedule</h2>
           <div className={styles.scheduleGroup}>
             <div className={styles.field}>
-              <label className={styles.label}>Frequency</label>
+              <label htmlFor="frequency" className={styles.label}>Frequency</label>
               <select
+                id="frequency"
                 value={preferences.schedule.frequency}
                 onChange={(e) => handleScheduleChange("frequency", e.target.value)}
                 className={styles.select}
@@ -110,12 +111,14 @@ export function Customize() {
               </select>
             </div>
             <div className={styles.field}>
-              <label className={styles.label}>Time</label>
+              <label htmlFor="schedule-time" className={styles.label}>Time</label>
               <input
+                id="schedule-time"
                 type="time"
                 value={preferences.schedule.time}
                 onChange={(e) => handleScheduleChange("time", e.target.value)}
                 className={styles.input}
+                aria-label="Select time for summary"
               />
             </div>
           </div>
@@ -132,8 +135,13 @@ export function Customize() {
                 placeholder="Add keyword..."
                 className={styles.input}
                 onKeyPress={(e) => e.key === "Enter" && addKeyword()}
+                aria-label="Enter keyword to add"
               />
-              <button onClick={addKeyword} className={styles.addBtn}>
+              <button 
+                onClick={addKeyword} 
+                className={styles.addBtn}
+                aria-label="Add keyword"
+              >
                 Add
               </button>
             </div>
@@ -141,7 +149,11 @@ export function Customize() {
               {preferences.keywords.map((keyword) => (
                 <span key={keyword} className={styles.keyword}>
                   {keyword}
-                  <button onClick={() => removeKeyword(keyword)} className={styles.removeBtn}>
+                  <button 
+                    onClick={() => removeKeyword(keyword)} 
+                    className={styles.removeBtn}
+                    aria-label={`Remove keyword ${keyword}`}
+                  >
                     ×
                   </button>
                 </span>
@@ -158,3 +170,5 @@ export function Customize() {
     </div>
   )
 }
+
+export default Customize

@@ -1,5 +1,5 @@
-import { Admin } from "../../components/features/admin"
+"use client"
 
-export default function AdminPage() {
-  return <Admin />
-}
+import { createPage } from "@/lib/page-utils"
+
+export default createPage(() => import("@/components/features/admin"))

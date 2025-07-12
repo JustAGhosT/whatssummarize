@@ -1,66 +1,56 @@
-"use client"
+'use client';
 
-import { useAuth } from "../contexts/auth-context"
-import { useApp } from "../contexts/app-context"
-import { EnhancedBackground } from "../components/common/enhanced-background"
-import { DashboardComponent } from "../components/features/dashboard"
-import styles from "./page.module.css"
+import { LoginModal } from '@/components/auth/login-modal';
+import { SignupModal } from '@/components/auth/signup-modal';
+import Dashboard from '@/components/features/dashboard/dashboard';
+import { useAuth } from '@/contexts/auth-context';
+import React from 'react';
+import LandingPage from './landing-page';
 
-export default function Page() {
-  const { user, isAuthenticated } = useAuth()
-  const { summaries, groups, getUnreadCount } = useApp()
+export default function Home() {
+  const { isAuthenticated, isLoading } = useAuth();
+  const [showLoginModal, setShowLoginModal] = React.useState(false);
+  const [showSignupModal, setShowSignupModal] = React.useState(false);
 
-  const stats = {
-    totalSummaries: summaries.length,
-    activeSummaries: summaries.filter((s) => !s.isRead).length,
-    archivedSummaries: summaries.filter((s) => s.isRead).length,
-    totalGroups: groups.length,
-  }
-
-  if (!isAuthenticated) {
+  // Show loading state while auth is being determined
+  if (isLoading) {
     return (
-      <div className={styles.container}>
-        <div className={styles.backgroundWrapper}>
-          <EnhancedBackground />
-        </div>
-        <div className={styles.content}>
-          <main className={styles.main}>
-            <div className={styles.hero}>
-              <h1 className={styles.heroTitle}>WhatsApp Conversation Summarizer</h1>
-              <p className={styles.heroSubtitle}>
-                Transform your chat conversations into meaningful summaries across multiple platforms
-              </p>
-              <div className={styles.heroFeatures}>
-                <div className={styles.feature}>
-                  <span className={styles.featureIcon}>💬</span>
-                  <span>Multi-Platform Support</span>
-                </div>
-                <div className={styles.feature}>
-                  <span className={styles.featureIcon}>🤖</span>
-                  <span>AI-Powered Summaries</span>
-                </div>
-                <div className={styles.feature}>
-                  <span className={styles.featureIcon}>📊</span>
-                  <span>Smart Analytics</span>
-                </div>
-              </div>
-            </div>
-          </main>
-        </div>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
       </div>
-    )
+    );
   }
 
+  // If user is authenticated, show dashboard
+  if (isAuthenticated) {
+    return <Dashboard />;
+  }
+
+  // If user is not authenticated, show landing page with auth modals
   return (
-    <div className={styles.container}>
-      <div className={styles.backgroundWrapper}>
-        <EnhancedBackground />
-      </div>
-      <div className={styles.content}>
-        <main className={styles.main}>
-          <DashboardComponent />
-        </main>
-      </div>
-    </div>
-  )
+    <>
+      <LandingPage 
+        onLoginClick={() => setShowLoginModal(true)}
+        onSignupClick={() => setShowSignupModal(true)}
+      />
+      
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onSwitchToSignup={() => {
+          setShowLoginModal(false);
+          setShowSignupModal(true);
+        }}
+      />
+      
+      <SignupModal
+        isOpen={showSignupModal}
+        onClose={() => setShowSignupModal(false)}
+        onSwitchToLogin={() => {
+          setShowSignupModal(false);
+          setShowLoginModal(true);
+        }}
+      />
+    </>
+  );
 }

@@ -1,5 +1,5 @@
-import { Customize } from "../../components/features/customize"
+"use client"
 
-export default function CustomizePage() {
-  return <Customize />
-}
+import { createPage } from "@/lib/page-utils"
+
+export default createPage(() => import("@/components/features/customize"))

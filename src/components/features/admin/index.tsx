@@ -17,7 +17,7 @@ const mockStats: SystemStats = {
   systemUptime: "99.9%",
 }
 
-export function Admin() {
+function Admin() {
   const [activeTab, setActiveTab] = useState<"overview" | "users" | "settings" | "logs">("overview")
   const [stats] = useState<SystemStats>(mockStats)
 
@@ -84,12 +84,28 @@ export function Admin() {
             <div className={styles.settingGroup}>
               <h3 className={styles.settingTitle}>System Configuration</h3>
               <div className={styles.settingItem}>
-                <label className={styles.settingLabel}>Max Summaries Per User</label>
-                <input type="number" defaultValue="10" className={styles.settingInput} />
+                <label htmlFor="maxSummaries" className={styles.settingLabel}>
+                  Max Summaries Per User
+                </label>
+                <input 
+                  id="maxSummaries"
+                  type="number" 
+                  defaultValue="10" 
+                  className={styles.settingInput}
+                  aria-label="Maximum number of summaries allowed per user"
+                />
               </div>
               <div className={styles.settingItem}>
-                <label className={styles.settingLabel}>Summary Retention (days)</label>
-                <input type="number" defaultValue="30" className={styles.settingInput} />
+                <label htmlFor="summaryRetention" className={styles.settingLabel}>
+                  Summary Retention (days)
+                </label>
+                <input 
+                  id="summaryRetention"
+                  type="number" 
+                  defaultValue="30" 
+                  className={styles.settingInput}
+                  aria-label="Number of days to retain summaries"
+                />
               </div>
             </div>
           </div>
@@ -154,3 +170,5 @@ export function Admin() {
     </div>
   )
 }
+
+export default Admin

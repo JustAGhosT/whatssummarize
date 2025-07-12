@@ -74,7 +74,7 @@ const mockChannels: DistributionChannel[] = [
   },
 ]
 
-export function Distribution() {
+function Distribution() {
   const [channels, setChannels] = useState<DistributionChannel[]>(mockChannels)
   const [showAddModal, setShowAddModal] = useState(false)
   const [selectedPlatform, setSelectedPlatform] = useState<string>("all")
@@ -158,11 +158,13 @@ export function Distribution() {
       <div className={styles.controls}>
         <div className={styles.filterSection}>
           <div className={styles.platformFilter}>
-            <label className={styles.filterLabel}>Platform:</label>
+            <label htmlFor="platform-select" className={styles.filterLabel}>Platform:</label>
             <select
+              id="platform-select"
               value={selectedPlatform}
               onChange={(e) => setSelectedPlatform(e.target.value)}
               className={styles.filterSelect}
+              aria-label="Select platform to filter by"
             >
               {platforms.map((platform) => (
                 <option key={platform} value={platform}>
@@ -295,3 +297,5 @@ export function Distribution() {
     </div>
   )
 }
+
+export default Distribution

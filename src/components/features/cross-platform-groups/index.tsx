@@ -92,7 +92,7 @@ const mockGroups: CrossPlatformGroup[] = [
   },
 ]
 
-export function CrossPlatformGroups() {
+function CrossPlatformGroups() {
   const [groups, setGroups] = useState<CrossPlatformGroup[]>(mockGroups)
   const [availableSources, setAvailableSources] = useState<ChatSource[]>(mockChatSources)
   const [showCreateModal, setShowCreateModal] = useState(false)
@@ -352,3 +352,5 @@ export function CrossPlatformGroups() {
     </div>
   )
 }
+
+export default CrossPlatformGroups

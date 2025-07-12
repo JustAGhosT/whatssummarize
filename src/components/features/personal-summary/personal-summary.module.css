@@ -15,8 +15,16 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: radial-gradient(circle at 30% 70%, rgba(37, 211, 102, 0.03) 0%, transparent 50%),
-    radial-gradient(circle at 70% 30%, rgba(18, 140, 126, 0.03) 0%, transparent 50%);
+  background: radial-gradient(
+      circle at 30% 70%,
+      rgba(37, 211, 102, 0.03) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 70% 30%,
+      rgba(18, 140, 126, 0.03) 0%,
+      transparent 50%
+    );
   animation: backgroundFloat 25s ease-in-out infinite;
   pointer-events: none;
   z-index: -1;
@@ -38,10 +46,15 @@
   align-items: center;
   margin-bottom: 2rem;
   padding: 2rem;
-  background: linear-gradient(135deg, rgba(37, 211, 102, 0.1) 0%, rgba(18, 140, 126, 0.05) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(37, 211, 102, 0.1) 0%,
+    rgba(18, 140, 126, 0.05) 100%
+  );
   border-radius: 1.5rem;
   position: relative;
   overflow: hidden;
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(37, 211, 102, 0.1);
 }
@@ -97,7 +110,11 @@
 
 .generateBtn {
   padding: 1rem 1.5rem;
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-primary) 0%,
+    var(--color-primary-dark) 100%
+  );
   color: white;
   border: none;
   border-radius: 0.75rem;
@@ -183,7 +200,11 @@
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg, var(--color-primary), var(--color-primary-dark));
+  background: linear-gradient(
+    90deg,
+    var(--color-primary),
+    var(--color-primary-dark)
+  );
   transition: all 0.3s ease;
 }
 
@@ -195,6 +216,66 @@
 .statCard:hover::before {
   height: 4px;
   box-shadow: 0 0 10px var(--color-primary);
+}
+
+/* Progress bar width classes */
+.progressBar100 {
+  width: 100%;
+}
+
+.progressBar75 {
+  width: 75%;
+}
+
+.progressBar25 {
+  width: 25%;
+}
+
+/* Additional progress bar percentage classes */
+.progressBar10 {
+  width: 10%;
+}
+
+.progressBar20 {
+  width: 20%;
+}
+
+.progressBar30 {
+  width: 30%;
+}
+
+.progressBar40 {
+  width: 40%;
+}
+
+.progressBar50 {
+  width: 50%;
+}
+
+.progressBar60 {
+  width: 60%;
+}
+
+.progressBar70 {
+  width: 70%;
+}
+
+.progressBar80 {
+  width: 80%;
+}
+
+.progressBar90 {
+  width: 90%;
+}
+
+/* Dynamic progress bar using CSS custom property */
+.progressBar {
+  width: var(--progress-width, 100%);
+}
+
+/* Dynamic progress bar classes for different percentages */
+.progressBarDynamic {
+  width: var(--progress-width);
 }
 
 .statValue {
@@ -270,7 +351,11 @@
 
 .emptyBtn {
   padding: 0.75rem 1.5rem;
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-primary) 0%,
+    var(--color-primary-dark) 100%
+  );
   color: white;
   border: none;
   border-radius: 0.5rem;

@@ -1,24 +1,24 @@
 "use client"
 
-import { useState, useMemo, useCallback } from "react"
 import {
-  Users,
-  MessageSquare,
-  Settings,
-  Search,
+  Clock,
+  Download,
+  Eye,
   Filter,
   Grid,
   List,
-  Plus,
-  TrendingUp,
-  Clock,
-  Star,
+  MessageSquare,
   MoreVertical,
+  Plus,
+  Search,
+  Settings,
   Share2,
-  Download,
-  Eye,
+  Star,
+  TrendingUp,
+  Users,
   Zap,
 } from "lucide-react"
+import { useCallback, useMemo, useState } from "react"
 import styles from "./groups.module.css"
 
 interface Group {
@@ -314,6 +314,7 @@ export function Groups() {
                 value={selectedPriority}
                 onChange={(e) => setSelectedPriority(e.target.value)}
                 className={styles.filterSelect}
+                aria-label="Filter by priority"
               >
                 <option value="all">All Priorities</option>
                 <option value="high">High Priority</option>
@@ -324,7 +325,12 @@ export function Groups() {
 
             <div className={styles.filterGroup}>
               <span className={styles.filterLabel}>Sort by:</span>
-              <select value={sortBy} onChange={(e) => setSortBy(e.target.value as any)} className={styles.filterSelect}>
+              <select 
+                value={sortBy} 
+                onChange={(e) => setSortBy(e.target.value as any)} 
+                className={styles.filterSelect}
+                aria-label="Sort groups by"
+              >
                 <option value="activity">Recent Activity</option>
                 <option value="name">Name</option>
                 <option value="engagement">Engagement</option>
@@ -337,12 +343,14 @@ export function Groups() {
                 <button
                   className={`${styles.viewButton} ${viewMode === "grid" ? styles.viewButtonActive : ""}`}
                   onClick={() => setViewMode("grid")}
+                  aria-label="Grid view"
                 >
                   <Grid className={styles.viewIcon} />
                 </button>
                 <button
                   className={`${styles.viewButton} ${viewMode === "list" ? styles.viewButtonActive : ""}`}
                   onClick={() => setViewMode("list")}
+                  aria-label="List view"
                 >
                   <List className={styles.viewIcon} />
                 </button>
@@ -387,13 +395,12 @@ export function Groups() {
             <div className={styles.cardHeader}>
               <div className={styles.groupAvatar}>
                 <img src={group.avatar || "/placeholder.svg"} alt={group.name} className={styles.avatarImage} />
-                <div className={styles.typeIndicator} style={{ backgroundColor: getTypeColor(group.type).primary }}>
+                <div className={`${styles.typeIndicator} ${styles[`typeIndicator${group.type.charAt(0).toUpperCase() + group.type.slice(1)}`]}`}>
                   <span className={styles.typeEmoji}>{typeIcons[group.type]}</span>
                 </div>
                 {group.isActive && <div className={styles.activeIndicator}></div>}
                 <div
-                  className={styles.priorityIndicator}
-                  style={{ backgroundColor: getPriorityColor(group.priority) }}
+                  className={`${styles.priorityIndicator} ${styles[`priorityIndicator${group.priority.charAt(0).toUpperCase() + group.priority.slice(1)}`]}`}
                 ></div>
               </div>
 
@@ -416,7 +423,7 @@ export function Groups() {
               </div>
 
               <div className={styles.cardMenu}>
-                <button className={styles.menuButton}>
+                <button className={styles.menuButton} aria-label="More options">
                   <MoreVertical size={16} />
                 </button>
               </div>

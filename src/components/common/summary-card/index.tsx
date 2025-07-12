@@ -1,22 +1,16 @@
 "use client"
 
-import { useState } from "react"
-import { useApp } from "@/contexts/app-context"
 import { ShareModal } from "@/components/common/share-modal"
+import { useApp } from "@/contexts/app-context"
+import { useState } from "react"
 import styles from "./summary-card.module.css"
 
-interface Summary {
-  id: string
-  title: string
-  content: string
-  type: "daily" | "weekly" | "monthly" | "custom"
+import type { Summary as AppSummary } from "@/contexts/app-context/types"
+
+interface Summary extends Omit<AppSummary, 'participants'> {
   status?: "draft" | "generated" | "shared"
-  createdAt: string
+  participants?: number | string[]
   groupName: string
-  messageCount?: number
-  participants?: number
-  keyTopics?: string[]
-  sentiment?: "positive" | "neutral" | "negative"
   isArchived?: boolean
 }
 
@@ -99,16 +93,16 @@ export function SummaryCard({ summary, viewMode = "grid", onDelete, onUpdate }: 
     })
   }
 
-  const getStatusColor = (status?: string) => {
+  const getStatusClass = (status?: string) => {
     switch (status) {
       case "draft":
-        return "#fbbf24"
+        return styles.statusDraft
       case "generated":
-        return "#10b981"
+        return styles.statusGenerated
       case "shared":
-        return "#3b82f6"
+        return styles.statusShared
       default:
-        return "#6b7280"
+        return styles.statusDefault
     }
   }
 
@@ -164,7 +158,7 @@ export function SummaryCard({ summary, viewMode = "grid", onDelete, onUpdate }: 
           </div>
           <div className={styles.headerRight}>
             {summary.status && (
-              <span className={styles.status} style={{ backgroundColor: getStatusColor(summary.status) }}>
+              <span className={`${styles.status} ${getStatusClass(summary.status)}`}>
                 {summary.status}
               </span>
             )}

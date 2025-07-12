@@ -1,7 +1,5 @@
 "use client"
 
-import { CrossPlatformGroups } from "@/components/features/cross-platform-groups"
+import { createPage } from "@/lib/page-utils"
 
-export default function CrossPlatformGroupsPage() {
-  return <CrossPlatformGroups />
-}
+export default createPage(() => import("@/components/features/cross-platform-groups"))

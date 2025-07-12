@@ -1,8 +1,14 @@
 .container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
   position: relative;
   overflow: hidden;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  transition: background 0.3s ease;
+}
+
+/* Dark theme styles */
+:global(.dark) .container {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
 }
 
 .backgroundWrapper {

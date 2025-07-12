@@ -67,6 +67,7 @@
   border-radius: 0.5rem;
   font-size: 0.875rem;
   font-weight: 500;
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
@@ -77,6 +78,23 @@
 
 .statusText {
   text-transform: capitalize;
+}
+
+/* Status color classes */
+.statusDraft {
+  color: #f59e0b;
+}
+
+.statusGenerated {
+  color: #10b981;
+}
+
+.statusShared {
+  color: #3b82f6;
+}
+
+.statusDefault {
+  color: #6b7280;
 }
 
 .stats {
@@ -141,7 +159,11 @@
   content: "";
   width: 3px;
   height: 1rem;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+  background: linear-gradient(
+    135deg,
+    var(--color-primary),
+    var(--color-primary-dark)
+  );
   border-radius: 1.5px;
 }
 
@@ -246,7 +268,11 @@
 }
 
 .shareBtn {
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-primary) 0%,
+    var(--color-primary-dark) 100%
+  );
   color: white;
   box-shadow: 0 2px 8px rgba(37, 211, 102, 0.3);
 }

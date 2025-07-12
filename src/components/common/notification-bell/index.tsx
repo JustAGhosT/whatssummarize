@@ -1,25 +1,17 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
+import { Bell, BellRing, Check, X } from "lucide-react"
+import { NotificationBase, NotificationBellProps } from "@/types/notifications"
 import styles from "./notification-bell.module.css"
 
-interface Notification {
-  id: string
-  type: "summary" | "platform" | "group" | "system"
-  title: string
-  message: string
-  timestamp: string
-  isRead: boolean
-  actionUrl?: string
-}
-
-const mockNotifications: Notification[] = [
+const mockNotifications: NotificationBase[] = [
   {
     id: "1",
     type: "summary",
     title: "Weekly Summary Ready",
     message: "Your personal weekly summary for Jan 8-14 is ready to view",
-    timestamp: "2024-01-15T10:30:00Z",
+    createdAt: "2024-01-15T10:30:00Z",
     isRead: false,
     actionUrl: "/personal/summary/1",
   },
@@ -28,7 +20,7 @@ const mockNotifications: Notification[] = [
     type: "platform",
     title: "New Messages in Slack",
     message: "23 new messages in Work Team #general since last read",
-    timestamp: "2024-01-15T09:15:00Z",
+    createdAt: "2024-01-15T09:15:00Z",
     isRead: false,
     actionUrl: "/distribution/slack",
   },
@@ -37,7 +29,7 @@ const mockNotifications: Notification[] = [
     type: "group",
     title: "Cross-Platform Group Update",
     message: "Work Communications group has 15 unread messages",
-    timestamp: "2024-01-15T08:45:00Z",
+    createdAt: "2024-01-15T08:45:00Z",
     isRead: true,
     actionUrl: "/cross-platform-groups/work",
   },
@@ -46,18 +38,26 @@ const mockNotifications: Notification[] = [
     type: "system",
     title: "Integration Connected",
     message: "Discord integration successfully connected",
-    timestamp: "2024-01-14T16:20:00Z",
+    createdAt: "2024-01-14T16:20:00Z",
     isRead: true,
   },
 ]
 
-export function NotificationBell() {
+export function NotificationBell({
+  initialNotifications = mockNotifications,
+  onNotificationClick,
+  onMarkAllAsRead,
+  onClearAll
+}: NotificationBellProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications)
+  const [notifications, setNotifications] = useState<NotificationBase[]>(initialNotifications)
+  const [unreadCount, setUnreadCount] = useState(0)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
 
-  const unreadCount = notifications.filter((n) => !n.isRead).length
+  useEffect(() => {
+    setUnreadCount(notifications.filter((n) => !n.isRead).length)
+  }, [notifications])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -90,7 +90,7 @@ export function NotificationBell() {
     setNotifications((prev) => prev.map((notification) => ({ ...notification, isRead: true })))
   }
 
-  const handleNotificationClick = (notification: Notification) => {
+  const handleNotificationClick = (notification: NotificationBase) => {
     markAsRead(notification.id)
     if (notification.actionUrl) {
       window.location.href = notification.actionUrl
@@ -157,7 +157,7 @@ export function NotificationBell() {
 
           <div className={styles.notificationsList}>
             {notifications.length > 0 ? (
-              notifications.map((notification) => (
+              notifications.map((notification: NotificationBase) => (
                 <div
                   key={notification.id}
                   className={`${styles.notificationItem} ${!notification.isRead ? styles.unread : ""} ${
@@ -169,7 +169,7 @@ export function NotificationBell() {
                   <div className={styles.notificationContent}>
                     <div className={styles.notificationTitle}>{notification.title}</div>
                     <div className={styles.notificationMessage}>{notification.message}</div>
-                    <div className={styles.notificationTime}>{formatTimestamp(notification.timestamp)}</div>
+                    <div className={styles.notificationTime}>{formatTimestamp(notification.createdAt)}</div>
                   </div>
                   {!notification.isRead && <div className={styles.unreadDot}></div>}
                 </div>

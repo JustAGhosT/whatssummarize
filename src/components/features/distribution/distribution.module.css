@@ -11,12 +11,12 @@
 .title {
   font-size: 2rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--color-text);
   margin-bottom: 0.5rem;
 }
 
 .subtitle {
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   font-size: 1.1rem;
 }
 
@@ -44,16 +44,16 @@
 
 .filterLabel {
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--color-text);
   font-size: 0.9rem;
 }
 
 .filterSelect {
   padding: 0.5rem 1rem;
-  border: 1px solid var(--border-primary);
+  border: 1px solid var(--color-border);
   border-radius: 0.5rem;
-  background: var(--bg-primary);
-  color: var(--text-primary);
+  background: var(--color-surface);
+  color: var(--color-text);
   font-size: 0.9rem;
   min-width: 150px;
 }
@@ -74,7 +74,7 @@
   align-items: center;
   gap: 0.5rem;
   font-size: 0.9rem;
-  color: var(--text-primary);
+  color: var(--color-text);
   cursor: pointer;
 }
 
@@ -90,17 +90,17 @@
 
 .statItem {
   font-size: 0.9rem;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
 }
 
 .statItem strong {
-  color: var(--text-primary);
+  color: var(--color-text);
   font-weight: 600;
 }
 
 .addBtn {
   padding: 0.75rem 1.5rem;
-  background: var(--accent-primary);
+  background: var(--color-primary);
   color: white;
   border: none;
   border-radius: 0.5rem;
@@ -110,7 +110,7 @@
 }
 
 .addBtn:hover {
-  background: var(--accent-hover);
+  background: var(--color-primary-dark);
   transform: translateY(-1px);
 }
 
@@ -121,8 +121,8 @@
 }
 
 .channelCard {
-  background: var(--bg-primary);
-  border: 1px solid var(--border-primary);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 1rem;
   padding: 1.5rem;
   transition: all 0.3s ease;
@@ -133,12 +133,12 @@
 .channelCard:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-  border-color: var(--accent-primary);
+  border-color: var(--color-primary);
 }
 
 .channelCard.disabled {
   opacity: 0.6;
-  background: var(--bg-secondary);
+  background: var(--color-surface-hover);
 }
 
 .channelHeader {
@@ -200,13 +200,13 @@
 .channelName {
   font-size: 1.1rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--color-text);
   margin-bottom: 0.25rem;
 }
 
 .channelType {
   font-size: 0.8rem;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -215,7 +215,7 @@
 
 .unreadBadge {
   display: inline-block;
-  background: var(--accent-primary);
+  background: var(--color-primary);
   color: white;
   font-size: 0.7rem;
   font-weight: 600;
@@ -241,15 +241,15 @@
 }
 
 .toggleBtn.enabled {
-  background: var(--success-bg);
-  color: var(--success-text);
-  border-color: var(--success-border);
+  background: rgba(0, 184, 148, 0.1);
+  color: var(--color-success);
+  border-color: var(--color-success);
 }
 
 .toggleBtn.disabled {
-  background: var(--error-bg);
-  color: var(--error-text);
-  border-color: var(--error-border);
+  background: rgba(231, 76, 60, 0.1);
+  color: var(--color-error);
+  border-color: var(--color-error);
 }
 
 .configBtn {
@@ -262,13 +262,13 @@
 }
 
 .configBtn:hover {
-  background: var(--bg-secondary);
+  background: var(--color-surface-hover);
 }
 
 .channelConfig {
   margin-bottom: 1rem;
   padding: 1rem;
-  background: var(--bg-secondary);
+  background: var(--color-surface-hover);
   border-radius: 0.5rem;
 }
 
@@ -285,12 +285,12 @@
 }
 
 .configKey {
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   font-weight: 500;
 }
 
 .configValue {
-  color: var(--text-primary);
+  color: var(--color-text);
   font-weight: 600;
 }
 
@@ -304,10 +304,10 @@
   flex: 1;
   min-width: 150px;
   padding: 0.75rem 1rem;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-primary);
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
   border-radius: 0.5rem;
-  color: var(--text-primary);
+  color: var(--color-text);
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -321,7 +321,7 @@
 .summaryBtn:hover:not(:disabled) {
   background: var(--accent-bg);
   color: var(--accent-primary);
-  border-color: var(--accent-primary);
+  border-color: var(--color-primary);
   transform: translateY(-1px);
 }
 
@@ -331,7 +331,7 @@
 }
 
 .actionBadge {
-  background: var(--accent-primary);
+  background: var(--color-primary);
   color: white;
   font-size: 0.7rem;
   font-weight: 600;
@@ -343,7 +343,7 @@
 .empty {
   text-align: center;
   padding: 4rem 2rem;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
 }
 
 .emptyIcon {
@@ -355,7 +355,7 @@
 .emptyTitle {
   font-size: 1.5rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--color-text);
   margin-bottom: 0.5rem;
 }
 

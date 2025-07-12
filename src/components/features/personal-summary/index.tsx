@@ -1,32 +1,46 @@
 "use client"
 
+import { Download, Grid, List, Minus, Plus, Search, TrendingDown, TrendingUp } from "lucide-react"
 import { useState } from "react"
-import { Search, Grid, List, Plus, Download, TrendingUp, TrendingDown, Minus } from "lucide-react"
+import { useApp } from "../../../contexts/app-context"
+import type { PersonalSummary, TopGroup } from "../../../types/contexts"
 import { PersonalSummaryCard } from "../../common/personal-summary-card"
-import { FilterDropdown } from "../../common/filter-dropdown"
 import { ShareModal } from "../../common/share-modal"
-import { useAppContext } from "../../../contexts/app-context"
 import styles from "./personal-summary.module.css"
 
-export function PersonalSummaryComponent() {
-  const { personalSummaries, topGroups } = useAppContext()
+// Utility function to get progress bar class based on percentage
+const getProgressBarClass = (percentage: number) => {
+  if (percentage <= 10) return styles.progressBar10
+  if (percentage <= 20) return styles.progressBar20
+  if (percentage <= 30) return styles.progressBar30
+  if (percentage <= 40) return styles.progressBar40
+  if (percentage <= 50) return styles.progressBar50
+  if (percentage <= 60) return styles.progressBar60
+  if (percentage <= 70) return styles.progressBar70
+  if (percentage <= 80) return styles.progressBar80
+  if (percentage <= 90) return styles.progressBar90
+  return styles.progressBar100
+}
+
+function PersonalSummary() {
+  const { personalSummaries, topGroups } = useApp()
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedFilter, setSelectedFilter] = useState("all")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [sortBy, setSortBy] = useState("date")
   const [shareModalOpen, setShareModalOpen] = useState(false)
-  const [selectedSummary, setSelectedSummary] = useState(null)
+  const [selectedSummary, setSelectedSummary] = useState<PersonalSummary | null>(null)
 
   // Filter and search summaries
-  const filteredSummaries = personalSummaries.filter((summary) => {
+  const filteredSummaries = (personalSummaries || []).filter((summary) => {
     const matchesSearch =
-      summary.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      summary.contact.toLowerCase().includes(searchTerm.toLowerCase())
+      summary.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      summary.contact?.toLowerCase().includes(searchTerm.toLowerCase())
 
     const matchesFilter =
       selectedFilter === "all" ||
       (selectedFilter === "recent" && new Date(summary.date) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)) ||
-      (selectedFilter === "important" && summary.keyPoints.length > 3) ||
+      (selectedFilter === "important" && (summary.keyPoints?.length || 0) > 3) ||
       (selectedFilter === "archived" && summary.archived)
 
     return matchesSearch && matchesFilter
@@ -46,7 +60,7 @@ export function PersonalSummaryComponent() {
     }
   })
 
-  const handleShare = (summary) => {
+  const handleShare = (summary: PersonalSummary) => {
     setSelectedSummary(summary)
     setShareModalOpen(true)
   }
@@ -55,7 +69,7 @@ export function PersonalSummaryComponent() {
     console.log("Exporting all summaries...")
   }
 
-  const calculateTrend = (current, previous) => {
+  const calculateTrend = (current: number, previous: number) => {
     if (previous === 0) return 0
     return ((current - previous) / previous) * 100
   }
@@ -114,7 +128,7 @@ export function PersonalSummaryComponent() {
             <div className={styles.statDescription}>All conversations tracked</div>
           </div>
           <div className={styles.statProgress}>
-            <div className={styles.progressBar} style={{ width: "100%" }}></div>
+            <div className={`${styles.progressBar} ${styles.progressBar100}`}></div>
           </div>
         </div>
 
@@ -134,7 +148,7 @@ export function PersonalSummaryComponent() {
             <span>+12%</span>
           </div>
           <div className={styles.statProgress}>
-            <div className={styles.progressBar} style={{ width: "75%" }}></div>
+            <div className={`${styles.progressBar} ${styles.progressBar75}`}></div>
           </div>
         </div>
 
@@ -154,7 +168,7 @@ export function PersonalSummaryComponent() {
             <span>0%</span>
           </div>
           <div className={styles.statProgress}>
-            <div className={styles.progressBar} style={{ width: "25%" }}></div>
+            <div className={`${styles.progressBar} ${styles.progressBar25}`}></div>
           </div>
         </div>
 
@@ -178,8 +192,7 @@ export function PersonalSummaryComponent() {
           </div>
           <div className={styles.statProgress}>
             <div
-              className={styles.progressBar}
-              style={{ width: `${Math.min(100, (thisWeekSummaries / Math.max(1, totalSummaries)) * 100)}%` }}
+              className={`${styles.progressBar} ${getProgressBarClass(Math.min(100, (thisWeekSummaries / Math.max(1, totalSummaries)) * 100))}`}
             ></div>
           </div>
         </div>
@@ -190,7 +203,7 @@ export function PersonalSummaryComponent() {
         <div className={styles.topGroupsSection}>
           <h2 className={styles.sectionTitle}>Most Active Contacts</h2>
           <div className={styles.topGroupsList}>
-            {topGroups.map((group, index) => (
+            {topGroups.map((group: TopGroup, index: number) => (
               <div key={`${group.name}-${index}`} className={styles.topGroupItem}>
                 <div className={styles.topGroupRank}>#{index + 1}</div>
                 <div className={styles.topGroupInfo}>
@@ -199,10 +212,7 @@ export function PersonalSummaryComponent() {
                 </div>
                 <div className={styles.topGroupBar}>
                   <div
-                    className={styles.topGroupProgress}
-                    style={{
-                      width: `${(group.messageCount / Math.max(...topGroups.map((g) => g.messageCount))) * 100}%`,
-                    }}
+                    className={`${styles.topGroupProgress} ${getProgressBarClass((group.messageCount / Math.max(...topGroups.map((g: TopGroup) => g.messageCount))) * 100)}`}
                   ></div>
                 </div>
               </div>
@@ -226,26 +236,28 @@ export function PersonalSummaryComponent() {
           </div>
 
           <div className={styles.filterControls}>
-            <FilterDropdown
+            <select
               value={selectedFilter}
-              onChange={setSelectedFilter}
-              options={[
-                { value: "all", label: "All Summaries" },
-                { value: "recent", label: "Recent" },
-                { value: "important", label: "Important" },
-                { value: "archived", label: "Archived" },
-              ]}
-            />
+              onChange={(e) => setSelectedFilter(e.target.value)}
+              className={styles.filterSelect}
+              aria-label="Filter summaries"
+            >
+              <option value="all">All Summaries</option>
+              <option value="recent">Recent</option>
+              <option value="important">Important</option>
+              <option value="archived">Archived</option>
+            </select>
 
-            <FilterDropdown
+            <select
               value={sortBy}
-              onChange={setSortBy}
-              options={[
-                { value: "date", label: "Sort by Date" },
-                { value: "contact", label: "Sort by Contact" },
-                { value: "messages", label: "Sort by Messages" },
-              ]}
-            />
+              onChange={(e) => setSortBy(e.target.value)}
+              className={styles.filterSelect}
+              aria-label="Sort summaries"
+            >
+              <option value="date">Sort by Date</option>
+              <option value="contact">Sort by Contact</option>
+              <option value="messages">Sort by Messages</option>
+            </select>
 
             <div className={styles.viewToggle}>
               <button
@@ -280,7 +292,6 @@ export function PersonalSummaryComponent() {
             <PersonalSummaryCard
               key={summary.id}
               summary={summary}
-              viewMode={viewMode}
               onShare={() => handleShare(summary)}
             />
           ))
@@ -305,8 +316,17 @@ export function PersonalSummaryComponent() {
 
       {/* Share Modal */}
       {shareModalOpen && selectedSummary && (
-        <ShareModal isOpen={shareModalOpen} onClose={() => setShareModalOpen(false)} summary={selectedSummary} />
+        <ShareModal 
+          isOpen={shareModalOpen} 
+          onClose={() => setShareModalOpen(false)} 
+          onShare={(channels) => {
+            console.log('Sharing to channels:', channels);
+            setShareModalOpen(false);
+          }}
+        />
       )}
     </div>
   )
 }
+
+export default PersonalSummary
