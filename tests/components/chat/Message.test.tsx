@@ -1,11 +1,8 @@
 import React from 'react';
-import { render, screen } from '@/tests/test-utils';
+import { render, screen } from '../../test-utils';
 import { Message } from '@/components/chat/Message';
 
-// Mock the cn utility
-jest.mock('@/lib/utils', () => ({
-  cn: (...classes: (string | undefined)[]) => classes.filter(Boolean).join(' '),
-}));
+// The mock for @/lib/utils is now in __mocks__/@/lib/utils.ts
 
 describe('Message Component', () => {
   const defaultProps = {

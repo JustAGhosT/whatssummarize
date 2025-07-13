@@ -1,7 +1,25 @@
 import '@testing-library/jest-dom';
 import { cleanup } from '@testing-library/react';
-import { afterEach } from 'vitest';
 import { server } from './mocks/server';
+import React from 'react';
+import { afterEach, beforeAll, afterAll } from '@jest/globals';
+
+// Start the mock server before all tests
+beforeAll(() => {
+  server.listen({ onUnhandledRequest: 'error' });
+});
+
+// Reset any request handlers that we may add during the tests
+// so they don't affect other tests
+afterEach(() => {
+  cleanup();
+  server.resetHandlers();
+});
+
+// Clean up after all tests are done
+afterAll(() => {
+  server.close();
+});
 
 // Mock Next.js router
 jest.mock('next/router', () => require('next-router-mock'));
@@ -74,11 +92,9 @@ jest.mock('next-auth/react', () => {
 });
 
 // Mock next/head
-jest.mock('next/head', () => {
-  return {
-    __esModule: true,
-    default: ({ children }: { children: Array<React.ReactElement> }) => {
-      return <>{children}</>;
-    },
-  };
-});
+import MockHead from './mocks/MockHead';
+
+jest.mock('next/head', () => ({
+  __esModule: true,
+  default: MockHead,
+}));

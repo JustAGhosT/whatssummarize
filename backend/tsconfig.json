@@ -15,6 +15,10 @@
       "@backend/*": ["src/*"]
     }
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "**/*.test.ts"]
+  "include": [
+    "src/**/*",
+    "**/*.d.ts"
+  ],
+  "exclude": ["node_modules", "**/*.test.ts"],
+  "types": ["node", "express", "body-parser"]
 }

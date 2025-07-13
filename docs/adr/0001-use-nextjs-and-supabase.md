@@ -11,12 +11,14 @@
 We need a modern, scalable architecture for the WhatsApp Summarizer application that allows for rapid development, easy maintenance, and seamless integration with WhatsApp and AI summarization services.
 
 ### Problem
+
 - Need to process and summarize WhatsApp conversations efficiently
 - Require real-time updates and synchronization
 - Need user authentication and data persistence
 - Must handle media and text content
 
 ### Goals
+
 - Fast development cycle
 - Scalable architecture
 - Real-time capabilities
@@ -24,6 +26,7 @@ We need a modern, scalable architecture for the WhatsApp Summarizer application 
 - Easy deployment
 
 ### Non-Goals
+
 - Building custom authentication
 - Creating a custom database solution
 - Developing a custom real-time engine
@@ -31,6 +34,7 @@ We need a modern, scalable architecture for the WhatsApp Summarizer application 
 ## Decision
 
 We will use:
+
 - **Next.js 14** for the frontend with App Router
 - **Supabase** for backend services (Auth, Database, Storage)
 - **TypeScript** for type safety
@@ -39,6 +43,7 @@ We will use:
 ## Consequences
 
 ### Positive
+
 - Rapid development with Next.js and Supabase
 - Built-in authentication and real-time capabilities
 - Type safety with TypeScript
@@ -46,6 +51,7 @@ We will use:
 - Large community and ecosystem
 
 ### Negative
+
 - Vendor lock-in with Supabase
 - Learning curve for team members new to these technologies
 - Potential costs at scale
@@ -53,11 +59,13 @@ We will use:
 ## Alternatives Considered
 
 ### 1. MERN Stack (MongoDB, Express, React, Node.js)
+
 - More control over backend
 - Requires more setup and maintenance
 - Would need to implement real-time features manually
 
 ### 2. Firebase
+
 - Similar to Supabase but with less control over the database
 - More expensive at scale
 - More mature but with more complex pricing
@@ -65,12 +73,14 @@ We will use:
 ## Implementation Details
 
 ### Frontend (Next.js)
+
 - App Router for routing
 - Server Components for better performance
 - Client Components for interactivity
 - API Routes for server-side functionality
 
 ### Backend (Supabase)
+
 - PostgreSQL database
 - Row Level Security (RLS)
 - Storage for media files

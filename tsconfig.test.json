@@ -1,0 +1,32 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "esModuleInterop": true,
+    "module": "commonjs",
+    "target": "es6",
+    "noEmit": true,
+    "strict": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "types": ["jest", "node", "@testing-library/jest-dom"],
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": [
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "**/tests/**/*.ts",
+    "**/tests/**/*.tsx",
+    "next-env.d.ts",
+    "jest.setup.ts"
+  ],
+  "exclude": ["node_modules", ".next", "out", "**/node_modules/**"]
+}
