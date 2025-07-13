@@ -220,7 +220,8 @@ export function Groups() {
   const getPriorityColor = (priority: Group["priority"]) => priorityColors[priority]
 
   return (
-    <div className={styles.groupsContainer}>
+    <div className="h-full w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      <div className={styles.groupsContainer}>
       {/* Enhanced Header */}
       <div className={styles.header}>
         <div className={styles.headerContent}>
@@ -495,6 +496,7 @@ export function Groups() {
           </button>
         </div>
       )}
+      </div>
     </div>
   )
 }

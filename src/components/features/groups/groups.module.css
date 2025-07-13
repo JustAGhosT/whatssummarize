@@ -1,8 +1,12 @@
 .groupsContainer {
-  min-height: 100vh;
-  padding: 90px 2rem 2rem;
+  min-height: 100%;
+  height: 100%;
+  padding: 2rem;
   max-width: 1400px;
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
 }
 
 /* Enhanced Header Styles */
@@ -408,6 +412,8 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
   gap: 1.5rem;
+  flex: 1;
+  align-content: start;
 }
 
 .groupsList {
@@ -826,7 +832,7 @@
 
 @media (max-width: 768px) {
   .groupsContainer {
-    padding: 80px 1rem 1rem;
+    padding: 1rem;
   }
 
   .groupsGrid {
@@ -886,7 +892,7 @@
 
 @media (max-width: 480px) {
   .groupsContainer {
-    padding: 70px 0.75rem 0.75rem;
+    padding: 0.75rem;
   }
 
   .groupCard {

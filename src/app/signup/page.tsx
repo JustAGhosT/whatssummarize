@@ -4,11 +4,16 @@ import { SignupForm } from "@/components/auth/signup-form"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
 import { Suspense } from "react"
+import PageWrapper from "../page-wrapper"
 
 export default function SignupPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted/20 p-4">
-      <Card className="w-full max-w-md shadow-lg">
+    <PageWrapper>
+      <div className="flex items-center justify-center min-h-[80vh]">
+        <Card className="w-full max-w-md shadow-lg card-border-animation relative">
+        {/* Animated gradient border effect */}
+        <div className="h-1.5 bg-gradient-to-r from-[#25D366] via-[#34E89E] to-[#128C7E] animate-gradient-x"></div>
+        
         <CardHeader className="space-y-2 text-center">
           <CardTitle className="text-3xl font-bold">Create an account</CardTitle>
           <CardDescription>
@@ -29,6 +34,7 @@ export default function SignupPage() {
           </div>
         </CardFooter>
       </Card>
-    </div>
+      </div>
+    </PageWrapper>
   )
 }

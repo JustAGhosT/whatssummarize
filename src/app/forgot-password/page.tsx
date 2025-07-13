@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { useAuth } from "@/contexts/auth-context"
 import { Loader2, AlertCircle, CheckCircle } from "lucide-react"
+import PageWrapper from "../page-wrapper"
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("")
@@ -42,8 +43,12 @@ export default function ForgotPasswordPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted/20 p-4">
-        <Card className="w-full max-w-md shadow-lg">
+      <PageWrapper>
+        <div className="flex items-center justify-center min-h-[80vh]">
+          <Card className="w-full max-w-md shadow-lg card-border-animation relative">
+          {/* Animated gradient border effect */}
+          <div className="h-1.5 bg-gradient-to-r from-[#25D366] via-[#34E89E] to-[#128C7E] animate-gradient-x"></div>
+          
           <CardHeader className="space-y-2 text-center">
             <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
               <CheckCircle className="h-6 w-6 text-green-600" />
@@ -64,13 +69,18 @@ export default function ForgotPasswordPage() {
             </Button>
           </CardFooter>
         </Card>
-      </div>
+        </div>
+      </PageWrapper>
     )
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted/20 p-4">
-      <Card className="w-full max-w-md shadow-lg">
+    <PageWrapper>
+      <div className="flex items-center justify-center min-h-[80vh]">
+        <Card className="w-full max-w-md shadow-lg card-border-animation relative">
+        {/* Animated gradient border effect */}
+        <div className="h-1.5 bg-gradient-to-r from-[#25D366] via-[#34E89E] to-[#128C7E] animate-gradient-x"></div>
+        
         <CardHeader className="space-y-2 text-center">
           <CardTitle className="text-2xl font-bold">Forgot your password?</CardTitle>
           <CardDescription>
@@ -110,6 +120,7 @@ export default function ForgotPasswordPage() {
           </Button>
         </CardFooter>
       </Card>
-    </div>
+      </div>
+    </PageWrapper>
   )
 }

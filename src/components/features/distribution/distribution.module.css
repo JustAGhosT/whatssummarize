@@ -2,6 +2,10 @@
   padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
+  min-height: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .header {
@@ -118,6 +122,8 @@
   display: grid;
   gap: 1.5rem;
   grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  flex: 1;
+  align-content: start;
 }
 
 .channelCard {

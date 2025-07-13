@@ -1,165 +1,167 @@
 .container {
-  padding: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
-  min-height: calc(100vh - 80px);
+  width: 100%;
 }
 
 .header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 2rem;
 }
 
 .title {
-  font-size: 2.5rem;
+  font-size: 1.8rem;
   font-weight: 700;
-  color: var(--text-primary);
-  margin-bottom: 0.5rem;
-  background: linear-gradient(135deg, #25d366, #128c7e);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--text-light);
 }
 
 .subtitle {
-  font-size: 1.125rem;
-  color: var(--text-secondary);
-  margin-bottom: 2rem;
+  color: var(--text-muted);
+  margin-top: 0.5rem;
 }
 
-.contentGrid {
-  display: grid;
-  grid-template-columns: 1fr 300px;
+.headerActions {
+  display: flex;
+  gap: 1rem;
+}
+
+.content {
+  display: flex;
   gap: 2rem;
 }
 
-.mainContent {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
 .sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+  width: 250px;
+  flex-shrink: 0;
 }
 
-.card {
-  background: var(--card-background);
-  border: 1px solid var(--border-color);
-  border-radius: 16px;
+.mainContent {
+  flex: 1;
+}
+
+.filterGroup {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
   padding: 1.5rem;
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 15px 35px rgba(37, 211, 102, 0.1);
-}
-
-.cardTitle {
-  font-size: 1.25rem;
+.filterTitle {
+  font-size: 0.875rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--text-muted);
   margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.filterButton {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
+  color: var(--text-light);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filterButton:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.filterButton.active {
+  background: rgba(37, 211, 102, 0.1);
+  color: var(--primary);
+}
+
+.unreadBadge {
+  background: var(--primary);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.125rem 0.5rem;
+  border-radius: 10px;
 }
 
 .notificationsList {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 1rem;
 }
 
 .notificationItem {
   display: flex;
-  align-items: flex-start;
   gap: 1rem;
-  padding: 1rem;
-  background: var(--hover-background);
-  border: 1px solid var(--border-color);
+  padding: 1.5rem;
   border-radius: 12px;
-  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
   cursor: pointer;
 }
 
 .notificationItem:hover {
-  background: rgba(37, 211, 102, 0.05);
-  border-color: var(--whatsapp-primary);
-  transform: translateX(4px);
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-2px);
 }
 
 .notificationItem.unread {
-  background: rgba(37, 211, 102, 0.08);
-  border-color: var(--whatsapp-primary);
+  background: rgba(37, 211, 102, 0.05);
+  border-color: rgba(37, 211, 102, 0.2);
 }
 
-.notificationIcon {
+.notificationIconContainer {
   width: 40px;
   height: 40px;
   border-radius: 50%;
+  background: rgba(37, 211, 102, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.125rem;
   flex-shrink: 0;
 }
 
-.notificationIcon.info {
-  background: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
-}
-
-.notificationIcon.success {
-  background: rgba(34, 197, 94, 0.1);
-  color: #22c55e;
-}
-
-.notificationIcon.warning {
-  background: rgba(245, 158, 11, 0.1);
-  color: #f59e0b;
-}
-
-.notificationIcon.error {
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
+.notificationIcon {
+  width: 20px;
+  height: 20px;
+  color: var(--primary);
 }
 
 .notificationContent {
   flex: 1;
-  min-width: 0;
 }
 
-.notificationTitle {
-  font-weight: 500;
-  color: var(--text-primary);
-  margin-bottom: 0.25rem;
-  line-height: 1.4;
-}
-
-.notificationMessage {
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-  line-height: 1.5;
+.notificationHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
   margin-bottom: 0.5rem;
 }
 
-.notificationMeta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 0.75rem;
-  color: var(--text-secondary);
+.notificationTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-light);
 }
 
 .notificationTime {
+  font-size: 0.75rem;
+  color: var(--text-muted);
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+}
+
+.notificationMessage {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
 }
 
 .notificationActions {
@@ -167,277 +169,77 @@
   gap: 0.5rem;
 }
 
-.actionButton {
-  padding: 0.25rem 0.5rem;
-  border: none;
-  border-radius: 4px;
-  background: transparent;
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 0.75rem;
-}
-
-.actionButton:hover {
-  background: var(--whatsapp-primary);
-  color: white;
-}
-
-.settingsCard {
-  background: var(--card-background);
-  border: 1px solid var(--border-color);
-  border-radius: 16px;
-  padding: 1.5rem;
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-}
-
-.settingsGroup {
-  margin-bottom: 1.5rem;
-}
-
-.settingsGroup:last-child {
-  margin-bottom: 0;
-}
-
-.settingsTitle {
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 1rem;
-  font-size: 1rem;
-}
-
-.settingItem {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.settingItem:last-child {
-  border-bottom: none;
-}
-
-.settingInfo {
-  flex: 1;
-}
-
-.settingLabel {
-  font-weight: 500;
-  color: var(--text-primary);
-  margin-bottom: 0.25rem;
-}
-
-.settingDescription {
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-  line-height: 1.4;
-}
-
-.switch {
-  position: relative;
-  width: 50px;
-  height: 24px;
-  background: var(--border-color);
-  border-radius: 12px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.switch.active {
-  background: var(--whatsapp-primary);
-}
-
-.switchHandle {
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 20px;
-  height: 20px;
-  background: white;
-  border-radius: 50%;
-  transition: transform 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.switch.active .switchHandle {
-  transform: translateX(26px);
-}
-
-.filterTabs {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
-  padding: 0.25rem;
-  background: var(--hover-background);
-  border-radius: 8px;
-}
-
-.filterTab {
-  flex: 1;
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 6px;
-  background: transparent;
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-
-.filterTab.active {
-  background: var(--whatsapp-primary);
-  color: white;
-}
-
-.filterTab:hover:not(.active) {
-  background: rgba(37, 211, 102, 0.1);
-  color: var(--whatsapp-primary);
-}
-
 .emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
   text-align: center;
-  padding: 3rem 1rem;
-  color: var(--text-secondary);
 }
 
 .emptyIcon {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-  opacity: 0.5;
-}
-
-.emptyTitle {
-  font-size: 1.125rem;
-  font-weight: 500;
-  color: var(--text-primary);
-  margin-bottom: 0.5rem;
-}
-
-.emptyDescription {
-  font-size: 0.875rem;
-  line-height: 1.5;
-}
-
-.button {
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 8px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 0.875rem;
-  display: inline-flex;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
   align-items: center;
-  gap: 0.5rem;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  color: var(--text-muted);
 }
 
-.buttonPrimary {
-  background: var(--whatsapp-primary);
-  color: white;
+.loadingState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
 }
 
-.buttonPrimary:hover {
-  background: var(--whatsapp-primary-dark);
-  transform: translateY(-1px);
+.loadingSpinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(37, 211, 102, 0.1);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
 }
 
-.buttonSecondary {
-  background: var(--card-background);
-  color: var(--text-primary);
-  border: 1px solid var(--border-color);
+.errorState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
 }
 
-.buttonSecondary:hover {
-  background: var(--hover-background);
+.errorIcon {
+  width: 40px;
+  height: 40px;
+  color: #ef4444;
+  margin-bottom: 1rem;
 }
 
-/* Dark mode styles */
-[data-theme="dark"] .container {
-  background: var(--background-dark);
+.retryButton {
+  margin-top: 1rem;
 }
 
-[data-theme="dark"] .card,
-[data-theme="dark"] .settingsCard {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.1);
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
-}
-
-[data-theme="dark"] .card:hover,
-[data-theme="dark"] .settingsCard:hover {
-  background: rgba(255, 255, 255, 0.08);
-  box-shadow: 0 15px 35px rgba(37, 211, 102, 0.15);
-}
-
-[data-theme="dark"] .notificationItem {
-  background: rgba(255, 255, 255, 0.03);
-  border-color: rgba(255, 255, 255, 0.08);
-}
-
-[data-theme="dark"] .notificationItem:hover {
-  background: rgba(37, 211, 102, 0.1);
-}
-
-[data-theme="dark"] .notificationItem.unread {
-  background: rgba(37, 211, 102, 0.12);
-}
-
-[data-theme="dark"] .settingItem {
-  border-bottom-color: rgba(255, 255, 255, 0.1);
-}
-
-[data-theme="dark"] .filterTabs {
-  background: rgba(255, 255, 255, 0.05);
-}
-
-[data-theme="dark"] .filterTab:hover:not(.active) {
-  background: rgba(37, 211, 102, 0.15);
-}
-
-[data-theme="dark"] .buttonSecondary {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.1);
-  color: var(--text-primary-dark);
-}
-
-[data-theme="dark"] .actionButton {
-  color: var(--text-secondary-dark);
-}
-
-@media (max-width: 1024px) {
-  .contentGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .sidebar {
-    order: -1;
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 
 @media (max-width: 768px) {
-  .container {
-    padding: 1rem;
-  }
-
-  .title {
-    font-size: 2rem;
-  }
-
-  .notificationItem {
+  .content {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 0.75rem;
   }
-
-  .notificationMeta {
+  
+  .sidebar {
     width: 100%;
-  }
-
-  .filterTabs {
-    flex-direction: column;
   }
 }

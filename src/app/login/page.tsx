@@ -4,21 +4,23 @@ import { LoginForm } from '@/components/auth/login-form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
+import PageWrapper from '../page-wrapper';
 
 function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
   const handleSuccess = () => {
-    const redirectTo = searchParams.get('redirectTo') || '/';
+    const redirectTo = searchParams.get('redirectTo') || '/dashboard';
     router.push(redirectTo);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-4 sm:p-6">
-      <Card className="w-full max-w-md shadow-lg overflow-hidden">
+    <PageWrapper>
+      <div className="flex items-center justify-center min-h-[80vh]">
+        <Card className="w-full max-w-md shadow-lg overflow-hidden card-border-animation relative">
         {/* Animated gradient border effect */}
-        <div className="h-1.5 bg-gradient-to-r from-blue-500 via-green-500 to-purple-500 animate-gradient-x"></div>
+        <div className="h-1.5 bg-gradient-to-r from-[#25D366] via-[#34E89E] to-[#128C7E] animate-gradient-x"></div>
         
         <CardHeader className="text-center space-y-1">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 mb-4">
@@ -42,16 +44,19 @@ function LoginPageContent() {
           />
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </PageWrapper>
   );
 }
 
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-      </div>
+      <PageWrapper>
+        <div className="flex items-center justify-center min-h-[80vh]">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        </div>
+      </PageWrapper>
     }>
       <LoginPageContent />
     </Suspense>

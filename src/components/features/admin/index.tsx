@@ -133,40 +133,42 @@ function Admin() {
   }
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <h1 className={styles.title}>Admin Dashboard</h1>
-        <p className={styles.subtitle}>System administration and monitoring</p>
-      </div>
+    <div className="h-full w-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+      <div className={styles.container}>
+        <div className={styles.header}>
+          <h1 className={styles.title}>Admin Dashboard</h1>
+          <p className={styles.subtitle}>System administration and monitoring</p>
+        </div>
 
-      <div className={styles.tabs}>
-        <button
-          onClick={() => setActiveTab("overview")}
-          className={`${styles.tab} ${activeTab === "overview" ? styles.active : ""}`}
-        >
-          Overview
-        </button>
-        <button
-          onClick={() => setActiveTab("users")}
-          className={`${styles.tab} ${activeTab === "users" ? styles.active : ""}`}
-        >
-          Users
-        </button>
-        <button
-          onClick={() => setActiveTab("settings")}
-          className={`${styles.tab} ${activeTab === "settings" ? styles.active : ""}`}
-        >
-          Settings
-        </button>
-        <button
-          onClick={() => setActiveTab("logs")}
-          className={`${styles.tab} ${activeTab === "logs" ? styles.active : ""}`}
-        >
-          Logs
-        </button>
-      </div>
+        <div className={styles.tabs}>
+          <button
+            onClick={() => setActiveTab("overview")}
+            className={`${styles.tab} ${activeTab === "overview" ? styles.active : ""}`}
+          >
+            Overview
+          </button>
+          <button
+            onClick={() => setActiveTab("users")}
+            className={`${styles.tab} ${activeTab === "users" ? styles.active : ""}`}
+          >
+            Users
+          </button>
+          <button
+            onClick={() => setActiveTab("settings")}
+            className={`${styles.tab} ${activeTab === "settings" ? styles.active : ""}`}
+          >
+            Settings
+          </button>
+          <button
+            onClick={() => setActiveTab("logs")}
+            className={`${styles.tab} ${activeTab === "logs" ? styles.active : ""}`}
+          >
+            Logs
+          </button>
+        </div>
 
-      <div className={styles.content}>{renderTabContent()}</div>
+        <div className={styles.content}>{renderTabContent()}</div>
+      </div>
     </div>
   )
 }

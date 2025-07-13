@@ -1,148 +1,116 @@
-"use client";
+"use client"
 
-import { useState, useRef, useCallback, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { CORE_NAV_ITEMS, MORE_NAV_ITEMS, getUserMenuItems } from '../constants/navigation';
-import { NavItem, UseNavigationReturn } from '../types';
-import { useClickOutside } from '@/hooks/useClickOutside';
-import { useDarkMode } from '@/hooks/useDarkMode';
+import { useEffect, useRef, useState } from "react"
+import { Home, BarChart2, Users, Settings, Bell, Palette } from "lucide-react"
 
-export const useNavigation = (isAuthenticated: boolean) => {
-  const router = useRouter();
-  const { isDarkMode, toggleDarkMode } = useDarkMode();
+export const useNavigation = (isAuthenticated: boolean = false) => {
+  const [isScrolled, setIsScrolled] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [moreDropdownOpen, setMoreDropdownOpen] = useState(false)
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false)
   
-  // State for UI elements
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [moreDropdownOpen, setMoreDropdownOpen] = useState(false);
-  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const mobileMenuRef = useRef(null)
+  const searchBarRef = useRef(null)
+  const moreDropdownRef = useRef(null)
+  const userDropdownRef = useRef(null)
 
-  // Refs for click outside detection with proper null checks
-  const moreDropdownRef = useRef<HTMLButtonElement>(null);
-  const userDropdownRef = useRef<HTMLDivElement>(null);
-  const mobileMenuRef = useRef<HTMLDivElement>(null);
-  const searchBarRef = useRef<HTMLDivElement>(null);
-  
-  // Click outside handlers for each dropdown
-  const handleClickOutsideMore = useCallback((event: MouseEvent) => {
-    if (moreDropdownRef.current && !moreDropdownRef.current.contains(event.target as Node)) {
-      setMoreDropdownOpen(false);
-    }
-  }, []);
-
-  const handleClickOutsideUser = useCallback((event: MouseEvent) => {
-    if (userDropdownRef.current && !userDropdownRef.current.contains(event.target as Node)) {
-      setUserDropdownOpen(false);
-    }
-  }, []);
-
-  const handleClickOutsideMobile = useCallback((event: MouseEvent) => {
-    if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
-      setMobileMenuOpen(false);
-    }
-  }, []);
-
-  const handleClickOutsideSearch = useCallback((event: MouseEvent) => {
-    if (searchBarRef.current && !searchBarRef.current.contains(event.target as Node)) {
-      setSearchOpen(false);
-    }
-  }, []);
-
-  // Filter navigation items based on auth state
-  const filteredNavItems = CORE_NAV_ITEMS.filter(
-    item => !item.requiresAuth || isAuthenticated
-  );
-
-  const filteredMoreItems = MORE_NAV_ITEMS.filter(
-    item => !item.requiresAuth || isAuthenticated
-  );
-
-  const userMenuItems = getUserMenuItems(router, () => {
-    // This will be handled by the actual logout function passed from the parent
-  });
-
-  // Toggle functions
-  const toggleMobileMenu = useCallback(() => {
-    setMobileMenuOpen(prev => !prev);
-  }, []);
-
-  const toggleSearch = useCallback(() => {
-    setSearchOpen(prev => !prev);
-  }, []);
-
-  const toggleMoreDropdown = useCallback(() => {
-    setMoreDropdownOpen(prev => !prev);
-  }, []);
-
-  const toggleUserDropdown = useCallback(() => {
-    setUserDropdownOpen(prev => !prev);
-  }, []);
-
-  // Set up click outside listeners
-  useEffect(() => {
-    document.addEventListener('mousedown', handleClickOutsideMore);
-    document.addEventListener('mousedown', handleClickOutsideUser);
-    document.addEventListener('mousedown', handleClickOutsideMobile);
-    document.addEventListener('mousedown', handleClickOutsideSearch);
-    
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutsideMore);
-      document.removeEventListener('mousedown', handleClickOutsideUser);
-      document.removeEventListener('mousedown', handleClickOutsideMobile);
-      document.removeEventListener('mousedown', handleClickOutsideSearch);
-    };
-  }, [handleClickOutsideMore, handleClickOutsideUser, handleClickOutsideMobile, handleClickOutsideSearch]);
-
-  // Handle scroll effect
+  // Handle scroll events
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-    };
+      setIsScrolled(window.scrollY > 10)
+    }
+    
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  // Handle keyboard navigation
+  // Close dropdowns when clicking outside
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setMoreDropdownOpen(false);
-        setUserDropdownOpen(false);
-        setMobileMenuOpen(false);
-        setSearchOpen(false);
+    const handleClickOutside = (event: MouseEvent) => {
+      if (moreDropdownRef.current && 
+          !(moreDropdownRef.current as any).contains(event.target)) {
+        setMoreDropdownOpen(false)
       }
-    };
+      
+      if (userDropdownRef.current && 
+          !(userDropdownRef.current as any).contains(event.target)) {
+        setUserDropdownOpen(false)
+      }
+      
+      if (searchBarRef.current && 
+          !(searchBarRef.current as any).contains(event.target)) {
+        setSearchOpen(false)
+      }
+    }
+    
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  // Close mobile menu on ESC key
+  useEffect(() => {
+    const handleEscKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setMobileMenuOpen(false)
+        setSearchOpen(false)
+      }
+    }
+    
+    document.addEventListener('keydown', handleEscKey)
+    return () => document.removeEventListener('keydown', handleEscKey)
+  }, [])
+
+  // Toggle functions
+  const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen)
+  const toggleSearch = () => setSearchOpen(!searchOpen)
+  const toggleMoreDropdown = () => setMoreDropdownOpen(!moreDropdownOpen)
+  const toggleUserDropdown = () => setUserDropdownOpen(!userDropdownOpen)
 
   // Handle user menu item click
-  const handleUserMenuItemClick = useCallback((e: React.MouseEvent, href?: string, onClick?: (e: React.MouseEvent) => void | Promise<void>) => {
-    e.preventDefault();
-    setUserDropdownOpen(false);
-    if (onClick) {
-      onClick(e);
-    } else if (href) {
-      router.push(href);
-    }
-  }, [router]);
+  const handleUserMenuItemClick = (
+    e: React.MouseEvent, 
+    href: string, 
+    callback?: () => void
+  ) => {
+    e.preventDefault()
+    setUserDropdownOpen(false)
+    if (callback) callback()
+  }
 
-  // Return the refs and other values
+  // Navigation items
+  const navItems = [
+    { href: '/', label: 'Home', icon: Home },
+    { href: '/dashboard', label: 'Dashboard', icon: BarChart2, requiresAuth: true },
+    { href: '/groups', label: 'Groups', icon: Users, requiresAuth: true },
+    { href: '/moodboard', label: 'Design', icon: Palette },
+  ]
+
+  const moreItems = [
+    { href: '/notifications', label: 'Notifications', icon: Bell, requiresAuth: true },
+    { href: '/customize', label: 'Customize', icon: Palette, requiresAuth: true },
+    { href: '/settings', label: 'Settings', icon: Settings, requiresAuth: true },
+  ]
+
+  // Filter items based on auth status
+  const filteredNavItems = navItems.filter(item => 
+    !item.requiresAuth || (item.requiresAuth && isAuthenticated)
+  )
+  
+  const filteredMoreItems = moreItems.filter(item => 
+    !item.requiresAuth || (item.requiresAuth && isAuthenticated)
+  )
+
   return {
     isScrolled,
     mobileMenuOpen,
     searchOpen,
     moreDropdownOpen,
     userDropdownOpen,
-    isDarkMode,
     toggleMobileMenu,
     toggleSearch,
     toggleMoreDropdown,
     toggleUserDropdown,
-    toggleDarkMode,
     handleUserMenuItemClick,
     moreDropdownRef,
     userDropdownRef,
@@ -150,6 +118,5 @@ export const useNavigation = (isAuthenticated: boolean) => {
     searchBarRef,
     filteredNavItems,
     filteredMoreItems,
-    userMenuItems
-  };
-};
+  }
+}

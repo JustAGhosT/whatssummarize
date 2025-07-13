@@ -57,7 +57,8 @@ function Customize() {
   }
 
   return (
-    <div className={styles.container}>
+    <div className="h-full w-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+      <div className={styles.container}>
       <div className={styles.header}>
         <h1 className={styles.title}>Customize Settings</h1>
         <p className={styles.subtitle}>Configure your summary preferences and schedule</p>
@@ -166,6 +167,7 @@ function Customize() {
           <button className={styles.saveBtn}>Save Settings</button>
           <button className={styles.resetBtn}>Reset to Default</button>
         </div>
+      </div>
       </div>
     </div>
   )

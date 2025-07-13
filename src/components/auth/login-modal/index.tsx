@@ -19,7 +19,7 @@ export function LoginModal({ isOpen, onClose, onSwitchToSignup }: LoginModalProp
       <LoginForm 
         onSuccess={handleSuccess}
         showHeader={false}
-        showSocialLogins={false}
+        showSocialLogins={true}
         showSignupLink={false}
         className="space-y-4"
       />

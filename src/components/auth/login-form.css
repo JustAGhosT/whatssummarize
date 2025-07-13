@@ -1,0 +1,86 @@
+/* Login Form Styles */
+.login-btn {
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-btn::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  height: 2px;
+  background: linear-gradient(90deg, #25D366, #34E89E, #128C7E, #075E54);
+  background-size: 300% 100%;
+  z-index: 2;
+  animation: borderRotate 4s linear infinite;
+}
+
+.email-form {
+  position: relative;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes borderRotate {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 300% 0%;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Remove the duplicate border */
+.space-y-6 {
+  position: relative;
+  border-radius: 8px;
+}
+
+/* Only keep the animated border on the Card component in the login page */
+.card-border-animation {
+  position: relative;
+  border: none !important;
+}
+
+.card-border-animation::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 0.5rem;
+  padding: 2px;
+  background: linear-gradient(90deg, #25D366, #34E89E, #128C7E, #075E54);
+  background-size: 300% 100%;
+  animation: rotate 4s linear infinite;
+  -webkit-mask: 
+     linear-gradient(#fff 0 0) content-box, 
+     linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes rotate {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 300% 0%;
+  }
+}

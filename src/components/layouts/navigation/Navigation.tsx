@@ -1,37 +1,29 @@
 "use client"
 
-import { usePathname, useRouter } from "next/navigation"
-import { useAuth } from "@/contexts/auth-context"
-import { cn } from "@/lib/utils"
-import { useNavigation } from "./hooks/useNavigation"
-import { CORE_NAV_ITEMS, MORE_NAV_ITEMS } from "./constants/navigation"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { 
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { useState, useEffect } from "react"
-import { 
-  Home, 
-  FileText, 
-  MessageSquare, 
-  Hash, 
-  Settings, 
-  HelpCircle, 
-  Info, 
-  User, 
-  LogOut, 
-  ChevronDown, 
-  Menu, 
-  X, 
-  Sun, 
-  Moon, 
-  Search as SearchIcon 
+import { Input } from "@/components/ui/input"
+import { useAuth } from "@/contexts/auth-context"
+import { cn } from "@/lib/utils"
+import {
+  ChevronDown,
+  LogOut,
+  Menu,
+  Search as SearchIcon,
+  Settings,
+  User,
+  X
 } from "lucide-react"
+import { ThemeToggle } from "@/components/ui/theme-toggle"
 import Link from "next/link"
+import { usePathname, useRouter } from "next/navigation"
+import * as React from "react"
+import { useNavigation } from "./hooks/useNavigation"
 import styles from "./navigation.module.css"
 
 type NavItem = {
@@ -99,12 +91,10 @@ export function Navigation() {
     searchOpen,
     moreDropdownOpen,
     userDropdownOpen,
-    isDarkMode,
     toggleMobileMenu,
     toggleSearch,
     toggleMoreDropdown,
     toggleUserDropdown,
-    toggleDarkMode,
     handleUserMenuItemClick,
     moreDropdownRef,
     userDropdownRef,
@@ -246,19 +236,9 @@ export function Navigation() {
             </Button>
 
             {/* Theme Toggle */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className={styles.themeToggle}
-              onClick={toggleDarkMode}
-              aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-            >
-              {isDarkMode ? (
-                <Sun className={styles.icon} />
-              ) : (
-                <Moon className={styles.icon} />
-              )}
-            </Button>
+            <div className={styles.themeToggle}>
+              <ThemeToggle />
+            </div>
 
             {isAuthenticated ? (
               <div className={styles.dropdown} ref={userDropdownRef as React.RefObject<HTMLDivElement>}>

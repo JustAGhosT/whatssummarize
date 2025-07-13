@@ -14,10 +14,11 @@ import { NavItem } from '../types';
 
 export const CORE_NAV_ITEMS: NavItem[] = [
   { 
-    href: "/", 
-    label: "Home", 
+    href: "/dashboard", 
+    label: "Dashboard", 
     icon: Home,
-    description: 'Return to the dashboard'
+    description: 'View your dashboard',
+    requiresAuth: true
   },
   { 
     href: "/summaries", 

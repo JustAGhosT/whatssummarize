@@ -21,13 +21,13 @@
 }
 
 /* Dark theme */
-[data-theme="dark"] .nav {
+:global(.dark) .nav {
   background: rgba(17, 24, 39, 0.9);
   border-bottom-color: rgba(255, 255, 255, 0.05);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-[data-theme="dark"] .nav.scrolled {
+:global(.dark) .nav.scrolled {
   background: rgba(17, 24, 39, 0.98);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
 }
@@ -99,11 +99,11 @@
   color: #111827;
 }
 
-[data-theme="dark"] .navLink {
+:global(.dark) .navLink {
   color: #9ca3af;
 }
 
-[data-theme="dark"] .navLink:hover {
+:global(.dark) .navLink:hover {
   background-color: rgba(255, 255, 255, 0.05);
   color: #f3f4f6;
 }
@@ -113,7 +113,7 @@
   font-weight: 600;
 }
 
-[data-theme="dark"] .navLink.active {
+:global(.dark) .navLink.active {
   color: #f3f4f6;
 }
 
@@ -144,11 +144,11 @@
   color: #111827;
 }
 
-[data-theme="dark"] .mobileMenuButton {
+:global(.dark) .mobileMenuButton {
   color: #9ca3af;
 }
 
-[data-theme="dark"] .mobileMenuButton:hover {
+:global(.dark) .mobileMenuButton:hover {
   background-color: rgba(255, 255, 255, 0.05);
   color: #f3f4f6;
 }
@@ -170,7 +170,7 @@
   flex-direction: column;
 }
 
-[data-theme="dark"] .mobileMenu {
+:global(.dark) .mobileMenu {
   background-color: #111827;
 }
 
@@ -197,7 +197,7 @@
   margin-bottom: 0.25rem;
 }
 
-[data-theme="dark"] .mobileNavLink {
+:global(.dark) .mobileNavLink {
   color: #9ca3af;
 }
 
@@ -207,8 +207,8 @@
   color: #111827;
 }
 
-[data-theme="dark"] .mobileNavLink:hover,
-[data-theme="dark"] .mobileNavLink.active {
+:global(.dark) .mobileNavLink:hover,
+:global(.dark) .mobileNavLink.active {
   background-color: rgba(255, 255, 255, 0.05);
   color: #f3f4f6;
 }
@@ -247,43 +247,18 @@
   color: #111827;
 }
 
-[data-theme="dark"] .searchButton {
+:global(.dark) .searchButton {
   color: #9ca3af;
 }
 
-[data-theme="dark"] .searchButton:hover {
+:global(.dark) .searchButton:hover {
   background-color: rgba(255, 255, 255, 0.05);
   color: #f3f4f6;
 }
 
 /* Theme Toggle */
 .themeToggle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 0.375rem;
-  background-color: transparent;
-  border: none;
-  color: #4b5563;
-  cursor: pointer;
-  transition: all 0.2s;
   margin-right: 0.5rem;
-}
-
-.themeToggle:hover {
-  background-color: rgba(0, 0, 0, 0.05);
-  color: #111827;
-}
-
-[data-theme="dark"] .themeToggle {
-  color: #9ca3af;
-}
-
-[data-theme="dark"] .themeToggle:hover {
-  background-color: rgba(255, 255, 255, 0.05);
-  color: #f3f4f6;
 }
 
 /* User Menu */
@@ -306,12 +281,12 @@
   border-color: #d1d5db;
 }
 
-[data-theme="dark"] .userButton {
+:global(.dark) .userButton {
   border-color: #374151;
   color: #f3f4f6;
 }
 
-[data-theme="dark"] .userButton:hover {
+:global(.dark) .userButton:hover {
   background-color: #1f2937;
   border-color: #4b5563;
 }
@@ -355,11 +330,11 @@
   color: #111827;
 }
 
-[data-theme="dark"] .dropdownButton {
+:global(.dark) .dropdownButton {
   color: #9ca3af;
 }
 
-[data-theme="dark"] .dropdownButton:hover {
+:global(.dark) .dropdownButton:hover {
   background-color: rgba(255, 255, 255, 0.05);
   color: #f3f4f6;
 }
@@ -408,12 +383,12 @@
   border-color: #d1d5db;
 }
 
-[data-theme="dark"] .loginButton {
+:global(.dark) .loginButton {
   color: #9ca3af;
   border-color: #374151;
 }
 
-[data-theme="dark"] .loginButton:hover {
+:global(.dark) .loginButton:hover {
   background-color: #1f2937;
   border-color: #4b5563;
 }
@@ -427,12 +402,12 @@
   background-color: #1f2937;
 }
 
-[data-theme="dark"] .signupButton {
+:global(.dark) .signupButton {
   background-color: #3b82f6;
   color: white;
 }
 
-[data-theme="dark"] .signupButton:hover {
+:global(.dark) .signupButton:hover {
   background-color: #2563eb;
 }
 
@@ -474,7 +449,7 @@
   transform: translateY(0);
 }
 
-[data-theme="dark"] .searchModalContent {
+:global(.dark) .searchModalContent {
   background-color: #1f2937;
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
 }
@@ -489,7 +464,7 @@
   color: #111827;
 }
 
-[data-theme="dark"] .searchInput {
+:global(.dark) .searchInput {
   color: #f3f4f6;
 }
 
@@ -508,7 +483,7 @@
   padding: 0.5rem 0;
 }
 
-[data-theme="dark"] .searchResults {
+:global(.dark) .searchResults {
   border-top-color: #374151;
 }
 

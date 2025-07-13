@@ -1,49 +1,31 @@
-import { NotificationBase } from "@/types/notifications"
+import { NotificationBase } from "@/types/notifications";
 
 export const mockNotifications: NotificationBase[] = [
   {
-    id: "1",
-    type: "summary-ready",
+    id: "notif-1",
     title: "New Summary Available",
-    message: "Your weekly summary for Family Group is ready to view.",
+    message: "Your weekly summary for 'Family Group' is ready to view.",
+    type: "summary-ready",
     isRead: false,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2 hours ago
-    actionUrl: "/personal/summary/1"
+    createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30 minutes ago
+    actionUrl: "/summaries/1"
   },
   {
-    id: "2",
+    id: "notif-2",
+    title: "While You Were Away",
+    message: "There were 25 new messages in 'Work Team' while you were away.",
     type: "while-away",
-    title: "Messages While Away",
-    message: "You have 15 new messages in Work Team that need summarizing.",
+    isRead: true,
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 3).toISOString(), // 3 hours ago
+    actionUrl: "/groups/2"
+  },
+  {
+    id: "notif-3",
+    title: "Scheduled Digest",
+    message: "Your monthly digest for all groups is now available.",
+    type: "scheduled-digest",
     isRead: false,
     createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 1 day ago
-    actionUrl: "/groups/work-team"
-  },
-  {
-    id: "3",
-    type: "scheduled-digest",
-    title: "Daily Digest",
-    message: "Your daily digest has been sent to your email.",
-    isRead: true,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(), // 2 days ago
-    actionUrl: "/digests/daily"
-  },
-  {
-    id: "4",
-    type: "summary",
-    title: "New Group Summary",
-    message: "A new summary is available for the Developers group.",
-    isRead: true,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 72).toISOString(), // 3 days ago
-    actionUrl: "/groups/developers/summary/123"
-  },
-  {
-    id: "5",
-    type: "system",
-    title: "System Update",
-    message: "New features and improvements have been deployed.",
-    isRead: false,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 96).toISOString(), // 4 days ago
-    actionUrl: "/changelog"
+    actionUrl: "/summaries"
   }
-]
+];

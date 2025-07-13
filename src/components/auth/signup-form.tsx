@@ -320,7 +320,8 @@ export function SignupForm({
         
         <Button 
           type="submit" 
-          className="w-full h-11 text-base font-medium transition-all hover:shadow-md bg-primary hover:bg-primary/90 text-primary-foreground"
+          variant="primary"
+          className="w-full h-11 text-base font-medium"
           disabled={isSubmitting}
         >
           {isSubmitting ? (

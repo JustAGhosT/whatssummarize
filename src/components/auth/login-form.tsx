@@ -13,6 +13,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { FcGoogle } from 'react-icons/fc';
+import './login-form.css';
 
 interface LoginFormProps {
   onSuccess?: () => void;
@@ -47,7 +48,7 @@ export function LoginForm({
   showSignupLink = true,
   className,
 }: LoginFormProps) {
-  const { signInWithEmail, signInWithGoogle, signInWithGithub } = useAuth();
+  const auth = useAuth();
   const [form, setForm] = useState<FormState>({
     email: '',
     password: '',
@@ -56,6 +57,7 @@ export function LoginForm({
     errors: {}
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showEmailForm, setShowEmailForm] = useState(false);
   const searchParams = useSearchParams();
 
   useEffect(() => {
@@ -95,11 +97,8 @@ export function LoginForm({
     setIsSubmitting(true);
     
     try {
-      const { error } = await signInWithEmail(form.email, form.password, form.rememberMe);
+      await auth.login(form.email, form.password);
       
-      if (error) {
-        throw error;
-      }
       
       toast({
         title: 'Login successful',
@@ -167,8 +166,18 @@ export function LoginForm({
             <Button 
               variant="outline" 
               type="button"
-              onClick={signInWithGoogle}
+              onClick={() => {
+                toast({
+                  title: 'Google Sign In',
+                  description: 'Connecting to Google...',
+                  variant: 'default',
+                });
+                // Mock Google login
+                auth.login('google@example.com', 'password');
+                onSuccess?.();
+              }}
               disabled={isSubmitting}
+              className="login-btn"
             >
               <FcGoogle className="h-4 w-4 mr-2" />
               Google
@@ -176,8 +185,18 @@ export function LoginForm({
             <Button 
               variant="outline" 
               type="button"
-              onClick={signInWithGithub}
+              onClick={() => {
+                toast({
+                  title: 'GitHub Sign In',
+                  description: 'Connecting to GitHub...',
+                  variant: 'default',
+                });
+                // Mock GitHub login
+                auth.login('github@example.com', 'password');
+                onSuccess?.();
+              }}
               disabled={isSubmitting}
+              className="login-btn"
             >
               <Github className="h-4 w-4 mr-2" />
               GitHub
@@ -189,15 +208,19 @@ export function LoginForm({
               <Separator className="w-full" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                Or continue with email
-              </span>
+              <button 
+                className="bg-background px-2 text-muted-foreground hover:text-primary transition-colors"
+                onClick={() => setShowEmailForm(!showEmailForm)}
+              >
+                {showEmailForm ? 'Hide email form' : 'Or continue with email'}
+              </button>
             </div>
           </div>
         </>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      {(showEmailForm || !showSocialLogins) && (
+        <form onSubmit={handleSubmit} className="space-y-4 email-form">
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <div className="relative">
@@ -290,6 +313,7 @@ export function LoginForm({
 
         <Button 
           type="submit" 
+          variant="primary"
           className="w-full"
           disabled={!isFormValid || isSubmitting}
         >
@@ -317,6 +341,7 @@ export function LoginForm({
           </div>
         )}
       </form>
+      )}
     </div>
   );
 }
