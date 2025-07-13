@@ -1,0 +1,237 @@
+openapi: 3.0.0
+info:
+  title: WhatsApp Summarizer API
+  description: API documentation for the WhatsApp Summarizer application
+  version: 1.0.0
+  contact:
+    name: Support
+    email: support@whatssummarize.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.whatssummarize.com/v1
+    description: Production server
+  - url: http://localhost:3000/api
+    description: Development server
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+    
+    Chat:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    
+    Message:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        chat_id:
+          type: string
+          format: uuid
+        sender:
+          type: string
+        content:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        is_from_me:
+          type: boolean
+
+paths:
+  /auth/register:
+    post:
+      tags: [Authentication]
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+                name:
+                  type: string
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+  
+  /auth/login:
+    post:
+      tags: [Authentication]
+      summary: Log in a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+      responses:
+        '200':
+          description: Successfully logged in
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+  
+  /chats:
+    get:
+      security:
+        - bearerAuth: []
+      tags: [Chats]
+      summary: Get all chats for the authenticated user
+      responses:
+        '200':
+          description: List of chats
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Chat'
+    
+    post:
+      security:
+        - bearerAuth: []
+      tags: [Chats]
+      summary: Create a new chat
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Chat created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Chat'
+  
+  /chats/{id}:
+    get:
+      security:
+        - bearerAuth: []
+      tags: [Chats]
+      summary: Get chat details and messages
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Chat details with messages
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  chat:
+                    $ref: '#/components/schemas/Chat'
+                  messages:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Message'
+  
+  /summarize:
+    post:
+      security:
+        - bearerAuth: []
+      tags: [Summarization]
+      summary: Generate a summary for a chat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                chat_id:
+                  type: string
+                  format: uuid
+                options:
+                  type: object
+                  properties:
+                    summary_length:
+                      type: string
+                      enum: [short, medium, long]
+                    include_key_points:
+                      type: boolean
+      responses:
+        '200':
+          description: Summary generated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  summary:
+                    type: string
+                  key_points:
+                    type: array
+                    items:
+                      type: string

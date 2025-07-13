@@ -1,0 +1,25 @@
+/* Vector shapes container */
+.vectorShapes {
+  height: 100vh;
+  pointer-events: none;
+}
+
+/* Hero section gradient */
+.heroGradient {
+  --gradient-from: rgb(240, 253, 244);
+  --gradient-via: rgb(255, 255, 255);
+  --gradient-to: rgb(240, 253, 244);
+  --dark-gradient-from: rgb(17, 24, 39);
+  --dark-gradient-via: rgb(31, 41, 55);
+  --dark-gradient-to: rgb(17, 24, 39);
+}
+
+/* CTA section gradient */
+.ctaGradient {
+  --gradient-from: rgb(18, 140, 126);
+  --gradient-via: rgb(37, 211, 102);
+  --gradient-to: rgb(18, 140, 126);
+  --dark-gradient-from: rgb(18, 140, 126);
+  --dark-gradient-via: rgb(37, 211, 102);
+  --dark-gradient-to: rgb(18, 140, 126);
+}
