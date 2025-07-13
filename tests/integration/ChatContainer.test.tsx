@@ -1,7 +1,5 @@
-import React from 'react';
 import { render, screen } from '@/tests/test-utils';
-import { ChatContainer } from '@/components/chat/ChatContainer';
-import { format } from 'date-fns';
+import { ChatContainer } from 'frontend/src/components/chat/ChatContainer';
 
 describe('ChatContainer Integration', () => {
   const currentUserId = 'user-1';

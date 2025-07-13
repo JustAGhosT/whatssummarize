@@ -1,6 +1,5 @@
-import React from 'react';
+import { formatChatMessages } from 'frontend/src/utils/chatUtils';
 import { Message, MessageProps } from './Message';
-import { formatChatMessages } from '@/utils/chatUtils';
 
 export interface ChatMessage extends Omit<MessageProps, 'isConsecutive' | 'showHeader'> {
   id: string;

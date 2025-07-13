@@ -63,7 +63,7 @@ const customJestConfig = {
   watchPlugins: [
     'jest-watch-typeahead/filename',
     'jest-watch-typeahead/testname',
-  ],
+  ].filter(Boolean),
   
   // Coverage configuration
   collectCoverage: true,

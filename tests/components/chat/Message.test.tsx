@@ -1,6 +1,5 @@
-import React from 'react';
+import { Message } from 'frontend/src/components/chat/Message';
 import { render, screen } from '../../test-utils';
-import { Message } from '@/components/chat/Message';
 
 // The mock for @/lib/utils is now in __mocks__/@/lib/utils.ts
 
