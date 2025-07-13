@@ -3,18 +3,27 @@
 import Image from "next/image"
 import Link from "next/link"
 import { ArrowRight, MessageSquare, BarChart2, Search, Shield, Zap } from "lucide-react"
-import { useEffect, useRef } from "react"
+import styles from "./landing-page.module.css"
+import { useEffect, useRef, ComponentType, MouseEvent as ReactMouseEvent } from "react"
 import { initMouseTracking, initStaggeredAnimations } from "@/lib/animation-utils"
 import "./enhanced-styles.css"
 
-const FeatureCard = ({ icon: Icon, title, description }) => {
-  const cardRef = useRef(null)
+interface FeatureCardProps {
+  icon: ComponentType<{ className?: string }>;
+  title: string;
+  description: string;
+}
+
+type MouseEvent = ReactMouseEvent<HTMLDivElement>;
+
+const FeatureCard = ({ icon: Icon, title, description }: FeatureCardProps) => {
+  const cardRef = useRef<HTMLDivElement>(null)
   
   useEffect(() => {
     const card = cardRef.current
     if (!card) return
     
-    const handleMouseMove = (e) => {
+    const handleMouseMove = (e: MouseEvent) => {
       const rect = card.getBoundingClientRect()
       const x = ((e.clientX - rect.left) / rect.width) * 100
       const y = ((e.clientY - rect.top) / rect.height) * 100
@@ -22,8 +31,9 @@ const FeatureCard = ({ icon: Icon, title, description }) => {
       card.style.setProperty('--y', `${y}%`)
     }
     
-    card.addEventListener('mousemove', handleMouseMove)
-    return () => card.removeEventListener('mousemove', handleMouseMove)
+    const mouseMoveHandler = (e: MouseEvent) => handleMouseMove(e as unknown as MouseEvent<HTMLDivElement>)
+    card.addEventListener('mousemove', mouseMoveHandler as EventListener)
+    return () => card.removeEventListener('mousemove', mouseMoveHandler as EventListener)
   }, [])
   
   return (
@@ -63,7 +73,7 @@ const LandingPage = () => {
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Vector Shapes Background - Only in hero section */}
-      <div className="vector-shapes" style={{ height: '100vh', pointerEvents: 'none' }}>
+      <div className={`${styles.vectorShapes} vector-shapes`}>
         <div className="vector-circle"></div>
         <div className="vector-square"></div>
         <div className="vector-hexagon"></div>
@@ -71,14 +81,7 @@ const LandingPage = () => {
       </div>
       
       {/* Hero Section */}
-      <section className="relative pt-24 pb-32 overflow-hidden bg-gradient" style={{
-        '--gradient-from': 'rgb(240, 253, 244)',
-        '--gradient-via': 'rgb(255, 255, 255)',
-        '--gradient-to': 'rgb(240, 253, 244)',
-        '--dark-gradient-from': 'rgb(17, 24, 39)',
-        '--dark-gradient-via': 'rgb(31, 41, 55)',
-        '--dark-gradient-to': 'rgb(17, 24, 39)',
-      }}>
+      <section className={`relative pt-24 pb-32 overflow-hidden bg-gradient ${styles.heroGradient}`}>
         <div className="absolute inset-0 z-0 opacity-30 dark:opacity-20">
           <div className="absolute right-0 top-0 w-80 h-80 bg-green-300 dark:bg-green-700 rounded-full filter blur-3xl -translate-y-1/2 translate-x-1/4"></div>
           <div className="absolute left-0 bottom-0 w-80 h-80 bg-green-200 dark:bg-green-800 rounded-full filter blur-3xl translate-y-1/2 -translate-x-1/4"></div>
@@ -244,14 +247,7 @@ const LandingPage = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient relative z-10" style={{
-        '--gradient-from': 'rgb(18, 140, 126)',
-        '--gradient-via': 'rgb(37, 211, 102)',
-        '--gradient-to': 'rgb(18, 140, 126)',
-        '--dark-gradient-from': 'rgb(18, 140, 126)',
-        '--dark-gradient-via': 'rgb(37, 211, 102)',
-        '--dark-gradient-to': 'rgb(18, 140, 126)',
-      }}>
+      <section className={`py-20 bg-gradient relative z-10 ${styles.ctaGradient}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold sm:text-4xl text-white text-shadow">
             Ready to understand your conversations better?

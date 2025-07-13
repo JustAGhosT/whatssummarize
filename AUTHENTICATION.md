@@ -17,7 +17,7 @@ This document outlines the authentication system implemented in the WhatsApp Sum
 
 Create a `.env.local` file in the root directory with the following variables:
 
-```
+```env
 NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 NEXT_PUBLIC_APP_NAME=whatssummarize
@@ -28,7 +28,7 @@ NEXT_PUBLIC_APP_NAME=whatssummarize
 1. Create a new project in Supabase
 2. Enable Email/Password authentication in Authentication > Providers
 3. Configure Google and GitHub OAuth providers if needed
-4. Update the site URL in Authentication > URL Configuration to include your local development URL (e.g., http://localhost:3000)
+4. Update the site URL in Authentication > URL Configuration to include your local development URL (e.g., `http://localhost:3000`)
 5. Add the following redirect URLs to your Supabase project:
    - `http://localhost:3000/auth/callback`
    - `http://localhost:3000/auth/callback?next=/`

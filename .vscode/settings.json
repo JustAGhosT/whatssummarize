@@ -5,5 +5,22 @@
   "css.customData": [".vscode/css_custom_data.json"],
   "files.associations": {
     "*.css": "tailwindcss"
-  }
+  },
+  "cSpell.words": [
+    "Akismet",
+    "cmdk",
+    "commercetools",
+    "Contentful",
+    "Eleventy",
+    "embla",
+    "KHTML",
+    "moodboard",
+    "qrcode",
+    "retryable",
+    "signup",
+    "sonner",
+    "supabase",
+    "vaul",
+    "whatssummarize"
+  ]
 }

@@ -2,7 +2,8 @@
 
 import * as React from "react"
 import * as SelectPrimitive from "@radix-ui/react-select"
-import { Check, ChevronDown, ChevronUp } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
+import { Check, ChevronDown, ChevronUp, Loader2 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
@@ -14,8 +15,10 @@ const SelectValue = SelectPrimitive.Value
 
 const SelectTrigger = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Trigger>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>
->(({ className, children, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger> & {
+    isLoading?: boolean
+  }
+>(({ className, children, isLoading, ...props }, ref) => (
   <SelectPrimitive.Trigger
     ref={ref}
     className={cn(
@@ -24,7 +27,11 @@ const SelectTrigger = React.forwardRef<
     )}
     {...props}
   >
-    {children}
+    {isLoading ? (
+      <Loader2 className="h-4 w-4 animate-spin" />
+    ) : (
+      children
+    )}
     <SelectPrimitive.Icon asChild>
       <ChevronDown className="h-4 w-4 opacity-50" />
     </SelectPrimitive.Icon>
@@ -69,34 +76,66 @@ SelectScrollDownButton.displayName =
 
 const SelectContent = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content>
->(({ className, children, position = "popper", ...props }, ref) => (
-  <SelectPrimitive.Portal>
-    <SelectPrimitive.Content
-      ref={ref}
-      className={cn(
-        "relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
-        position === "popper" &&
-          "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
-        className
-      )}
-      position={position}
-      {...props}
-    >
-      <SelectScrollUpButton />
-      <SelectPrimitive.Viewport
-        className={cn(
-          "p-1",
-          position === "popper" &&
-            "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]"
-        )}
-      >
-        {children}
-      </SelectPrimitive.Viewport>
-      <SelectScrollDownButton />
-    </SelectPrimitive.Content>
-  </SelectPrimitive.Portal>
-))
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Content> & {
+    animationType?: 'fade' | 'slide' | 'scale'
+  }
+>(({ className, children, position = "popper", animationType = 'fade', ...props }, ref) => {
+  const animationVariants = {
+    fade: {
+      initial: { opacity: 0, y: 5 },
+      animate: { opacity: 1, y: 0 },
+      exit: { opacity: 0, y: -5 },
+    },
+    slide: {
+      initial: { x: -10, opacity: 0 },
+      animate: { x: 0, opacity: 1 },
+      exit: { x: 10, opacity: 0 },
+    },
+    scale: {
+      initial: { scale: 0.95, opacity: 0 },
+      animate: { scale: 1, opacity: 1 },
+      exit: { scale: 0.95, opacity: 0 },
+    },
+  }[animationType]
+
+  return (
+    <SelectPrimitive.Portal>
+      <AnimatePresence>
+        <motion.div
+          initial="initial"
+          animate="animate"
+          exit="exit"
+          variants={animationVariants}
+          transition={{ duration: 0.2 }}
+        >
+          <SelectPrimitive.Content
+            ref={ref}
+            className={cn(
+              "relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+              position === "popper" &&
+                "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
+              className
+            )}
+            position={position}
+            {...props}
+          >
+            <SelectScrollUpButton />
+            <SelectPrimitive.Viewport
+              className={cn(
+                "p-1",
+                position === "popper" &&
+                  "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]"
+              )}
+            >
+              {children}
+            </SelectPrimitive.Viewport>
+            <SelectScrollDownButton />
+          </SelectPrimitive.Content>
+        </motion.div>
+      </AnimatePresence>
+    </SelectPrimitive.Portal>
+  )
+})
 SelectContent.displayName = SelectPrimitive.Content.displayName
 
 const SelectLabel = React.forwardRef<
@@ -145,6 +184,83 @@ const SelectSeparator = React.forwardRef<
   />
 ))
 SelectSeparator.displayName = SelectPrimitive.Separator.displayName
+
+export interface SelectItemType {
+  value: string
+  label: string
+  disabled?: boolean
+}
+
+export interface EnhancedSelectProps {
+  isLoading?: boolean
+  loadingText?: string
+  items: SelectItemType[]
+  label?: string
+  placeholder?: string
+  error?: string
+  animationType?: 'fade' | 'slide' | 'scale'
+  value?: string
+  onValueChange?: (value: string) => void
+  defaultValue?: string
+  className?: string
+  disabled?: boolean
+}
+
+export const EnhancedSelect = ({
+  isLoading = false,
+  loadingText = 'Loading...',
+  items = [],
+  label,
+  placeholder = 'Select an option',
+  error,
+  animationType = 'fade',
+  value,
+  onValueChange,
+  defaultValue,
+  className,
+  disabled = false,
+  ...props
+}: EnhancedSelectProps) => {
+  return (
+    <div className={cn("grid w-full items-center gap-1.5", className)}>
+      {label && (
+        <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+          {label}
+        </label>
+      )}
+      
+      <Select
+        value={value}
+        onValueChange={onValueChange}
+        defaultValue={defaultValue}
+        disabled={disabled || isLoading}
+        {...props}
+      >
+        <SelectTrigger className="w-full" isLoading={isLoading}>
+          <SelectValue placeholder={isLoading ? loadingText : placeholder} />
+        </SelectTrigger>
+        
+        <SelectContent animationType={animationType}>
+          {items.map((item) => (
+            <SelectItem
+              key={item.value}
+              value={item.value}
+              disabled={item.disabled}
+            >
+              {item.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      
+      {error && (
+        <p className="text-sm text-destructive" role="alert">
+          {error}
+        </p>
+      )}
+    </div>
+  )
+}
 
 export {
   Select,
