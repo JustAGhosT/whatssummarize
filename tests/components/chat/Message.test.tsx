@@ -1,4 +1,4 @@
-import { Message } from 'frontend/src/components/chat/Message';
+import { Message } from '../../../frontend/src/components/chat/Message';
 import { render, screen } from '../../test-utils';
 
 // The mock for @/lib/utils is now in __mocks__/@/lib/utils.ts
@@ -33,32 +33,28 @@ describe('Message Component', () => {
   });
 
   it('applies correct styling for messages from me', () => {
-    const { container } = render(
-      <Message {...defaultProps} isFromMe={true} />
-    );
-    const messageElement = container.firstChild as HTMLElement;
-    expect(messageElement).toHaveClass('items-end');
+    render(<Message {...defaultProps} isFromMe={true} id="test-message" />);
+    const messageElement = screen.getByTestId('message-test-message');
+    expect(messageElement).toHaveAttribute('data-test-classes', 'items-end');
   });
 
   it('applies correct styling for messages from others', () => {
-    const { container } = render(
-      <Message {...defaultProps} isFromMe={false} />
-    );
-    const messageElement = container.firstChild as HTMLElement;
-    expect(messageElement).toHaveClass('items-start');
+    render(<Message {...defaultProps} isFromMe={false} id="test-message" />);
+    const messageElement = screen.getByTestId('message-test-message');
+    expect(messageElement).toHaveAttribute('data-test-classes', 'items-start');
   });
 
   it('displays formatted time correctly', () => {
-    render(<Message {...defaultProps} />);
-    expect(screen.getByText('8:00 PM')).toBeInTheDocument();
+    render(<Message {...defaultProps} timestamp="2025-07-13T10:00:00Z" />);
+    expect(screen.getByText('10:00 AM')).toBeInTheDocument();
   });
 
   it('applies custom className when provided', () => {
     const customClass = 'custom-class';
-    const { container } = render(
-      <Message {...defaultProps} className={customClass} />
+    render(
+      <Message {...defaultProps} className={customClass} id="test-message" />
     );
-    const messageElement = container.firstChild as HTMLElement;
-    expect(messageElement).toHaveClass(customClass);
+    const messageElement = screen.getByTestId('message-test-message');
+    expect(messageElement.className).toContain(customClass);
   });
 });

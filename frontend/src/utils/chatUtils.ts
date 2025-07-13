@@ -1,4 +1,8 @@
-import { format, parseISO, isToday, isYesterday, isThisWeek } from 'date-fns';
+import { format } from 'date-fns/format';
+import { parseISO } from 'date-fns/parseISO';
+import { isToday } from 'date-fns/isToday';
+import { isYesterday } from 'date-fns/isYesterday';
+import { isThisWeek } from 'date-fns/isThisWeek';
 
 export interface ChatMessage {
   id: string;

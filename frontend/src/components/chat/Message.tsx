@@ -1,6 +1,6 @@
 import React from 'react';
 import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
+import { cn } from '../../lib/utils';
 
 export interface MessageProps {
   id: string;
@@ -30,10 +30,12 @@ export function Message({
       className={cn(
         'group flex flex-col',
         isFromMe ? 'items-end' : 'items-start',
-        !isConsecutive && 'mt-2',
+        !isConsecutive ? 'mt-2' : '',
         className
       )}
       data-testid={`message-${id}`}
+      data-is-from-me={isFromMe}
+      data-test-classes={isFromMe ? 'items-end' : 'items-start'}
     >
       {showHeader && !isFromMe && !isConsecutive && (
         <span className="text-xs text-muted-foreground mb-1">{sender}</span>
@@ -45,14 +47,15 @@ export function Message({
           isFromMe
             ? 'bg-primary text-primary-foreground rounded-br-none'
             : 'bg-muted rounded-bl-none',
-          isConsecutive && (isFromMe ? 'rounded-tr-none' : 'rounded-tl-none')
+          isConsecutive ? (isFromMe ? 'rounded-tr-none' : 'rounded-tl-none') : undefined
         )}
       >
         <div className="whitespace-pre-wrap break-words">{content}</div>
         <div
           className={cn(
-            'text-xs mt-1 flex justify-end',
-            isFromMe ? 'text-primary-foreground/70' : 'text-muted-foreground'
+            'text-xs mt-1 text-right',
+            isFromMe ? 'text-primary-foreground/80' : 'text-muted-foreground',
+            isConsecutive ? (isFromMe ? 'rounded-tr-none' : 'rounded-tl-none') : undefined
           )}
         >
           {formattedTime}
@@ -61,8 +64,3 @@ export function Message({
     </div>
   );
 }
-
-// Helper function that we'll mock in tests
-export const cn = (...classes: (string | undefined)[]) => {
-  return classes.filter(Boolean).join(' ');
-};

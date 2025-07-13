@@ -1,43 +1,52 @@
-import * as dateFns from 'date-fns';
 import { formatChatMessages, formatMessageDate } from '../../frontend/src/utils/chatUtils';
 
-// Mock date-fns functions
-jest.mock('date-fns', () => {
-  const actual = jest.requireActual('date-fns');
-  return {
-    ...actual,
-    format: jest.fn((date, formatStr) => {
-      // Mock format function implementation
-      const dateObj = new Date(date);
-      const dateStr = dateObj.toISOString().split('T')[0];
-      
-      if (formatStr === 'h:mm a') return '10:00 AM';
-      if (formatStr === 'yyyy-MM-dd') return dateStr;
-      if (formatStr === 'EEEE') {
-        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-        return days[dateObj.getDay()];
-      }
-      if (formatStr === 'MMM d, yyyy') {
-        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        return `${months[dateObj.getMonth()]} ${dateObj.getDate()}, ${dateObj.getFullYear()}`;
-      }
-      return actual.format(date, formatStr);
-    }),
-    isToday: jest.fn((date) => {
-      return new Date(date).toISOString().split('T')[0] === '2025-07-13';
-    }),
-    isYesterday: jest.fn((date) => {
-      return new Date(date).toISOString().split('T')[0] === '2025-07-12';
-    }),
-    isThisWeek: jest.fn((date) => {
-      const testDate = new Date(date);
-      const today = new Date('2025-07-13T12:00:00Z');
-      const weekAgo = new Date(today);
-      weekAgo.setDate(weekAgo.getDate() - 7);
-      return testDate > weekAgo && testDate < today;
-    }),
-  };
-});
+// Mock date-fns functions individually
+jest.mock('date-fns/format', () => ({
+  __esModule: true,
+  format: jest.fn((date, formatStr) => {
+    const dateObj = new Date(date);
+    const dateStr = dateObj.toISOString().split('T')[0];
+    
+    if (formatStr === 'h:mm a') return '10:00 AM';
+    if (formatStr === 'yyyy-MM-dd') return dateStr;
+    if (formatStr === 'EEEE') {
+      const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      return days[dateObj.getDay()];
+    }
+    if (formatStr === 'MMM d, yyyy') {
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      return `${months[dateObj.getMonth()]} ${dateObj.getDate()}, ${dateObj.getFullYear()}`;
+    }
+    return dateStr;
+  })
+}));
+
+jest.mock('date-fns/isToday', () => ({
+  __esModule: true,
+  isToday: jest.fn((date) => new Date(date).toISOString().split('T')[0] === '2025-07-13')
+}));
+
+jest.mock('date-fns/isYesterday', () => ({
+  __esModule: true,
+  isYesterday: jest.fn((date) => new Date(date).toISOString().split('T')[0] === '2025-07-12')
+}));
+
+jest.mock('date-fns/isThisWeek', () => ({
+  __esModule: true,
+  isThisWeek: jest.fn((date) => {
+    const testDate = new Date(date);
+    const today = new Date('2025-07-13T12:00:00Z');
+    const weekAgo = new Date(today);
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    return testDate > weekAgo && testDate < today;
+  })
+}));
+
+// Mock parseISO since it's used in the implementation
+jest.mock('date-fns/parseISO', () => ({
+  __esModule: true,
+  parseISO: jest.fn((dateString) => new Date(dateString))
+}));
 
 describe('formatChatMessages', () => {
   const baseMessage = {
@@ -48,14 +57,12 @@ describe('formatChatMessages', () => {
     isFromMe: false,
   };
 
-  it('should format a single message correctly', () => {
-    // Mock format to return a specific time string
-    (dateFns.format as jest.Mock).mockImplementation((date, formatStr) => {
-      if (formatStr === 'h:mm a') return '10:00 AM';
-      if (formatStr === 'yyyy-MM-dd') return '2025-07-13';
-      return '';
-    });
+  beforeEach(() => {
+    // Clear all mocks before each test
+    jest.clearAllMocks();
+  });
 
+  it('should format a single message correctly', () => {
     const result = formatChatMessages([baseMessage]);
     
     expect(result).toHaveLength(1);
@@ -82,8 +89,13 @@ describe('formatChatMessages', () => {
   });
 
   it('should show header for new day messages', () => {
+    // Get the format mock
+    const formatModule = require('date-fns/format');
+    const formatSpy = jest.spyOn(formatModule, 'format');
+    
     // Mock format to return different dates for the two messages
-    (dateFns.format as jest.Mock).mockImplementation((date, formatStr) => {
+    formatSpy.mockImplementation((...args: any[]) => {
+      const [date, formatStr] = args;
       const dateObj = new Date(date);
       if (formatStr === 'h:mm a') return '10:00 AM';
       if (formatStr === 'yyyy-MM-dd') {
@@ -127,12 +139,28 @@ describe('formatMessageDate', () => {
   let isYesterdaySpy: jest.SpyInstance;
   let isThisWeekSpy: jest.SpyInstance;
 
+  // Import the mocked modules
+  const formatModule = require('date-fns/format');
+  const isTodayModule = require('date-fns/isToday');
+  const isYesterdayModule = require('date-fns/isYesterday');
+  const isThisWeekModule = require('date-fns/isThisWeek');
+  const parseISOModule = require('date-fns/parseISO');
+
   beforeEach(() => {
     jest.clearAllMocks();
-    formatSpy = jest.spyOn(dateFns, 'format');
-    isTodaySpy = jest.spyOn(dateFns, 'isToday');
-    isYesterdaySpy = jest.spyOn(dateFns, 'isYesterday');
-    isThisWeekSpy = jest.spyOn(dateFns, 'isThisWeek');
+    
+    // Setup spies on the mocked modules
+    formatSpy = jest.spyOn(formatModule, 'format');
+    isTodaySpy = jest.spyOn(isTodayModule, 'isToday');
+    isYesterdaySpy = jest.spyOn(isYesterdayModule, 'isYesterday');
+    isThisWeekSpy = jest.spyOn(isThisWeekModule, 'isThisWeek');
+    
+    // Default mock implementations
+    formatSpy.mockImplementation((date, formatStr) => {
+      if (formatStr === 'EEEE') return 'Wednesday';
+      if (formatStr === 'MMM d, yyyy') return 'Jul 1, 2025';
+      return '';
+    });
   });
 
   it('should return "Today" for today\'s date', () => {
@@ -141,6 +169,7 @@ describe('formatMessageDate', () => {
     
     const result = formatMessageDate(today.toISOString());
     expect(result).toBe('Today');
+    expect(parseISOModule.parseISO).toHaveBeenCalledWith(today.toISOString());
     expect(isTodaySpy).toHaveBeenCalledWith(expect.any(Date));
   });
 
@@ -151,6 +180,7 @@ describe('formatMessageDate', () => {
     
     const result = formatMessageDate(yesterday.toISOString());
     expect(result).toBe('Yesterday');
+    expect(parseISOModule.parseISO).toHaveBeenCalledWith(yesterday.toISOString());
     expect(isYesterdaySpy).toHaveBeenCalledWith(expect.any(Date));
   });
 
@@ -159,10 +189,10 @@ describe('formatMessageDate', () => {
     isTodaySpy.mockReturnValueOnce(false);
     isYesterdaySpy.mockReturnValueOnce(false);
     isThisWeekSpy.mockReturnValueOnce(true);
-    formatSpy.mockReturnValueOnce('Wednesday');
     
     const result = formatMessageDate(wednesday.toISOString());
     expect(result).toBe('Wednesday');
+    expect(parseISOModule.parseISO).toHaveBeenCalledWith(wednesday.toISOString());
     expect(isThisWeekSpy).toHaveBeenCalledWith(expect.any(Date), { weekStartsOn: 1 });
   });
 
@@ -171,10 +201,10 @@ describe('formatMessageDate', () => {
     isTodaySpy.mockReturnValueOnce(false);
     isYesterdaySpy.mockReturnValueOnce(false);
     isThisWeekSpy.mockReturnValueOnce(false);
-    formatSpy.mockReturnValueOnce('Jul 1, 2025');
     
     const result = formatMessageDate(oldDate.toISOString());
     expect(result).toBe('Jul 1, 2025');
+    expect(parseISOModule.parseISO).toHaveBeenCalledWith(oldDate.toISOString());
   });
 
   it('should handle invalid date strings', () => {
