@@ -1,0 +1,30 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "baseUrl": "..",
+    "outDir": "../../dist/tests/__config__",
+    "rootDir": ".",
+    "paths": {
+      "@/*": ["./*"],
+      "@/tests/*": ["./tests/*"]
+    },
+    "typeRoots": [
+      "../../node_modules/@types",
+      "../../frontend/node_modules/@types",
+      "../../types"
+    ],
+    "types": ["node", "jest", "@testing-library/jest-dom"]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "../../jest.config.js",
+    "../../jest.setup.js"
+  ],
+  "exclude": [
+    "node_modules",
+    "**/node_modules/*",
+    "dist"
+  ]
+}

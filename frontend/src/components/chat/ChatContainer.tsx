@@ -1,4 +1,4 @@
-import { formatChatMessages } from 'frontend/src/utils/chatUtils';
+import { formatChatMessages } from '../../utils/chatUtils';
 import { Message, MessageProps } from './Message';
 
 export interface ChatMessage extends Omit<MessageProps, 'isConsecutive' | 'showHeader'> {

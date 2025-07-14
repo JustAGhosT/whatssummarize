@@ -9,7 +9,7 @@ async function globalSetup(config: FullConfig) {
   
   try {
     await page.goto('http://localhost:3001');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('networkidle' as const);
     console.log('Development server is ready!');
   } catch (error) {
     console.error('Failed to connect to development server:', error);

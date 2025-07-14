@@ -46,6 +46,7 @@ yarn-error.log*
 /coverage
 /test-results/
 /playwright-report/
+tests/__results__/
 
 # Local development
 .DS_Store

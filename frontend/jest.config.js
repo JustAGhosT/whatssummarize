@@ -28,6 +28,7 @@ const customJestConfig = {
     '^@/lib/(.*)$': '<rootDir>/frontend/src/lib/$1',
     '^@/utils/(.*)$': '<rootDir>/frontend/src/utils/$1',
     '^@/types/(.*)$': '<rootDir>/frontend/src/types/$1',
+    '^@/tests/(.*)$': '<rootDir>/tests/$1',
     '^@/styles/(.*)$': '<rootDir>/frontend/src/styles/$1',
     '^@/public/(.*)$': '<rootDir>/frontend/public/$1',
     '^@/hooks/(.*)$': '<rootDir>/frontend/src/hooks/$1',
@@ -35,7 +36,6 @@ const customJestConfig = {
     '^@/services/(.*)$': '<rootDir>/frontend/src/services/$1',
     '^@/constants/(.*)$': '<rootDir>/frontend/src/constants/$1',
     '^@/assets/(.*)$': '<rootDir>/frontend/src/assets/$1',
-    '^@/tests/(.*)$': '<rootDir>/tests/$1',
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
   },
   

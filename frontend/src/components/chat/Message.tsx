@@ -34,7 +34,8 @@ export function Message({
         className
       )}
       data-testid={`message-${id}`}
-      data-is-from-me={isFromMe}
+      data-is-from-me={isFromMe ? 'true' : 'false'}
+      data-is-consecutive={String(isConsecutive)}
       data-test-classes={isFromMe ? 'items-end' : 'items-start'}
     >
       {showHeader && !isFromMe && !isConsecutive && (

@@ -1,8 +1,4 @@
-import { format } from 'date-fns/format';
-import { parseISO } from 'date-fns/parseISO';
-import { isToday } from 'date-fns/isToday';
-import { isYesterday } from 'date-fns/isYesterday';
-import { isThisWeek } from 'date-fns/isThisWeek';
+import { format, parseISO, isToday, isYesterday, isThisWeek } from 'date-fns';
 
 export interface ChatMessage {
   id: string;
@@ -34,15 +30,51 @@ export function formatChatMessages(messages: ChatMessage[]): FormattedMessage[] 
       const currentDate = parseISO(message.timestamp);
       const prevDate = prevMessage ? parseISO(prevMessage.timestamp) : null;
       
-      // Check if this is the first message of the day
+      // Check if this is the first message of the day by comparing local dates
       const isNewDay = !prevDate || 
-        format(currentDate, 'yyyy-MM-dd') !== format(prevDate, 'yyyy-MM-dd');
+        currentDate.getDate() !== prevDate.getDate() ||
+        currentDate.getMonth() !== prevDate.getMonth() ||
+        currentDate.getFullYear() !== prevDate.getFullYear();
+        
+      // Debug log for day comparison
+      if (message.id === '1' || message.id === '2') {
+        console.log('Day comparison (local time):', {
+          currentDate: currentDate.toString(),
+          prevDate: prevDate?.toString(),
+          currentLocalDate: `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`,
+          prevLocalDate: prevDate ? `${prevDate.getFullYear()}-${String(prevDate.getMonth() + 1).padStart(2, '0')}-${String(prevDate.getDate()).padStart(2, '0')}` : 'none',
+          isNewDay
+        });
+      }
       
       // Check if this is a consecutive message from the same sender
+      const timeDiff = prevMessage ? new Date(message.timestamp).getTime() - new Date(prevMessage.timestamp).getTime() : 0;
       const isConsecutive = !!prevMessage && 
         prevMessage.sender === message.sender && 
         !isNewDay &&
-        (new Date(message.timestamp).getTime() - new Date(prevMessage.timestamp).getTime()) < 5 * 60 * 1000; // 5 minutes
+        timeDiff < 5 * 60 * 1000; // 5 minutes
+        
+      // Debug logging
+      if (message.id === '3' || message.id === '2') {
+        console.log(`Message ${message.id} debug:`, {
+          prevMessage: prevMessage ? { 
+            id: prevMessage.id, 
+            sender: prevMessage.sender, 
+            timestamp: prevMessage.timestamp,
+            date: prevDate ? format(prevDate, 'yyyy-MM-dd HH:mm:ss') : null
+          } : null,
+          currentMessage: { 
+            id: message.id, 
+            sender: message.sender, 
+            timestamp: message.timestamp,
+            date: format(currentDate, 'yyyy-MM-dd HH:mm:ss')
+          },
+          sameSender: prevMessage ? prevMessage.sender === message.sender : false,
+          isNewDay,
+          timeDiff,
+          isConsecutive
+        });
+      }
 
       // Format the time
       const formattedTime = format(currentDate, 'h:mm a');

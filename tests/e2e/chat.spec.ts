@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { createTestUser, deleteTestUser } from '../helpers/auth';
+import { createTestUser, deleteTestUser } from '../__scripts__/utils/auth';
 
 test.describe('Chat Functionality', () => {
   let testUser: { email: string; password: string };
