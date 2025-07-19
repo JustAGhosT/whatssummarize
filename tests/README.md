@@ -4,7 +4,7 @@ This directory contains all automated tests, test utilities, and configurations 
 
 ## Directory Structure
 
-```
+``` text
 tests/
 ├── e2e/               # End-to-end tests using Playwright
 ├── unit/              # Unit tests for individual components and utilities
@@ -24,6 +24,7 @@ tests/
 ## Running Tests
 
 ### Run All Tests
+
 ```bash
 npm test
 # or
@@ -31,6 +32,7 @@ npm run test:all
 ```
 
 ### Run Specific Test Types
+
 ```bash
 # Unit tests
 npm run test:unit
@@ -116,21 +118,25 @@ The custom test runner (`test-runner.js`) provides a unified way to run all test
 ## Writing Tests
 
 ### Unit Tests
+
 - Test individual functions and pure logic
 - Mock all external dependencies
 - Keep tests fast and focused
 
 ### Component Tests
+
 - Test React components in isolation
 - Use `@testing-library/react`
 - Test user interactions and component output
 
 ### Integration Tests
+
 - Test interactions between components/modules
 - Mock only external services
 - Test data flow and state management
 
 ### E2E Tests
+
 - Test critical user flows
 - Use Page Object Model pattern
 - Run against a real or mocked backend
@@ -138,22 +144,26 @@ The custom test runner (`test-runner.js`) provides a unified way to run all test
 ## Best Practices
 
 ### General
+
 - Follow the Arrange-Act-Assert pattern
 - Test behavior, not implementation
 - Keep tests independent and isolated
 - Use descriptive test names
 
 ### Test Data
+
 - Use factories for test data
 - Keep test data close to tests
 - Use TypeScript types for test data
 
 ### Performance
+
 - Keep tests fast (ideally < 5s for unit tests)
 - Use `test.concurrent` for independent tests
 - Mock expensive operations
 
 ### Maintenance
+
 - Update tests when features change
 - Remove or update flaky tests
 - Document complex test scenarios
@@ -161,6 +171,7 @@ The custom test runner (`test-runner.js`) provides a unified way to run all test
 ## Debugging Tests
 
 ### Jest Debugging
+
 ```bash
 # Run in watch mode with debug output
 npm test -- --watch --verbose
@@ -170,6 +181,7 @@ node --inspect-brk node_modules/.bin/jest --runInBand tests/unit/example.test.ts
 ```
 
 ### Playwright Debugging
+
 ```bash
 # Run in headed mode
 npx playwright test --headed

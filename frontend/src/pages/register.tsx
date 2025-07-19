@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import { useAuth } from '../contexts/AuthContext';
 import { Layout } from '../components/Layout';
 import { Form, Input, Button, Card, Typography, message } from 'antd';
+import type { Rule } from 'antd/es/form';
 import { UserOutlined, MailOutlined, LockOutlined } from '@ant-design/icons';
 import Link from 'next/link';
 
@@ -14,12 +15,14 @@ const RegisterPage: React.FC = () => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (values: {
+  interface RegisterFormValues {
     name: string;
     email: string;
     password: string;
     confirmPassword: string;
-  }) => {
+  }
+
+  const handleSubmit = async (values: any) => {
     if (values.password !== values.confirmPassword) {
       message.error('Passwords do not match!');
       return;
@@ -43,10 +46,10 @@ const RegisterPage: React.FC = () => {
       <div className="auth-container">
         <Card className="auth-card">
           <div className="auth-header">
-            <Title level={2} className="text-center">Create an Account</Title>
-            <Text type="secondary" className="text-center">
+            <Typography.Title level={2} className="text-center">Create an Account</Typography.Title>
+            <Typography.Text type="secondary" className="text-center">
               Join us to get started
-            </Text>
+            </Typography.Text>
           </div>
 
           <Form
@@ -59,8 +62,9 @@ const RegisterPage: React.FC = () => {
               name="name"
               rules={[
                 { required: true, message: 'Please input your name!' },
-                { min: 2, message: 'Name must be at least 2 characters' },
+                { min: 3, message: 'Name must be at least 3 characters' },
               ]}
+              hasFeedback
             >
               <Input
                 prefix={<UserOutlined className="site-form-item-icon" />}
@@ -73,8 +77,9 @@ const RegisterPage: React.FC = () => {
               name="email"
               rules={[
                 { required: true, message: 'Please input your email!' },
-                { type: 'email', message: 'Please enter a valid email' },
-              ]}
+                { type: 'email', message: 'Please enter a valid email!' },
+              ] as Rule[]}
+              hasFeedback
             >
               <Input
                 prefix={<MailOutlined className="site-form-item-icon" />}
@@ -87,8 +92,8 @@ const RegisterPage: React.FC = () => {
               name="password"
               rules={[
                 { required: true, message: 'Please input your password!' },
-                { min: 6, message: 'Password must be at least 6 characters' },
-              ]}
+                { min: 6, message: 'Password must be at least 6 characters long!' },
+              ] as Rule[]}
               hasFeedback
             >
               <Input.Password
@@ -104,18 +109,15 @@ const RegisterPage: React.FC = () => {
               hasFeedback
               rules={[
                 {
-                  required: true,
-                  message: 'Please confirm your password!',
-                },
-                ({ getFieldValue }) => ({
                   validator(_, value) {
-                    if (!value || getFieldValue('password') === value) {
+                    if (!value || form.getFieldValue('password') === value) {
                       return Promise.resolve();
                     }
                     return Promise.reject(new Error('The two passwords do not match!'));
                   },
-                }),
-              ]}
+                },
+                { required: true, message: 'Please confirm your password!' },
+              ] as Rule[]}
             >
               <Input.Password
                 prefix={<LockOutlined className="site-form-item-icon" />}
@@ -129,10 +131,11 @@ const RegisterPage: React.FC = () => {
                 type="primary"
                 htmlType="submit"
                 size="large"
-                block
+                block={true}
                 loading={isLoading}
+                style={{ width: '100%' }}
               >
-                Create Account
+                Register
               </Button>
             </Form.Item>
           </Form>

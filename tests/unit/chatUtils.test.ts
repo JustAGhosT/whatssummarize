@@ -1,4 +1,4 @@
-import { formatChatMessages, formatMessageDate } from '../../frontend/src/utils/chatUtils';
+import { formatChatMessages, formatMessageDate } from '@/utils/chatUtils';
 
 // First, mock all the date-fns modules with jest.mock
 jest.mock('date-fns', () => {

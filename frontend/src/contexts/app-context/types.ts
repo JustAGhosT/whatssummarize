@@ -1,12 +1,24 @@
+import { Platform } from '@/types/contexts';
+
 export interface Summary {
   id: string;
   title: string;
-  date: string;
-  isRead: boolean;
-  messages: number;
-  participants: number | string[];
+  content: string;
+  date: Date;
+  type: string;
+  platform: Platform;
+  groupId: string;
   groupName: string;
-  // Add any other properties that your Summary type should have
+  messageCount: number;
+  participants: string[];
+  tags: string[];
+  isRead: boolean;
+  isArchived: boolean;
+  dateRange: {
+    start: string;
+    end: string;
+    timeZone?: string;
+  };
 }
 
 export interface DashboardStats {

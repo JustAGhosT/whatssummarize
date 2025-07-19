@@ -3,6 +3,7 @@ import { Footer } from "@/components/layouts/footer"
 import { AuthProvider } from "@/contexts/auth-context"
 import { AppProvider } from "@/contexts/app-context"
 import { ThemeProvider } from "@/components/theme-provider"
+import { Toaster } from "@/components/ui/toaster"
 import "./globals.css"
 import { Inter } from "next/font/google"
 
@@ -29,6 +30,7 @@ export default function RootLayout({ children }) {
                 <Header />
                 <main className="flex-grow pt-16">
                   {children}
+                  <Toaster />
                 </main>
                 <Footer />
               </div>

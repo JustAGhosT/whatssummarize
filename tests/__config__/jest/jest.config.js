@@ -1,21 +1,40 @@
 // @ts-check
-const baseConfig = require('../../../jest.config.js');
+const path = require('path');
+
+// Get base config if it exists
+let baseConfig = {};
+try {
+  baseConfig = require('../../../jest.config.js');
+  // If baseConfig is a function, call it
+  if (typeof baseConfig === 'function') {
+    baseConfig = baseConfig();
+  }
+  // If it returns a promise, we'll handle it synchronously for now
+  if (baseConfig && typeof baseConfig.then === 'function') {
+    console.warn('Asynchronous Jest config is not fully supported. Using empty config.');
+    baseConfig = {};
+  }
+} catch (e) {
+  // If base config doesn't exist, use empty object
+  baseConfig = {};
+}
 
 /** @type {import('ts-jest').JestConfigWithTsJest} */
 module.exports = {
   ...baseConfig,
-  // Add test-specific overrides here
+  // Look for test files in the test directory
   testMatch: [
-    '<rootDir>/tests/unit/**/*.test.ts',
-    '<rootDir>/tests/unit/**/*.test.tsx',
+    '**/__tests__/**/*.[jt]s?(x)',
+    '**/?(*.)+(spec|test).[tj]s?(x)',
+    '**/tests/**/*.test.[jt]s?(x)'
   ],
+  
   // Configure test results output
-  outputDirectory: '<rootDir>/tests/__results__/junit',
   testResultsProcessor: 'jest-junit',
   reporters: [
     'default',
     ['jest-junit', {
-      outputDirectory: '<rootDir>/tests/__results__/junit',
+      outputDirectory: path.join(process.cwd(), 'tests', '__results__', 'junit'),
       outputName: 'junit.xml',
       ancestorSeparator: ' › ',
       uniqueOutputName: 'false',
@@ -25,16 +44,37 @@ module.exports = {
   
   // Add any test-specific setup
   setupFilesAfterEnv: [
-    ...(baseConfig.setupFilesAfterEnv || []),
-    '<rootDir>/tests/setupTests.ts',
+    ...(Array.isArray(baseConfig.setupFilesAfterEnv) ? baseConfig.setupFilesAfterEnv : []),
+    path.join(process.cwd(), 'tests', 'setupTests.ts'),
   ],
+  
   // Ensure test files are properly transformed
   transform: {
     '^.+\\.(ts|tsx)$': [
       'ts-jest',
       {
-        tsconfig: '<rootDir>/tests/tsconfig.json',
+        tsconfig: path.join(process.cwd(), 'tsconfig.json'),
       },
     ],
   },
+  
+  // Module name mapper for path aliases
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/frontend/src/$1',
+    '^@/tests/(.*)$': '<rootDir>/tests/$1',
+  },
+  
+  // Test environment
+  testEnvironment: 'jsdom',
+  
+  // Coverage configuration
+  collectCoverage: false,
+  coverageDirectory: path.join(process.cwd(), 'tests', '__results__', 'coverage'),
+  coverageReporters: ['json', 'lcov', 'text', 'clover'],
+  
+  // Watch plugins
+  watchPlugins: [
+    'jest-watch-typeahead/filename',
+    'jest-watch-typeahead/testname',
+  ],
 };

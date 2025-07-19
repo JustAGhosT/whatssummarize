@@ -3,11 +3,11 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import { json, urlencoded } from 'body-parser';
-import { AppDataSource } from './config/database';
-import { initializeDatabase } from './config/database';
-import authRoutes from './api/auth.routes';
-import groupRoutes from './api/group.routes';
-import { logger } from './utils/logger';
+import { initializeDatabase } from './config/database.js';
+import authRoutes from './routes/auth.routes.js';
+import groupRoutes from './routes/group.routes.js';
+import chatExportRoutes from './routes/chat-export.routes.js';
+import { logger } from './utils/logger.js';
 
 export const createApp = (): Application => {
   const app = express();
@@ -34,6 +34,7 @@ export const createApp = (): Application => {
   // API Routes
   app.use('/api/auth', authRoutes);
   app.use('/api/groups', groupRoutes);
+  app.use('/api/chat-export', chatExportRoutes);
 
   // 404 handler
   app.use((_req: Request, res: Response) => {

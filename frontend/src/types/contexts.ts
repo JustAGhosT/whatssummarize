@@ -1,6 +1,16 @@
 // Basic types for app context
 export type Platform = 'whatsapp' | 'telegram' | 'signal' | 'discord';
 
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  image?: string;
+  emailVerified?: boolean;
+  role?: string;
+  settings?: Record<string, any>;
+}
+
 export interface Summary {
   id: string;
   title: string;

@@ -1,11 +1,21 @@
-import { io, Socket } from 'socket.io-client';
+import * as io from 'socket.io-client';
 import { apiClient } from '../api/client';
 
-type MessageHandler = (message: any) => void;
-type EventHandler = (data: any) => void;
+type MessageHandler = (message: unknown) => void;
+type EventHandler = (data: unknown) => void;
+
+interface SocketError {
+  message: string;
+  code?: string | number;
+  data?: unknown;
+}
+
+type CustomSocket = SocketIOClient.Socket & {
+  reconnect: () => CustomSocket;
+};
 
 class SocketService {
-  private socket: Socket | null = null;
+  private socket: CustomSocket | null = null;
   private messageHandlers: Map<string, Set<MessageHandler>> = new Map();
   private eventHandlers: Map<string, Set<EventHandler>> = new Map();
   private isConnected = false;
@@ -21,12 +31,22 @@ class SocketService {
     const token = localStorage.getItem('authToken');
     if (!token) return;
 
-    this.socket = io(process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:3001', {
-      auth: { token },
+    this.initializeSocket();
+  }
+
+  private initializeSocket() {
+    const token = localStorage.getItem('authToken');
+    if (!token) return;
+
+    const socket = (io as any).connect(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001', {
+      transports: ['websocket'],
+      query: { token },
       reconnection: true,
       reconnectionAttempts: this.maxReconnectAttempts,
       reconnectionDelay: this.reconnectDelay,
     });
+
+    this.socket = socket as unknown as CustomSocket;
 
     this.setupEventListeners();
   }
@@ -34,28 +54,33 @@ class SocketService {
   private setupEventListeners() {
     if (!this.socket) return;
 
-    this.socket.on('connect', () => {
-      console.log('Connected to WebSocket server');
-      this.isConnected = true;
-      this.reconnectAttempts = 0;
-    });
-
-    this.socket.on('disconnect', (reason) => {
-      console.log('Disconnected from WebSocket server:', reason);
-      this.isConnected = false;
-      this.handleReconnect();
-    });
-
-    this.socket.on('message', (data) => {
-      this.notifyMessageHandlers('message', data);
-    });
-
-    this.socket.on('error', (error) => {
-      console.error('WebSocket error:', error);
-    });
+    this.socket.on('connect', this.handleConnect);
+    this.socket.on('disconnect', this.handleDisconnect);
+    this.socket.on('message', this.handleMessage);
+    this.socket.on('error', this.handleError);
   }
 
-  private handleReconnect() {
+  private handleConnect = () => {
+    console.log('Connected to WebSocket server');
+    this.isConnected = true;
+    this.reconnectAttempts = 0;
+  }
+
+  private handleDisconnect = (reason: string) => {
+    console.log('Disconnected from WebSocket server:', reason);
+    this.isConnected = false;
+    this.handleReconnect();
+  }
+
+  private handleMessage = (data: unknown) => {
+    this.notifyMessageHandlers('message', data);
+  }
+
+  private handleError = (error: SocketError) => {
+    console.error('WebSocket error:', error);
+  }
+
+  private handleReconnect = () => {
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
       this.reconnectAttempts++;
       const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1);
@@ -77,15 +102,15 @@ class SocketService {
   }
 
   // Public methods
-  connect() {
-    if (!this.socket) {
-      this.initialize();
-    } else if (!this.isConnected) {
+  public connect() {
+    if (this.socket) {
       this.socket.connect();
+    } else {
+      this.initializeSocket();
     }
   }
 
-  disconnect() {
+  public disconnect() {
     if (this.socket) {
       this.socket.disconnect();
       this.socket = null;
@@ -93,7 +118,7 @@ class SocketService {
     }
   }
 
-  onMessage(event: string, handler: MessageHandler) {
+  public onMessage(event: string, handler: MessageHandler) {
     if (!this.messageHandlers.has(event)) {
       this.messageHandlers.set(event, new Set());
     }
@@ -105,7 +130,7 @@ class SocketService {
     };
   }
 
-  onEvent(event: string, handler: EventHandler) {
+  public onEvent(event: string, handler: EventHandler) {
     if (!this.eventHandlers.has(event)) {
       this.eventHandlers.set(event, new Set());
       this.socket?.on(event, (data: any) => {
@@ -120,16 +145,14 @@ class SocketService {
     };
   }
 
-  emit(event: string, data: any) {
-    if (this.socket && this.isConnected) {
+  public sendMessage(event: string, data: unknown) {
+    if (this.socket) {
       this.socket.emit(event, data);
-      return true;
     }
-    return false;
   }
 
-  monitorGroup(groupId: string) {
-    return this.emit('monitor_group', { groupId });
+  public monitorGroup(groupId: string) {
+    return this.sendMessage('monitor_group', { groupId });
   }
 }
 

@@ -1,16 +1,46 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn } from 'typeorm';
-import { Group } from './Group';
+import { 
+  Entity, 
+  PrimaryGeneratedColumn, 
+  Column, 
+  ManyToOne, 
+  CreateDateColumn, 
+  UpdateDateColumn,
+  JoinColumn,
+  Index
+} from 'typeorm';
+import type { Relation } from 'typeorm';
+import { Group } from './Group.js';
+import { User } from './User.js';
 
-@Entity()
+export interface MessageMetadata {
+  whatsappMessageId?: string;
+  forwarded?: boolean;
+  replyToMessageId?: string;
+  reactions?: Record<string, string>; // userId -> reaction
+  edited?: boolean;
+  deleted?: boolean;
+  readBy?: string[]; // user IDs who have read the message
+}
+
+@Entity({ name: 'messages' })
+@Index(['groupId', 'createdAt']) // For faster message retrieval by group
+@Index(['senderId']) // For faster message lookup by sender
 export class Message {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column('text')
   content: string;
 
   @Column({ nullable: true })
-  sender: string;
+  senderName: string;
+
+  @ManyToOne(() => User, { onDelete: 'SET NULL', nullable: true })
+  @JoinColumn({ name: 'senderId' })
+  sender: Relation<User>;
+
+  @Column({ nullable: true })
+  senderId?: string;
 
   @Column({ default: false })
   isMedia: boolean;
@@ -18,15 +48,25 @@ export class Message {
   @Column({ nullable: true })
   mediaUrl?: string;
 
-  @Column({ type: 'json', nullable: true })
-  metadata?: Record<string, any>;
+  @Column({ type: 'jsonb', nullable: true })
+  metadata?: MessageMetadata;
 
-  @ManyToOne(() => Group, group => group.messages, { onDelete: 'CASCADE' })
-  group: Group;
+  @ManyToOne(() => Group, group => group.messages, { 
+    onDelete: 'CASCADE',
+    nullable: false
+  })
+  @JoinColumn({ name: 'groupId' })
+  group: Relation<Group>;
 
-  @CreateDateColumn()
+  @Column({ type: 'uuid' })
+  groupId: string;
+
+  @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
+
+  @Column({ type: 'timestamp', nullable: true })
+  deletedAt?: Date;
 }

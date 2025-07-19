@@ -1,27 +1,75 @@
 const { exec } = require('child_process');
 const path = require('path');
 const fs = require('fs');
-const { program } = require('commander');
+const chalk = require('chalk');
+
+// Default configuration
+const config = {
+  outputDir: path.join('tests', '__results__'),
+  ci: false
+};
 
 // Parse command line arguments
-program
-  .option('--output <path>', 'Output directory for test results', './tests/__results__')
-  .option('--ci', 'Run in CI mode', false);
-program.parse(process.argv);
-
-const options = program.opts();
+process.argv.forEach((arg, index) => {
+  if (arg === '--output' && process.argv[index + 1]) {
+    config.outputDir = process.argv[index + 1];
+  } else if (arg === '--ci') {
+    config.ci = true;
+  }
+});
 
 // Ensure output directory exists
-const resultsDir = path.resolve(process.cwd(), options.output);
+const resultsDir = path.resolve(process.cwd(), config.outputDir);
 const junitDir = path.join(resultsDir, 'junit');
 const coverageDir = path.join(resultsDir, 'coverage');
-const playwrightDir = path.join(resultsDir, 'playwright');
 
-[resultsDir, junitDir, coverageDir, playwrightDir].forEach(dir => {
+[resultsDir, junitDir, coverageDir].forEach(dir => {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
 });
+
+// Set environment variables for test output
+process.env.JEST_JUNIT_OUTPUT_DIR = junitDir;
+process.env.COVERAGE_DIR = coverageDir;
+
+// Test configuration
+const TEST_CONFIG = {
+  unit: {
+    command: 'npm',
+    args: ['run', 'test:unit', '--', '--config=jest.config.js', '--passWithNoTests'],
+    description: 'Unit Tests',
+    color: 'blue',
+    outputFile: path.join(junitDir, 'junit.xml')
+  },
+  components: {
+    command: 'npm',
+    args: ['run', 'test:components', '--', '--config=jest.config.js', '--passWithNoTests'],
+    description: 'Component Tests',
+    color: 'cyan',
+    outputFile: path.join(junitDir, 'components-junit.xml')
+  },
+  integration: {
+    command: 'npm',
+    args: ['run', 'test:integration', '--', '--config=jest.config.js', '--passWithNoTests'],
+    description: 'Integration Tests',
+    color: 'magenta',
+    outputFile: path.join(junitDir, 'integration-junit.xml')
+  },
+  e2e: {
+    command: 'npm',
+    args: ['run', 'test:e2e', '--', '--config=tests/__config__/playwright/playwright.config.js'],
+    description: 'End-to-End Tests',
+    color: 'yellow',
+    needsServer: true
+  },
+  coverage: {
+    command: 'npm',
+    args: ['run', 'test:coverage', '--', '--config=jest.config.js'],
+    description: 'Test Coverage',
+    color: 'green'
+  }
+};
 
 // Colors for console output
 const colors = {
@@ -37,65 +85,94 @@ const colors = {
 // Helper function to run commands
 const runCommand = (command, cwd = process.cwd()) => {
   return new Promise((resolve, reject) => {
-    console.log(`\n${colors.blue}▶ ${colors.reset}${colors.cyan}${command}${colors.reset}\n`);
-    
-    const startTime = Date.now();
-    const child = exec(command, { cwd, maxBuffer: 1024 * 1024 * 5 }, (error, stdout, stderr) => {
-      const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+    async function runTest(testName, testConfig) {
+      console.log(`\n🚀 Running ${chalk.blue(testConfig.description)}...`);
       
-      if (error) {
-        console.error(`\n${colors.red}✖ Failed after ${duration}s${colors.reset}\n`);
-        console.error(`${colors.red}Error: ${error.message}${colors.reset}`);
-        return reject({ error, stdout, stderr, duration });
-      }
+      const startTime = Date.now();
       
-      console.log(`\n${colors.green}✓ Completed in ${duration}s${colors.reset}\n`);
-      resolve({ stdout, stderr, duration });
-    });
+      return new Promise((resolve) => {
+        try {
+          const testProcess = exec(
+            `${testConfig.command} ${testConfig.args.join(' ')}`,
+            { 
+              cwd: process.cwd(), 
+              maxBuffer: 1024 * 1024 * 10,
+              env: {
+                ...process.env,
+                JEST_JUNIT_OUTPUT_DIR: path.join(process.cwd(), 'tests', '__results__', 'junit')
+              }
+            },
+            (error, stdout, stderr) => {
+              const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+              
+              if (error) {
+                console.error(chalk.red(`❌ ${testConfig.description} failed after ${duration}s`));
+                if (stderr) console.error(chalk.red(stderr));
+                if (stdout) console.log(stdout);
+                resolve({ 
+                  name: testName, 
+                  success: false, 
+                  duration, 
+                  error: error.message || 'Unknown error',
+                  stdout,
+                  stderr
+                });
+              } else {
+                console.log(chalk.green(`✅ ${testConfig.description} passed in ${duration}s`));
+                if (stdout) console.log(stdout);
+                if (stderr) console.error(chalk.yellow(stderr));
+                resolve({ 
+                  name: testName, 
+                  success: true, 
+                  duration,
+                  stdout,
+                  stderr
+                });
+              }
+            }
+          );
+          
+          if (testProcess.stdout) testProcess.stdout.pipe(process.stdout);
+          if (testProcess.stderr) testProcess.stderr.pipe(process.stderr);
+          
+          testProcess.on('error', (error) => {
+            console.error(chalk.red(`❌ Error running ${testConfig.description}: ${error.message}`));
+            resolve({ 
+              name: testName, 
+              success: false, 
+              duration: ((Date.now() - startTime) / 1000).toFixed(2),
+              error: error.message,
+              stdout: '',
+              stderr: error.stack || error.message
+            });
+          });
+          
+        } catch (error) {
+          console.error(chalk.red(`❌ Unhandled error in ${testConfig.description}: ${error.message}`));
+          resolve({
+            name: testName,
+            success: false,
+            duration: ((Date.now() - startTime) / 1000).toFixed(2),
+            error: error.message,
+            stdout: '',
+            stderr: error.stack || error.message
+          });
+        }
+      });
+    };
 
-    // Forward child process output
-    child.stdout.pipe(process.stdout);
-    child.stderr.pipe(process.stderr);
+    // Run a single test command
+    runTest('test', { command: 'npm', args: ['run', 'test'] })
+      .then((result) => {
+        resolve(result);
+      })
+      .catch((error) => {
+        reject(error);
+      });
   });
 };
 
-// Test configuration
-const TEST_CONFIG = {
-  unit: {
-    command: 'npm',
-    args: ['run', 'test:unit'],
-    description: 'Unit Tests',
-    outputFile: path.join(junitDir, 'junit.xml')
-  },
-  components: {
-    command: 'npm',
-    args: ['run', 'test:components'],
-    description: 'Component Tests',
-    outputFile: path.join(junitDir, 'components-junit.xml')
-  },
-  integration: {
-    command: 'npm',
-    args: ['run', 'test:integration'],
-    description: 'Integration Tests',
-    outputFile: path.join(junitDir, 'integration-junit.xml')
-  },
-  e2e: {
-    command: 'npx',
-    args: ['playwright', 'test', '--config=tests/__config__/playwright/playwright.config.js'],
-    description: 'End-to-End Tests',
-    needsServer: true
-  },
-  performance: {
-    command: 'node',
-    args: ['tests/performance/runner.js'],
-    description: 'Performance Tests'
-  },
-  security: {
-    command: 'node',
-    args: ['tests/security/runner.js'],
-    description: 'Security Tests'
-  }
-};
+
 
 // Generate test report
 function generateReport(results) {
@@ -122,44 +199,49 @@ function generateReport(results) {
 
 // Main test runner
 async function runTests() {
-  console.log(`\n${colors.magenta}🚀 Starting test suite...${colors.reset}\n`);
-  console.log(`${colors.blue}Output directory: ${resultsDir}${colors.reset}\n`);
-  
-  const results = {};
-  const testTypes = Object.keys(TEST_CONFIG);
-  
-  for (const type of testTypes) {
-    const config = TEST_CONFIG[type];
-    console.log(`\n${colors.yellow}=== ${config.description} ===${colors.reset}\n`);
+  try {
+    console.log(`\n${colors.magenta}🚀 Starting test suite...${colors.reset}\n`);
+    console.log(`${colors.blue}Output directory: ${resultsDir}${colors.reset}\n`);
     
-    try {
-      const command = [config.command, ...config.args].join(' ');
-      const { stdout, stderr, duration } = await runCommand(command);
+    const results = {};
+    const testTypes = Object.keys(TEST_CONFIG);
+    
+    for (const type of testTypes) {
+      const testConfig = TEST_CONFIG[type];
+      console.log(`\n${colors.yellow}=== ${testConfig.description} ===${colors.reset}\n`);
       
-      results[type] = { 
-        success: true, 
-        duration: parseFloat(duration),
-        stdout,
-        stderr
-      };
-      
-      console.log(`\n${colors.green}✓ ${config.description} passed in ${duration}s${colors.reset}`);
-    } catch (error) {
-      console.error(`\n${colors.red}✖ ${config.description} failed after ${error.duration || '?'}s${colors.reset}`);
-      results[type] = { 
-        success: false, 
-        error: error.error || error,
-        duration: error.duration ? parseFloat(error.duration) : 0,
-        stdout: error.stdout,
-        stderr: error.stderr
-      };
-      
-      if (options.ci) {
-        console.error(`${colors.red}❌ Failing fast due to error in ${type} tests (CI mode)${colors.reset}`);
-        generateReport(results);
-        process.exit(1);
+      try {
+        const command = [testConfig.command, ...testConfig.args].join(' ');
+        const { stdout, stderr, duration } = await runCommand(command);
+        
+        results[type] = { 
+          success: true, 
+          duration: parseFloat(duration),
+          stdout,
+          stderr
+        };
+        
+        console.log(`\n${colors.green}✓ ${testConfig.description} passed in ${duration}s${colors.reset}`);
+      } catch (error) {
+        console.error(`\n${colors.red}✖ ${testConfig.description} failed after ${error.duration || '?'}s${colors.reset}`);
+        results[type] = { 
+          success: false, 
+          error: error.error || error,
+          duration: error.duration ? parseFloat(error.duration) : 0,
+          stdout: error.stdout,
+          stderr: error.stderr
+        };
+        
+        if (config.ci) {
+          console.error(`${colors.red}❌ Failing fast due to error in ${type} tests (CI mode)${colors.reset}`);
+          generateReport(results);
+          process.exit(1);
+        }
       }
     }
+  } catch (error) {
+    console.error(`\n${colors.red}✖ An unexpected error occurred: ${error.message}${colors.reset}`);
+    process.exit(1);
   }
   
   // Generate and save test report

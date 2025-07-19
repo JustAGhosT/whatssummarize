@@ -1,5 +1,17 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, BeforeInsert } from 'typeorm';
-import * as bcrypt from 'bcryptjs';
+import { 
+  Entity, 
+  PrimaryGeneratedColumn, 
+  Column, 
+  CreateDateColumn, 
+  UpdateDateColumn, 
+  BeforeInsert, 
+  BeforeUpdate,
+  OneToMany 
+} from 'typeorm';
+import bcrypt from 'bcryptjs';
+import { Group } from './Group.js';
+import { Message } from './Message.js';
+import { Exclude } from 'class-transformer';
 
 export enum UserRole {
   ADMIN = 'admin',
@@ -15,6 +27,7 @@ export class User {
   email: string;
 
   @Column()
+  @Exclude()
   password: string;
 
   @Column({ nullable: true })
@@ -33,18 +46,34 @@ export class User {
   @Column({ nullable: true })
   lastLogin?: Date;
 
-  @CreateDateColumn()
+  @OneToMany(() => Group, group => group.owner)
+  ownedGroups: Group[];
+
+  @OneToMany(() => Message, message => message.sender)
+  messages: Message[];
+
+  @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
 
   @BeforeInsert()
+  @BeforeUpdate()
   async hashPassword() {
-    this.password = await bcrypt.hash(this.password, 10);
+    if (this.password && !this.password.startsWith('$2a$')) {
+      this.password = await bcrypt.hash(this.password, 10);
+    }
   }
 
   async validatePassword(password: string): Promise<boolean> {
+    if (!password || !this.password) return false;
     return bcrypt.compare(password, this.password);
+  }
+
+  toJSON() {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...user } = this;
+    return user;
   }
 }

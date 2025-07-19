@@ -3,24 +3,36 @@
  * @param selector CSS selector for elements to apply the effect to
  */
 export function initMouseTracking(selector: string): void {
-  if (typeof window === 'undefined') return
+  if (typeof window === 'undefined' || typeof document === 'undefined') {
+    return;
+  }
   
   // Check for reduced motion preference
-  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  if (prefersReducedMotion) return
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (prefersReducedMotion) {
+    return;
+  }
   
-  const elements = document.querySelectorAll(selector)
+  const elements = document.querySelectorAll<HTMLElement>(selector);
+  
+  const handleMouseMove = (e: MouseEvent) => {
+    const target = e.currentTarget as HTMLElement;
+    const rect = target.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    
+    target.style.setProperty('--x', `${x}%`);
+    target.style.setProperty('--y', `${y}%`);
+  };
   
   elements.forEach(element => {
-    element.addEventListener('mousemove', (e: MouseEvent) => {
-      const rect = (element as HTMLElement).getBoundingClientRect()
-      const x = ((e.clientX - rect.left) / rect.width) * 100
-      const y = ((e.clientY - rect.top) / rect.height) * 100
-      
-      (element as HTMLElement).style.setProperty('--x', `${x}%`)
-      (element as HTMLElement).style.setProperty('--y', `${y}%`)
-    })
-  })
+    element.addEventListener('mousemove', handleMouseMove as EventListener);
+    
+    // Cleanup function to remove event listener when component unmounts
+    return () => {
+      element.removeEventListener('mousemove', handleMouseMove as EventListener);
+    };
+  });
 }
 
 /**
