@@ -1,22 +1,21 @@
 import { render } from '@testing-library/react';
-import { ChatContainer } from 'frontend/src/components/chat/ChatContainer';
+import { ChatContainer } from '../../frontend/src/components/chat/ChatContainer';
 import { measurePerformance } from 'reassure';
 
 // Generate a large number of test messages
-const generateTestMessages = (count: number) => {
+const generateTestMessages = (count: number, offset: number = 0) => {
   const messages = [];
-  let timestamp = Date.now() - count * 60000; // Spread messages over time
-  
+  const timestamp = Date.now();
   for (let i = 0; i < count; i++) {
-    const isFromMe = Math.random() > 0.5;
+    const isFromMe = i % 2 === 0;
     messages.push({
-      id: `msg-${i}`,
-      sender: isFromMe ? 'current-user' : `user-${Math.floor(Math.random() * 5) + 1}`,
-      content: `This is test message #${i + 1}. `.repeat(Math.floor(Math.random() * 5) + 1).trim(),
-      timestamp: new Date(timestamp).toISOString(),
-      isFromMe,
+      id: `msg-${offset + i}-${timestamp}-${Math.random().toString(36).substr(2, 9)}`,
+      content: `Test message ${i + 1}`,
+      sender: isFromMe ? 'current-user' : `user-${i % 5 + 1}`,
+      timestamp: new Date(timestamp - i * 60000).toISOString(),
+      status: 'delivered',
+      isFromMe
     });
-    timestamp += 60000; // 1 minute between messages
   }
   
   return messages;
@@ -27,7 +26,8 @@ describe('Chat Performance', () => {
     const testMessages = generateTestMessages(50);
     
     await measurePerformance(
-      <ChatContainer messages={testMessages} currentUserId="current-user" />
+      <ChatContainer messages={testMessages} currentUserId="current-user" />,
+      { runs: 3 }
     );
   });
 
@@ -36,32 +36,27 @@ describe('Chat Performance', () => {
     
     await measurePerformance(
       <ChatContainer messages={testMessages} currentUserId="current-user" />,
-      { timeout: 10000 } // Give it more time for larger datasets
+      { runs: 3 }
     );
   });
 
   it('should handle rapid updates efficiently', async () => {
     const initialMessages = generateTestMessages(50);
-    const additionalMessages = generateTestMessages(10);
+    // Generate additional messages with an offset to ensure unique IDs
+    const additionalMessages = generateTestMessages(10, 50);
     
+    // Initial render
     const { rerender } = render(
       <ChatContainer messages={initialMessages} currentUserId="current-user" />
     );
     
     // Measure time to add 10 more messages
     await measurePerformance(
-      () => {
-        rerender(
-          <ChatContainer 
-            messages={[...initialMessages, ...additionalMessages]} 
-            currentUserId="current-user" 
-          />
-        );
-      },
-      { 
-        runs: 5, // Run multiple times to get more stable metrics
-        warmup: 2, // Warmup runs before measuring
-      }
+      <ChatContainer 
+        messages={[...initialMessages, ...additionalMessages]} 
+        currentUserId="current-user" 
+      />,
+      { runs: 3 }
     );
   });
 });

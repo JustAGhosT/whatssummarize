@@ -36,38 +36,39 @@ process.env.COVERAGE_DIR = coverageDir;
 // Test configuration
 const TEST_CONFIG = {
   unit: {
-    command: 'npm',
-    args: ['run', 'test:unit', '--', '--config=jest.config.js', '--passWithNoTests'],
+    command: 'npx',
+    args: ['jest', '--config=jest.config.js', '--passWithNoTests', '--verbose', '--colors', '--testMatch', '**/tests/unit/**/*.test.{ts,tsx}'],
     description: 'Unit Tests',
     color: 'blue',
     outputFile: path.join(junitDir, 'junit.xml')
   },
   components: {
-    command: 'npm',
-    args: ['run', 'test:components', '--', '--config=jest.config.js', '--passWithNoTests'],
+    command: 'npx',
+    args: ['jest', '--config=jest.config.js', '--passWithNoTests', '--verbose', '--colors', '--testMatch', '**/tests/components/**/*.test.{ts,tsx}'],
     description: 'Component Tests',
     color: 'cyan',
     outputFile: path.join(junitDir, 'components-junit.xml')
   },
   integration: {
-    command: 'npm',
-    args: ['run', 'test:integration', '--', '--config=jest.config.js', '--passWithNoTests'],
+    command: 'npx',
+    args: ['jest', '--config=jest.config.js', '--passWithNoTests', '--verbose', '--colors', '--testMatch', '**/tests/integration/**/*.test.{ts,tsx}'],
     description: 'Integration Tests',
     color: 'magenta',
     outputFile: path.join(junitDir, 'integration-junit.xml')
   },
   e2e: {
-    command: 'npm',
-    args: ['run', 'test:e2e', '--', '--config=tests/__config__/playwright/playwright.config.js'],
+    command: 'npx',
+    args: ['playwright', 'test', '--config=playwright.config.ts', '--reporter=list,html', '--output=' + resultsDir],
     description: 'End-to-End Tests',
-    color: 'yellow',
-    needsServer: true
+    color: 'green',
+    outputFile: path.join(junitDir, 'e2e-results')
   },
   coverage: {
-    command: 'npm',
-    args: ['run', 'test:coverage', '--', '--config=jest.config.js'],
+    command: 'npx',
+    args: ['jest', '--config=jest.config.js', '--coverage', '--passWithNoTests', '--coverageReporters=json-summary', '--coverageDirectory=' + coverageDir],
     description: 'Test Coverage',
-    color: 'green'
+    color: 'yellow',
+    outputFile: path.join(coverageDir, 'coverage-summary.json')
   }
 };
 
@@ -83,92 +84,103 @@ const colors = {
 };
 
 // Helper function to run commands
-const runCommand = (command, cwd = process.cwd()) => {
-  return new Promise((resolve, reject) => {
-    async function runTest(testName, testConfig) {
-      console.log(`\n🚀 Running ${chalk.blue(testConfig.description)}...`);
-      
-      const startTime = Date.now();
-      
-      return new Promise((resolve) => {
-        try {
-          const testProcess = exec(
-            `${testConfig.command} ${testConfig.args.join(' ')}`,
-            { 
-              cwd: process.cwd(), 
-              maxBuffer: 1024 * 1024 * 10,
-              env: {
-                ...process.env,
-                JEST_JUNIT_OUTPUT_DIR: path.join(process.cwd(), 'tests', '__results__', 'junit')
-              }
-            },
-            (error, stdout, stderr) => {
-              const duration = ((Date.now() - startTime) / 1000).toFixed(2);
-              
-              if (error) {
-                console.error(chalk.red(`❌ ${testConfig.description} failed after ${duration}s`));
-                if (stderr) console.error(chalk.red(stderr));
-                if (stdout) console.log(stdout);
-                resolve({ 
-                  name: testName, 
-                  success: false, 
-                  duration, 
-                  error: error.message || 'Unknown error',
-                  stdout,
-                  stderr
-                });
-              } else {
-                console.log(chalk.green(`✅ ${testConfig.description} passed in ${duration}s`));
-                if (stdout) console.log(stdout);
-                if (stderr) console.error(chalk.yellow(stderr));
-                resolve({ 
-                  name: testName, 
-                  success: true, 
-                  duration,
-                  stdout,
-                  stderr
-                });
-              }
+const runCommand = (command, cwd = process.cwd(), testConfig = {}) => {
+  return new Promise((resolve) => {
+    const startTime = Date.now();
+    const testName = testConfig.description || 'tests';
+    let output = '';
+    let errorOutput = '';
+    
+    console.log(`\n${chalk.blue('➤')} ${chalk.bold(testName)}`);
+    
+    try {
+      const testProcess = exec(
+        command,
+        { 
+          cwd: cwd, 
+          maxBuffer: 1024 * 1024 * 10,
+          env: {
+            ...process.env,
+            FORCE_COLOR: '1',
+            NODE_ENV: 'test',
+            JEST_JUNIT_OUTPUT_DIR: path.join(process.cwd(), 'tests', '__results__', 'junit')
+          }
+        },
+        (error, stdout, stderr) => {
+          const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+          output = stdout || '';
+          errorOutput = stderr || '';
+          
+          if (error) {
+            console.error(chalk.red(`✖ ${testName} failed after ${duration}s`));
+            if (errorOutput) {
+              console.error(chalk.red('Error Output:'));
+              console.error(chalk.red(errorOutput));
             }
-          );
-          
-          if (testProcess.stdout) testProcess.stdout.pipe(process.stdout);
-          if (testProcess.stderr) testProcess.stderr.pipe(process.stderr);
-          
-          testProcess.on('error', (error) => {
-            console.error(chalk.red(`❌ Error running ${testConfig.description}: ${error.message}`));
+            if (output) {
+              console.log('Output:');
+              console.log(output);
+            }
             resolve({ 
               name: testName, 
               success: false, 
-              duration: ((Date.now() - startTime) / 1000).toFixed(2),
-              error: error.message,
-              stdout: '',
-              stderr: error.stack || error.message
+              duration: parseFloat(duration), 
+              error: error.message || 'Test failed',
+              stdout: output,
+              stderr: errorOutput
             });
-          });
-          
-        } catch (error) {
-          console.error(chalk.red(`❌ Unhandled error in ${testConfig.description}: ${error.message}`));
-          resolve({
-            name: testName,
-            success: false,
-            duration: ((Date.now() - startTime) / 1000).toFixed(2),
-            error: error.message,
-            stdout: '',
-            stderr: error.stack || error.message
-          });
+          } else {
+            console.log(chalk.green(`✓ ${testName} passed in ${duration}s`));
+            if (errorOutput) {
+              console.log(chalk.yellow('Test output:'));
+              console.log(chalk.yellow(errorOutput));
+            }
+            resolve({
+              name: testName,
+              success: true,
+              duration: parseFloat(duration),
+              stdout: output,
+              stderr: errorOutput
+            });
+          }
+        }
+      );
+
+      // Handle process stdout/stderr streams
+      if (testProcess.stdout) {
+        testProcess.stdout.on('data', (data) => {
+          output += data.toString();
+        });
+      }
+      
+      if (testProcess.stderr) {
+        testProcess.stderr.on('data', (data) => {
+          errorOutput += data.toString();
+        });
+      }
+
+      // Handle process exit
+      testProcess.on('exit', (code) => {
+        if (code !== 0 && code !== null) {
+          console.error(chalk.red(`✖ ${testName} process exited with code ${code}`));
         }
       });
-    };
-
-    // Run a single test command
-    runTest('test', { command: 'npm', args: ['run', 'test'] })
-      .then((result) => {
-        resolve(result);
-      })
-      .catch((error) => {
-        reject(error);
+      
+    } catch (error) {
+      const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+      const errorMsg = error.stack || error.message || 'Unknown error';
+      console.error(chalk.red(`✖ Unhandled error in ${testName}:`));
+      console.error(chalk.red(errorMsg));
+      
+      resolve({
+        name: testName,
+        success: false,
+        duration: parseFloat(duration),
+        error: errorMsg,
+        stdout: output,
+        stderr: errorOutput || errorMsg
       });
+    }
   });
 };
 
@@ -199,11 +211,12 @@ function generateReport(results) {
 
 // Main test runner
 async function runTests() {
+  const results = {}; // Initialize results object
+  
   try {
     console.log(`\n${colors.magenta}🚀 Starting test suite...${colors.reset}\n`);
     console.log(`${colors.blue}Output directory: ${resultsDir}${colors.reset}\n`);
     
-    const results = {};
     const testTypes = Object.keys(TEST_CONFIG);
     
     for (const type of testTypes) {
@@ -212,24 +225,25 @@ async function runTests() {
       
       try {
         const command = [testConfig.command, ...testConfig.args].join(' ');
-        const { stdout, stderr, duration } = await runCommand(command);
+        const result = await runCommand(command, process.cwd(), testConfig);
         
         results[type] = { 
-          success: true, 
-          duration: parseFloat(duration),
-          stdout,
-          stderr
+          success: result.success, 
+          duration: result.duration || 0,
+          stdout: result.stdout,
+          stderr: result.stderr,
+          error: result.error
         };
         
-        console.log(`\n${colors.green}✓ ${testConfig.description} passed in ${duration}s${colors.reset}`);
+        console.log(`\n${colors.green}✓ ${testConfig.description} passed in ${result.duration}s${colors.reset}`);
       } catch (error) {
         console.error(`\n${colors.red}✖ ${testConfig.description} failed after ${error.duration || '?'}s${colors.reset}`);
         results[type] = { 
           success: false, 
           error: error.error || error,
           duration: error.duration ? parseFloat(error.duration) : 0,
-          stdout: error.stdout,
-          stderr: error.stderr
+          stdout: error.stdout || '',
+          stderr: error.stderr || error.message || 'Unknown error'
         };
         
         if (config.ci) {
@@ -239,8 +253,22 @@ async function runTests() {
         }
       }
     }
+    
+    // Generate report after all tests are done
+    generateReport(results);
+    
+    // Check if any tests failed
+    const failedTests = Object.values(results).filter(r => !r.success);
+    if (failedTests.length > 0) {
+      console.error(`\n${colors.red}❌ ${failedTests.length} test suite(s) failed!${colors.reset}`);
+      process.exit(1);
+    }
+    
+    console.log(`\n${colors.green}✅ All test suites passed!${colors.reset}`);
+    process.exit(0);
   } catch (error) {
     console.error(`\n${colors.red}✖ An unexpected error occurred: ${error.message}${colors.reset}`);
+    console.error(error.stack);
     process.exit(1);
   }
   

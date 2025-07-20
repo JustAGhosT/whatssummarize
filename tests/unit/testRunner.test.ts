@@ -1,17 +1,19 @@
-import { describe, it, expect, vi, beforeEach, afterEach, beforeAll } from 'vitest';
-import type { Mock } from 'vitest';
-import { exec } from 'child_process';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { runCommand, TEST_CONFIG } from '../../tests/test-runner';
 
-// Create a mock for child_process
+// Mock the child_process module
 const mockExec = vi.fn();
 
-// Mock child_process module
-vi.mock('child_process', () => ({
-  exec: mockExec
-}));
+// Use dynamic import for the mock setup
+const setupMocks = async () => {
+  const childProcess = await import('node:child_process');
+  vi.spyOn(childProcess, 'exec').mockImplementation(mockExec);
+};
 
-// Import the test runner after mocking
-import { runCommand, TEST_CONFIG } from '../../tests/test-runner';
+// Setup mocks before tests
+beforeAll(async () => {
+  await setupMocks();
+});
 
 describe('Test Runner', () => {
   let originalConsoleLog: typeof console.log;
@@ -37,37 +39,39 @@ describe('Test Runner', () => {
   });
 
   describe('runCommand', () => {
-    it('should execute a command successfully', async () => {
-      const mockStdout = 'Command output';
-      const mockStderr = '';
+    it('should handle command errors', async () => {
+      const error = new Error('Command failed');
+      const mockStdout = 'Partial output';
+      const mockStderr = 'Error occurred';
       
-      // Mock exec to call the callback with success
-      mockExec.mockImplementation((command, options, callback) => {
-        if (typeof callback === 'function') {
-          callback(null, { stdout: mockStdout, stderr: mockStderr });
-        }
-        return { 
-          stdout: { on: vi.fn() }, 
-          stderr: { on: vi.fn() },
-          on: vi.fn()
-        };
+      // Mock exec to reject with an error
+      mockExec.mockRejectedValueOnce({
+        stdout: mockStdout,
+        stderr: mockStderr,
+        message: error.message
       });
       
-      // Test the runCommand function
-      const result = await runCommand('echo test');
+      const result = await runCommand('fail-command');
       
-      // Verify the command was executed
-      expect(mockExec).toHaveBeenCalledWith(
-        'echo test',
-        expect.any(Object),
-        expect.any(Function)
-      );
+      expect(mockExec).toHaveBeenCalled();
+      expect(result.stdout).toBe(mockStdout);
+      expect(result.stderr).toContain(error.message);
+    });
+    
+    it('should pass options to exec', async () => {
+      const mockStdout = 'Command output';
+      const mockStderr = '';
+      const options = { cwd: '/test/dir' };
       
-      // Verify the result
-      expect(result).toEqual({
+      // Mock exec to resolve successfully
+      mockExec.mockResolvedValueOnce({
         stdout: mockStdout,
         stderr: mockStderr
       });
+      
+      await runCommand('echo test', options);
+      
+      expect(mockExec).toHaveBeenCalledWith('echo test', options);
     });
 
     it('should handle command errors', async () => {
@@ -91,22 +95,12 @@ describe('Test Runner', () => {
     });
   });
 
-  // Add more tests for the test runner's main functionality
-  describe('Test Runner Main', () => {
-    it('should have the correct test configuration', () => {
-      // Check that TEST_CONFIG has all required properties
-      expect(TEST_CONFIG).toHaveProperty('unit');
-      expect(TEST_CONFIG).toHaveProperty('components');
-      expect(TEST_CONFIG).toHaveProperty('integration');
-      expect(TEST_CONFIG).toHaveProperty('e2e');
-      expect(TEST_CONFIG).toHaveProperty('performance');
-      expect(TEST_CONFIG).toHaveProperty('security');
-      
-      // Check the structure of each test type
-      Object.values(TEST_CONFIG).forEach((config) => {
-        expect(config).toHaveProperty('command');
-        expect(config).toHaveProperty('args');
-        expect(config).toHaveProperty('description');
+  describe('TEST_CONFIG', () => {
+    it('should have the correct test command and patterns', () => {
+      expect(TEST_CONFIG).toEqual({
+        testCommand: 'vitest run',
+        testMatch: ['**/*.test.ts', '**/*.spec.ts'],
+        testIgnore: ['**/node_modules/**', '**/dist/**', '**/coverage/**']
       });
     });
   });

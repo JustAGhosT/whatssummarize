@@ -11,15 +11,19 @@ export const TEST_CONFIG = {
 };
 
 export async function runCommand(command: string, options: { cwd?: string } = {}): Promise<{ stdout: string; stderr: string }> {
-  return new Promise((resolve, reject) => {
-    const { exec } = require('child_process');
-    exec(command, { ...options }, (error: any, stdout: string, stderr: string) => {
-      if (error) {
-        return reject({ error, stdout, stderr });
-      }
-      resolve({ stdout, stderr });
-    });
-  });
+  const { exec } = await import('node:child_process');
+  const { promisify } = await import('node:util');
+  const execAsync = promisify(exec);
+  
+  try {
+    const { stdout, stderr } = await execAsync(command, options);
+    return { stdout, stderr };
+  } catch (error: any) {
+    return {
+      stdout: error.stdout || '',
+      stderr: error.stderr || error.message
+    };
+  }
 }
 
 export class CustomTestRunner {

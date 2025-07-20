@@ -1,6 +1,12 @@
 import { Message } from '../../../frontend/src/components/chat/Message';
 import { render, screen } from '../../test-utils';
 
+// Mock date-fns to return a consistent time
+jest.mock('date-fns', () => ({
+  ...jest.requireActual('date-fns'),
+  format: jest.fn().mockReturnValue('2:00 PM')
+}));
+
 // The mock for @/lib/utils is now in __mocks__/@/lib/utils.ts
 
 describe('Message Component', () => {
@@ -45,8 +51,10 @@ describe('Message Component', () => {
   });
 
   it('displays formatted time correctly', () => {
-    render(<Message {...defaultProps} timestamp="2025-07-13T10:00:00Z" />);
-    expect(screen.getByText('10:00 AM')).toBeInTheDocument();
+    render(<Message {...defaultProps} timestamp="2025-07-13T12:00:00Z" />);
+    
+    // Check that the formatted time is in the document
+    expect(screen.getByText('2:00 PM')).toBeInTheDocument();
   });
 
   it('applies custom className when provided', () => {

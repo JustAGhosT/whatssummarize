@@ -36,6 +36,17 @@ export function formatChatMessages(messages: ChatMessage[]): FormattedMessage[] 
         currentDate.getMonth() !== prevDate.getMonth() ||
         currentDate.getFullYear() !== prevDate.getFullYear();
         
+      // Debug log for date comparison
+      if (message.id === '1' || message.id === '2') {
+        console.log(`[${message.id}] Date comparison:`, {
+          currentDate: currentDate.toISOString(),
+          prevDate: prevDate?.toISOString(),
+          currentLocal: `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`,
+          prevLocal: prevDate ? `${prevDate.getFullYear()}-${String(prevDate.getMonth() + 1).padStart(2, '0')}-${String(prevDate.getDate()).padStart(2, '0')}` : 'none',
+          isNewDay
+        });
+      }
+        
       // Debug log for day comparison
       if (message.id === '1' || message.id === '2') {
         console.log('Day comparison (local time):', {
