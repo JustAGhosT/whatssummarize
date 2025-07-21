@@ -68,7 +68,6 @@
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.3.3",
     "@jest/globals": "^29.7.0",
-    "@types/jest-environment-jsdom": "^29.5.7",
     "jest-environment-jsdom": "^29.7.0",
     "jest-junit": "^16.0.0",
     "jest-mock-extended": "^3.0.5",
