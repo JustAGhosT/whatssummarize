@@ -1,41 +1,50 @@
 {
   "compilerOptions": {
-    "target": "es2020",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "noEmit": false,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "module": "commonjs",
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
     "moduleResolution": "node",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
-    "incremental": true,
+    "noEmit": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./frontend/src/*"],
-      "@/tests/*": ["./tests/*"]
+      "@/*": ["./apps/*/src"],
+      "@backend/*": ["./apps/backend/src/*"],
+      "@frontend/*": ["./apps/frontend/src/*"]
     },
     "typeRoots": [
       "./node_modules/@types"
     ],
     "types": [
       "node",
-      "jest"
-    ]
+      "vite/client",
+      "vitest/globals",
+      "@testing-library/jest-dom"
+    ],
+    "lib": [
+      "ES2020",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "composite": true,
+    "jsx": "react-jsx"
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx"
+    "**/*.tsx",
+    "**/*.d.ts",
+    "**/vite.config.ts"
   ],
   "exclude": [
     "node_modules",
-    ".next",
     "dist",
-    "out"
+    "**/dist",
+    "**/node_modules",
+    "**/coverage"
   ]
 }
