@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { cn } from '@/lib/utils';
+import { cn } from '@utils/utils';
 import { MobileNavLinkProps } from '../../types';
 import styles from '../../navigation.module.css';
 

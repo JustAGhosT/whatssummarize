@@ -2,7 +2,7 @@
 
 import { ReactNode, Suspense, useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
-import { PageLoading } from '@/components/ui/loading'
+import { PageLoading } from '@ui/ui/loading'
 import PageWrapper from '@/app/page-wrapper'
 
 type DynamicComponentProps = {

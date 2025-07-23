@@ -11,7 +11,7 @@ import {
   ToastProvider,
   ToastTitle,
   ToastViewport,
-} from '@/components/ui/toast';
+} from '@ui/ui/toast';
 
 const TOAST_LIMIT = 5;
 const TOAST_REMOVE_DELAY = 5000;

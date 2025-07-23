@@ -2,14 +2,14 @@
 
 import dynamic from 'next/dynamic'
 import { Suspense } from 'react'
-import { PageHeader } from '@/components/ui/page-header'
-import { Button } from '@/components/ui/button'
+import { PageHeader } from '@ui/ui/page-header'
+import { Button } from '@ui/ui/button'
 import { Bell, Settings } from 'lucide-react'
-import { LoadingSkeleton } from '@/components/ui/loading-skeleton'
+import { LoadingSkeleton } from '@ui/ui/loading-skeleton'
 
 // Use dynamic import with SSR disabled
 const Notifications = dynamic(
-  () => import('@/components/features/notifications/notifications'),
+  () => import('@ui/features/notifications/notifications'),
   { 
     ssr: false,
     loading: () => <LoadingSkeleton />

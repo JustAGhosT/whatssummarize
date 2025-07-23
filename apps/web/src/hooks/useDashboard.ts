@@ -5,7 +5,7 @@ import {
   calculateDashboardStats, 
   SortOption, 
   SortOrder 
-} from "@/lib/dashboard-utils"
+} from "@utils/dashboard-utils"
 
 export const useDashboard = () => {
   const { 

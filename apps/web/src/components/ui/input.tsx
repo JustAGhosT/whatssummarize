@@ -3,7 +3,7 @@
 import * as React from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Loader2, Search as SearchIcon, X } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { cn } from "@utils/utils"
 
 export interface InputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {}

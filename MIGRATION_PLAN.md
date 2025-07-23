@@ -1,7 +1,8 @@
 # Codebase Reorganization Plan
 
 ## Target Structure
-```
+
+``` text
 project-root/
 ├── apps/
 │   ├── web/           # Frontend application (from frontend/)
@@ -17,6 +18,7 @@ project-root/
 ## Migration Tasks
 
 ### 1. Directory Restructuring
+
 - [x] Rename `frontend/` to `apps/web/`
 - [x] Rename `backend/` to `apps/api/`
 - [x] Create `packages/` directory structure
@@ -25,6 +27,7 @@ project-root/
   - [x] `packages/utils/`
 
 ### 2. Move and Reorganize Code
+
 - [x] Move shared UI components to `packages/ui/`
   - [x] Button component
   - [x] Input component (including SearchInput)
@@ -53,6 +56,7 @@ project-root/
   - [x] Created documentation in README.md
 
 ### 3. Update Configuration Files
+
 - [x] Update `package.json` workspaces
   - [x] Added workspaces configuration for packages and tools
   - [x] Added new scripts for development tasks
@@ -64,16 +68,19 @@ project-root/
 - [ ] Update CI/CD pipelines
 
 ### 4. Testing and Validation
+
 - [ ] Run test suite
 - [ ] Verify build process
 - [ ] Test application functionality
 
 ### 5. Cleanup
+
 - [ ] Remove old directories and files
 - [ ] Update documentation
 - [ ] Commit changes
 
 ## Notes
+
 - All file paths in configuration files will need to be updated to reflect the new structure.
 - Dependencies between packages should be updated to use workspace references.
 - Ensure all team members are aware of the new structure and update their local environments accordingly.

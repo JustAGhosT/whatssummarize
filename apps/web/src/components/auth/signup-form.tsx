@@ -3,12 +3,12 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/auth-context';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Button } from '@ui/ui/button';
+import { Input } from '@ui/ui/input';
+import { Label } from '@ui/ui/label';
 import { Loader2, User, Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
-import { toast } from '@/components/ui/toaster';
-import { cn } from '@/lib/utils';
+import { toast } from '@ui/ui/toaster';
+import { cn } from '@utils/utils';
 import Link from 'next/link';
 
 interface SignupFormProps {

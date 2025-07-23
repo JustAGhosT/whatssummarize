@@ -1,5 +1,5 @@
 "use client"
 
-import { createPage } from "@/lib/page-utils"
+import { createPage } from "@utils/page-utils"
 
-export default createPage(() => import("@/components/features/cross-platform-groups"))
+export default createPage(() => import("@ui/features/cross-platform-groups"))

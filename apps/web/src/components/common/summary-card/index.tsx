@@ -1,6 +1,6 @@
 "use client"
 
-import { ShareModal } from "@/components/common/share-modal"
+import { ShareModal } from "@ui/common/share-modal"
 import { useApp } from "@/contexts/app-context"
 import { useState } from "react"
 import styles from "./summary-card.module.css"

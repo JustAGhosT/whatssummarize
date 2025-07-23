@@ -26,6 +26,7 @@
     "react-hook-form": "^7.54.2",
     "sonner": "^1.7.1",
     "tailwind-merge": "^2.6.0",
+    "tailwindcss-animate": "^1.0.7",
     "zod": "^3.24.1"
   },
   "devDependencies": {
@@ -39,6 +40,7 @@
     "@typescript-eslint/eslint-plugin": "^8.35.1",
     "@typescript-eslint/parser": "^8.35.1",
     "@vitejs/plugin-react": "^4.6.0",
+    "@vitest/coverage-v8": "^1.5.2",
     "autoprefixer": "^10.4.21",
     "eslint": "^9.30.1",
     "eslint-config-prettier": "^9.1.0",
@@ -62,7 +64,6 @@
     "typescript-eslint": "^8.35.1",
     "vite": "^7.0.4",
     "vite-tsconfig-paths": "^4.3.2",
-    "vitest": "^1.5.2",
-    "@vitest/coverage-v8": "^1.5.2"
+    "vitest": "^1.5.2"
   }
 }
