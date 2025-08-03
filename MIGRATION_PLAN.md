@@ -2,9 +2,10 @@
 
 ## Target Structure
 
-``` text
 project-root/
 ├── apps/
+│   ├── frontend/      # Frontend application
+│   ├── backend/       # Backend application  
 │   ├── web/           # Frontend application (from frontend/)
 │   └── api/           # Backend application (from backend/)
 ├── packages/
@@ -13,7 +14,6 @@ project-root/
 │   └── utils/         # Shared utilities
 ├── tools/             # Development tools and scripts
 └── docs/              # Project documentation
-```
 
 ## Migration Tasks
 
