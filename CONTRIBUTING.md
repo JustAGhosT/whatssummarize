@@ -2,6 +2,8 @@
 
 Thank you for your interest in contributing! Here's how you can help:
 
+There is a known buglist, ask for the details.
+
 ## 🛠 Development Setup
 
 1. Fork the repository
