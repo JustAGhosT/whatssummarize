@@ -106,8 +106,8 @@ Currently looking for someone to drive the project over the line. As soon as som
 - [x] WhatsApp Web integration
 - [ ] File upload system with drag-and-drop
 - [ ] WhatsApp export parser (.txt format)
-- [ ] Basic summarization engine
-- [ ] User dashboard with analytics
+- [x] Basic summarization engine
+- [x] User dashboard with analytics
 
 ### Phase 2: Multi-Platform Expansion
 
