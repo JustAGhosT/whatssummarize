@@ -9,33 +9,33 @@ const createJestConfig = nextJest({
 // Custom configuration to be passed to Jest
 const customJestConfig = {
   // The root of your source code
-  rootDir: '../../whatssummarize',
-  roots: ['<rootDir>/frontend/src', '<rootDir>/tests'],
+  rootDir: '../../',
+  roots: ['<rootDir>/apps/web/src', '<rootDir>/tools/test-utils'],
   
   // Test environment
   testEnvironment: 'jsdom',
   
   // Setup files
-  setupFilesAfterEnv: ['<rootDir>/frontend/jest.setup.js'],
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   
   // Module paths
-  moduleDirectories: ['node_modules', '<rootDir>/frontend/node_modules'],
+  moduleDirectories: ['node_modules', '<rootDir>/apps/web/node_modules'],
   
   // Module name mapping - must match your tsconfig.json paths
   moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/frontend/src/$1',
-    '^@/components/(.*)$': '<rootDir>/frontend/src/components/$1',
-    '^@/lib/(.*)$': '<rootDir>/frontend/src/lib/$1',
-    '^@/utils/(.*)$': '<rootDir>/frontend/src/utils/$1',
-    '^@/types/(.*)$': '<rootDir>/frontend/src/types/$1',
-    '^@/tests/(.*)$': '<rootDir>/tests/$1',
-    '^@/styles/(.*)$': '<rootDir>/frontend/src/styles/$1',
-    '^@/public/(.*)$': '<rootDir>/frontend/public/$1',
-    '^@/hooks/(.*)$': '<rootDir>/frontend/src/hooks/$1',
-    '^@/contexts/(.*)$': '<rootDir>/frontend/src/contexts/$1',
-    '^@/services/(.*)$': '<rootDir>/frontend/src/services/$1',
-    '^@/constants/(.*)$': '<rootDir>/frontend/src/constants/$1',
-    '^@/assets/(.*)$': '<rootDir>/frontend/src/assets/$1',
+    '^@/(.*)$': '<rootDir>/apps/web/src/$1',
+    '^@ui/(.*)$': '<rootDir>/packages/ui/src/$1',
+    '^@utils/(.*)$': '<rootDir>/packages/utils/src/$1',
+    '^@config/(.*)$': '<rootDir>/packages/config/src/$1',
+    '^@/types/(.*)$': '<rootDir>/apps/web/src/types/$1',
+    '^@/tests/(.*)$': '<rootDir>/tools/test-utils/$1',
+    '^@/styles/(.*)$': '<rootDir>/apps/web/src/styles/$1',
+    '^@/public/(.*)$': '<rootDir>/apps/web/public/$1',
+    '^@/hooks/(.*)$': '<rootDir>/apps/web/src/hooks/$1',
+    '^@/contexts/(.*)$': '<rootDir>/packages/contexts/src/$1',
+    '^@/services/(.*)$': '<rootDir>/apps/web/src/services/$1',
+    '^@/constants/(.*)$': '<rootDir>/apps/web/src/constants/$1',
+    '^@/assets/(.*)$': '<rootDir>/apps/web/src/assets/$1',
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
   },
   
