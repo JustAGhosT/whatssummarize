@@ -6,8 +6,9 @@ import { fetch } from 'cross-fetch';
 import { server } from './mocks/server';
 
 // Add fetch polyfill for Node.js
-// @ts-ignore
-global.fetch = fetch;
+- // @ts-ignore
+- global.fetch = fetch;
++ (global as any).fetch = fetch;
 
 // Mock global objects
 Object.defineProperty(window, 'matchMedia', {
