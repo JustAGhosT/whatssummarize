@@ -26,7 +26,8 @@ RUN npm ci --only=production
 COPY --from=builder /app/dist ./dist
 
 # Copy required files
-COPY .env.example .env
+# Environment variables should be provided at runtime
+# Either mount a proper .env file or use container environment variables
 
 # Create necessary directories
 RUN mkdir -p ./data ./logs ./uploads
