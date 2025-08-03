@@ -13,7 +13,8 @@ services:
     ports:
       - "3001:3001"
       - "9229:9229" # Node.js debug port
-      - "1080:1080" # MailHog UI
+      - "3001:3001"
+      - "9229:9229" # Node.js debug port
     volumes:
       - .:/app
       - /app/node_modules
