@@ -133,7 +133,7 @@ services:
     networks:
       - app-network
     healthcheck:
-      test: ["CMD", "ls", "/app/data/development.sqlite"]
+      test: ["CMD", "sqlite3", "/app/data/development.sqlite", ".tables"]
       interval: 10s
       timeout: 5s
       retries: 5
