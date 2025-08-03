@@ -1,47 +1,41 @@
 {
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "target": "es5",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "module": "esnext",
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "jsxImportSource": "react",
-    "incremental": true,
+    /* This file is the root of the TypeScript project graph */
+    "composite": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./apps/*/src"],
+      "@web/*": ["./apps/web/src/*"],
+      "@api/*": ["./apps/api/src/*"],
+      "@ui/*": ["./packages/ui/src/*"],
+      "@config/*": ["./packages/config/src/*"],
+      "@utils/*": ["./packages/utils/src/*"],
+      "@test-utils/*": ["./tools/test-utils/src/*"]
     },
+    "typeRoots": [
+      "./node_modules/@types"
+    ],
     "types": [
       "node",
-      "jest",
+      "vite/client",
+      "vitest/globals",
       "@testing-library/jest-dom",
-      "@testing-library/react",
-      "@types/jest",
-      "@types/node",
-      "@types/react",
-      "@types/react-dom"
+      "@testing-library/jest-dom/vitest"
     ]
   },
   "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    "**/*.test.ts",
-    "**/*.test.tsx",
-    "**/*.d.ts",
-    ".next/types/**/*.ts",
-    "src/types/**/*.d.ts"
+    "./apps/**/*",
+    "./packages/**/*",
+    "./tools/**/*",
+    "**/*.d.ts"
   ],
   "exclude": [
-    "node_modules"
+    "**/node_modules",
+    "**/dist",
+    "**/build",
+    "**/.next",
+    "**/.turbo",
+    "**/coverage"
   ]
 }

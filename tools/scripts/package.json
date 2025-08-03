@@ -1,0 +1,33 @@
+{
+  "name": "@whatssummarize/scripts",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Development and maintenance scripts for the project",
+  "type": "module",
+  "bin": {
+    "generate-test-data": "./generators/test-data.js",
+    "organize-tests": "./organize-tests.js",
+    "update-imports": "./update-imports.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@faker-js/faker": "^8.0.0",
+    "commander": "^11.0.0",
+    "fs-extra": "^11.0.0",
+    "inquirer": "^9.0.0",
+    "ora": "^7.0.0"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.0",
+    "@types/glob": "^8.1.0",
+    "@types/inquirer": "^9.0.0",
+    "@types/minimatch": "^6.0.0",
+    "@types/node": "^20.19.9",
+    "chalk": "^5.4.1",
+    "glob": "^10.4.5",
+    "minimatch": "^10.0.3",
+    "typescript": "^5.0.0"
+  }
+}

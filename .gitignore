@@ -1,7 +1,8 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # Dependencies
-/node_modules
+# Ignore all node_modules directories
+**/node_modules/
 /.pnp
 .pnp.*
 
@@ -46,6 +47,10 @@ yarn-error.log*
 /coverage
 /test-results/
 /playwright-report/
+tests/__results__/
+
+# Turborepo
+.turbo/
 
 # Local development
 .DS_Store

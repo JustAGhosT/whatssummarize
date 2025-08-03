@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      target: development
+    container_name: whatssummarize-backend
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - logs:/app/logs
+      - data:/app/data
+      - uploads:/app/uploads
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - DB_TYPE=sqlite
+      - DATABASE_PATH=/app/data/database.sqlite
+      - JWT_SECRET=dev_jwt_secret_change_in_production
+      - LOG_LEVEL=debug
+      - LOG_TO_FILE=true
+      - LOG_DIR=/app/logs
+    networks:
+      - app-network
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    container_name: whatssummarize-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - app-network
+
+  # For production, use a separate database like PostgreSQL
+  # db:
+  #   image: postgres:15-alpine
+  #   container_name: whatssummarize-db
+  #   restart: unless-stopped
+  #   environment:
+  #     POSTGRES_USER: ${DB_USERNAME:-postgres}
+  #     POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+  #     POSTGRES_DB: ${DB_NAME:-whatssummarize}
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   ports:
+  #     - "5432:5432"
+  #   networks:
+  #     - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+  logs:
+  data:
+  uploads:
