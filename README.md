@@ -12,7 +12,7 @@ A comprehensive platform for analyzing and summarizing conversations across mult
 ## 🚀 Current Status: Phase 1 - MVP Development
 
 We're currently in the MVP phase, focusing on core functionality and WhatsApp integration.
-Check out our [roadmap](../docs/ROADMAP.md) below for details on upcoming features and progress.
+Currently loooking for someone to drive the projefct over the line. As soon as someone signs upyoud be able to check out our [roadmap](../docs/ROADMAP.md) below for details on upcoming features and progress.
 
 ## ✨ Features
 
