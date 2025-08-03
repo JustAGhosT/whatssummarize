@@ -49,6 +49,9 @@ yarn-error.log*
 /playwright-report/
 tests/__results__/
 
+# Turborepo
+.turbo/
+
 # Local development
 .DS_Store
 *.pem
