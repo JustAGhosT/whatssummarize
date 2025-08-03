@@ -31,8 +31,7 @@ class ResizeObserverStub {
   disconnect() {}
 }
 
-// @ts-ignore
-window.ResizeObserver = ResizeObserverStub;
+(window as any).ResizeObserver = ResizeObserverStub;
 
 // Start the mock server before all tests
 beforeAll(() => {
