@@ -1,36 +1,23 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from '../contexts/AuthContext';
 import { useGroups } from '../contexts/GroupContext';
 import { Layout } from '../components/Layout';
 import { GroupManager } from '../components/GroupManager';
-import { Card, Row, Col, Statistic, Typography, Spin, Button } from 'antd';
-import { 
-  TeamOutlined, 
-  MessageOutlined, 
-  UserOutlined,
-  PlusOutlined
-} from '@ant-design/icons';
-
-const { Title, Text } = Typography;
+import { Button } from '@whatssummarize/ui';
+import { Card, CardContent, CardHeader, CardTitle } from '@whatssummarize/ui';
+import { TeamIcon, MessageSquareIcon, PlusIcon, Loader2 } from 'lucide-react';
 
 const DashboardPage: React.FC = () => {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const { groups, isLoading: groupsLoading } = useGroups();
   const router = useRouter();
 
-  // Redirect to login if not authenticated
-  useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      router.push('/login?redirect=/dashboard');
-    }
-  }, [isAuthenticated, authLoading, router]);
-
   if (authLoading || !isAuthenticated) {
     return (
       <Layout>
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
-          <Spin size="large" />
+        <div className="flex justify-center items-center h-[80vh]">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
         </div>
       </Layout>
     );
@@ -40,145 +27,81 @@ const DashboardPage: React.FC = () => {
     {
       title: 'Total Groups',
       value: groups.length,
-      icon: <TeamOutlined style={{ fontSize: '24px', color: '#1890ff' }} />,
-      color: '#1890ff',
+      icon: <TeamIcon className="h-6 w-6 text-blue-500" />,
     },
     {
       title: 'Active Groups',
       value: groups.filter(g => g.isActive).length,
-      icon: <MessageOutlined style={{ fontSize: '24px', color: '#52c41a' }} />,
-      color: '#52c41a',
+      icon: <MessageSquareIcon className="h-6 w-6 text-green-500" />,
     },
     {
       title: 'Total Messages',
       value: groups.reduce((sum, group) => sum + (group.messageCount || 0), 0),
-      icon: <MessageOutlined style={{ fontSize: '24px', color: '#722ed1' }} />,
-      color: '#722ed1',
+      icon: <MessageSquareIcon className="h-6 w-6 text-purple-500" />,
     },
   ];
 
   return (
     <Layout>
-      <div className="dashboard-container">
-        <div className="dashboard-header">
+      <div className="container mx-auto p-4 md:p-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
           <div>
-            <Title level={2} style={{ margin: 0 }}>Welcome back, {user?.name || 'User'}</Title>
-            <Text type="secondary">Here's what's happening with your groups</Text>
+            <h1 className="text-3xl font-bold">Welcome back, {user?.name || 'User'}</h1>
+            <p className="text-muted-foreground">Here's what's happening with your groups</p>
           </div>
           <Button 
-            type="primary" 
-            icon={<PlusOutlined />}
+            className="mt-4 md:mt-0"
             onClick={() => router.push('/groups/new')}
           >
-            Add Group
+            <PlusIcon className="mr-2 h-4 w-4" /> Add Group
           </Button>
         </div>
 
-        <Row gutter={[16, 16]} className="stats-row">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mb-6">
           {stats.map((stat, index) => (
-            <Col xs={24} sm={12} lg={8} key={index}>
-              <Card className="stat-card">
-                <Statistic
-                  title={stat.title}
-                  value={stat.value}
-                  prefix={stat.icon}
-                  valueStyle={{ color: stat.color }}
-                />
-              </Card>
-            </Col>
+            <Card key={index}>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
+                {stat.icon}
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{stat.value}</div>
+              </CardContent>
+            </Card>
           ))}
-        </Row>
+        </Grid>
 
-        <Card 
-          title={
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span>Recent Activity</span>
-              <Button type="link" onClick={() => router.push('/groups')}>
+        <Card>
+          <CardHeader>
+            <div className="flex justify-between items-center">
+              <CardTitle>Recent Activity</CardTitle>
+              <Button variant="link" onClick={() => router.push('/groups')}>
                 View All
               </Button>
             </div>
-          }
-          className="activity-card"
-        >
-          {groupsLoading ? (
-            <div style={{ textAlign: 'center', padding: '20px 0' }}>
-              <Spin />
-            </div>
-          ) : groups.length > 0 ? (
-            <GroupManager />
-          ) : (
-            <div className="empty-state">
-              <TeamOutlined style={{ fontSize: '48px', color: '#bfbfbf', marginBottom: '16px' }} />
-              <Title level={4} style={{ color: '#8c8c8c' }}>No groups yet</Title>
-              <Text type="secondary">Get started by adding your first WhatsApp group</Text>
-              <div style={{ marginTop: '16px' }}>
-                <Button 
-                  type="primary" 
-                  icon={<PlusOutlined />}
-                  onClick={() => router.push('/groups/new')}
-                >
-                  Add Group
-                </Button>
+          </CardHeader>
+          <CardContent>
+            {groupsLoading ? (
+              <div className="flex justify-center py-5">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
-            </div>
-          )}
+            ) : groups.length > 0 ? (
+              <GroupManager />
+            ) : (
+              <div className="text-center py-12">
+                <TeamIcon className="mx-auto h-12 w-12 text-gray-400" />
+                <h3 className="mt-2 text-sm font-medium text-gray-900">No groups yet</h3>
+                <p className="mt-1 text-sm text-gray-500">Get started by adding your first WhatsApp group.</p>
+                <div className="mt-6">
+                  <Button onClick={() => router.push('/groups/new')}>
+                    <PlusIcon className="mr-2 h-4 w-4" /> Add Group
+                  </Button>
+                </div>
+              </div>
+            )}
+          </CardContent>
         </Card>
       </div>
-
-      <style jsx>{`
-        .dashboard-container {
-          max-width: 1200px;
-          margin: 0 auto;
-          padding: 0 16px;
-        }
-        
-        .dashboard-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 24px;
-        }
-        
-        .stats-row {
-          margin-bottom: 24px;
-        }
-        
-        .stat-card {
-          height: 100%;
-          border-radius: 8px;
-          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
-          transition: all 0.3s;
-        }
-        
-        .stat-card:hover {
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-          transform: translateY(-2px);
-        }
-        
-        .activity-card {
-          border-radius: 8px;
-          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
-        }
-        
-        .empty-state {
-          padding: 48px 0;
-          text-align: center;
-          background-color: #fafafa;
-          border-radius: 4px;
-        }
-        
-        @media (max-width: 768px) {
-          .dashboard-header {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 16px;
-          }
-          
-          .dashboard-header button {
-            width: 100%;
-          }
-        }
-      `}</style>
     </Layout>
   );
 };
