@@ -19,6 +19,9 @@ jobs:
     # Only run if deployment is enabled
     if: ${{ env.ENABLE_VERCEL_DEPLOYMENT == 'true' }}
     
+    permissions:
+      contents: read
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
