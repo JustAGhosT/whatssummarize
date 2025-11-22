@@ -82,8 +82,6 @@ src/
 
 The easiest way to deploy this application is to use [Vercel](https://vercel.com/), the creators of Next.js.
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/git/external?repository-url=https%3A%2F%2Fgithub.com%2Fyourusername%2Fwhatsapp-group-monitor)
-
 ## Environment Variables
 
 | Variable | Description | Required | Default |
