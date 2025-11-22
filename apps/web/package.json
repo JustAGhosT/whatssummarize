@@ -17,7 +17,6 @@
     "test:update": "jest --config=jest.config.js -u"
   },
   "dependencies": {
-    "@ant-design/icons": "^6.0.0",
     "@whatssummarize/contexts": "workspace:^",
     "@whatssummarize/ui": "workspace:*",
     "antd": "^5.26.5",

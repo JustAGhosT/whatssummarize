@@ -1,38 +1,44 @@
 # Social Media Conversation Summarizer
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FJustAGhosT%2Fwhatssummarize)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat&logo=nextdotjs&logoColor=white)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Coverage](https://img.shields.io/badge/coverage-85%25-brightgreen)](https://github.com/JustAGhosT/whatssummarize/actions)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 
-A comprehensive platform for analyzing and summarizing conversations across multiple messaging platforms including WhatsApp, Telegram, and Discord. Built with Next.js, TypeScript, and a robust backend service.
+A comprehensive platform for analyzing and summarizing conversations across multiple messaging platforms, starting with WhatsApp.
 
-## 🚀 Current Status: Phase 1 - MVP Development
+## 🚀 Overview
 
-We're currently in the MVP phase, focusing on core functionality and WhatsApp integration.
-Currently looking for someone to drive the project over the line. As soon as someone signs up you'd be able to check out our [roadmap](../docs/ROADMAP.md) for details on upcoming features and progress.
+This project aims to provide a centralized dashboard for users to upload, analyze, and receive AI-powered summaries of their chat histories from various messaging platforms. It is built with a modern, scalable, and secure technology stack, designed for a high-quality user experience.
 
 ## ✨ Features
 
-### Core Features (Implemented)
+- **📱 WhatsApp Integration:** Upload and analyze WhatsApp chat exports.
+- **📊 Dashboard & Analytics:** Visualize key statistics about your conversations.
+- **🎨 Modern UI:** A clean, consistent, and responsive user interface.
+- **🔐 Secure Authentication:** User accounts are protected with Supabase Auth.
+- **🚧 Roadmap:** Future plans include multi-platform support (Telegram, Discord), real-time analysis, and more.
 
-- 📱 WhatsApp Web integration with real-time monitoring
-- 📊 Basic chat analytics and message statistics
-- 🔍 Message search functionality
-- 🎨 Dark/Light mode support
-- 📱 Responsive web interface
-- 🔐 Secure Authentication with Supabase Auth
+## 🛠️ Technology Stack & Architecture
 
-### Coming Soon (Phase 1)
+This project is a monorepo managed with `pnpm` and `Turbo`.
 
-- 📤 WhatsApp export file upload
-- 🤖 AI-powered conversation summaries
-- 📅 Message filtering by date range
-- 👥 Contact and group management
+- **Frontend:**
+  - **Framework:** [Next.js](https://nextjs.org/) (App Router)
+  - **Language:** [TypeScript](https://www.typescriptlang.org/)
+  - **UI Components:** A custom, in-house component library built with [Tailwind CSS](https://tailwindcss.com/) and Radix UI primitives, following the `shadcn/ui` methodology.
+  - **Styling:** Tailwind CSS for utility-first styling.
+  - **Icons:** [Lucide React](https://lucide.dev/)
+- **Backend:**
+  - **Platform:** [Supabase](https://supabase.com/)
+  - **Database:** PostgreSQL with Row Level Security (RLS)
+  - **Authentication:** Supabase Auth
+  - **Storage:** Supabase Storage for file uploads.
+- **Testing:**
+  - **Unit/Integration:** [Jest](https://jestjs.io/) & [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/)
+  - **E2E:** [Playwright](https://playwright.dev/)
 
-### Planned Features
+The architecture is designed to be server-centric, leveraging Next.js's server-side rendering capabilities for performance and security. Authentication is handled by server-side middleware to protect user routes.
 
 - 🔄 Multi-platform support (Telegram, Discord)
 - 📧 Email/SMS summary delivery
@@ -64,11 +70,10 @@ The architecture is designed to be server-centric, leveraging Next.js's server-s
 
 ### Prerequisites
 
-- Node.js 18+ (LTS recommended)
-- pnpm 8.x (or npm/yarn)
-- Git 2.25+
-- Chrome/Chromium browser (for Puppeteer)
-- Supabase account (for authentication)
+- Node.js 18+
+- pnpm 8.x
+- Git
+- A [Supabase](https://supabase.com/) account
 
 ### Local Development
 
@@ -85,7 +90,7 @@ The architecture is designed to be server-centric, leveraging Next.js's server-s
    pnpm install
    ```
 
-3. **Set up environment variables**
+3. **Set up Supabase**
 
    - Go to [Supabase](https://supabase.com) and create a new project.
    - Navigate to the **Settings > API** section of your project.
@@ -219,17 +224,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🤝 Contributing
 
 We welcome contributions! Please read our [Contributing Guidelines](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
-
-## 📈 Project Status
-
-[![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
-
-## 🔗 Related Projects
-
-- [WhatsApp Web API](https://github.com/pedroslopez/whatsapp-web.js/)
-- [Telegram Bot API](https://core.telegram.org/bots/api)
-- [Discord.js](https://discord.js.org/)
-
-## 📬 Contact
-
-For feature requests and support, please [open an issue](https://github.com/JustAGhosT/whatssummarize/issues).
