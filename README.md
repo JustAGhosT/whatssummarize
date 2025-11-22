@@ -179,6 +179,28 @@ Deploy your own instance with Vercel:
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FJustAGhosT%2Fwhatssummarize)
 
+### Automated Deployment (Optional)
+
+The repository includes an optional GitHub Actions workflow for automated Vercel deployment. By default, this workflow is **disabled**.
+
+To enable automated deployments:
+
+1. Set the required secrets in your repository:
+   - `VERCEL_TOKEN`: Your Vercel API token
+   - `VERCEL_ORG_ID`: Your Vercel organization ID
+   - `VERCEL_PROJECT_ID`: Your Vercel project ID
+
+2. Edit `.github/workflows/vercel-deploy.yml` and change:
+   ```yaml
+   ENABLE_VERCEL_DEPLOYMENT: 'false'
+   ```
+   to:
+   ```yaml
+   ENABLE_VERCEL_DEPLOYMENT: 'true'
+   ```
+
+The workflow will then automatically deploy to Vercel on pushes to the `main` branch
+
 ## 📚 Documentation
 
 For detailed documentation, please visit our [Documentation Wiki](https://github.com/JustAGhosT/whatssummarize/wiki).
