@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "builds": [],
   "github": {
     "enabled": false,
     "silent": true
