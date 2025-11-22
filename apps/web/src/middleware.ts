@@ -64,6 +64,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
+  // Set theme header for consistency
+  const theme = request.cookies.get('theme')?.value || 'light'
+  response.headers.set('x-theme', theme)
+
   return response
 }
 
