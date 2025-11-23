@@ -1,0 +1,22 @@
+{
+  "name": "WhatsSummarize MCP Assistant",
+  "description": "MCP integration for WhatsSummarize development",
+  "default_permissions": {
+    "contents": "write",
+    "issues": "write",
+    "pull_requests": "write",
+    "actions": "write",
+    "checks": "write"
+  },
+  "default_events": [
+    "issues",
+    "issue_comment",
+    "pull_request",
+    "pull_request_review",
+    "push",
+    "workflow_dispatch"
+  ],
+  "public": false,
+  "webhook_url": "https://whatssummarize-mcp.azurewebsites.net/webhook",
+  "webhook_secret": "${WEBHOOK_SECRET}"
+}

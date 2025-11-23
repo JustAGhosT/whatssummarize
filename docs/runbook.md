@@ -46,8 +46,7 @@ pnpm build
 # Start production server
 pnpm start
 
-# Or deploy to Vercel
-vercel --prod
+# (Deployment process to be defined)
 ```
 
 ### Database Migrations

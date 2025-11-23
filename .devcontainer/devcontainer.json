@@ -1,0 +1,55 @@
+{
+  "name": "WhatsApp Conversation Summarizer Development Environment",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:20",
+
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "GitHub.copilot",
+        "GitHub.copilot-chat",
+        "bradlc.vscode-tailwindcss"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.codeActionsOnSave": {
+          "source.organizeImports": true,
+          "source.fixAll.eslint": true
+        },
+        "github.copilot.enable": {
+          "*": true
+        }
+      }
+    },
+
+    "codespaces": {
+      "repositories": {
+        "JustAGhosT/whatssummarize": {
+          "permissions": {
+            "contents": "write",
+            "pull_requests": "write",
+            "issues": "write"
+          }
+        }
+      }
+    }
+  },
+
+  "postCreateCommand": "corepack enable && pnpm install && pnpm build",
+
+  "forwardPorts": [3000, 3001],
+
+  "mounts": [
+    "source=${localWorkspaceFolder}/.github/copilot-instructions.md,target=/workspace/.copilot/instructions.md,type=bind,consistency=cached"
+  ],
+
+  "remoteEnv": {
+    "NODE_ENV": "development"
+  }
+}

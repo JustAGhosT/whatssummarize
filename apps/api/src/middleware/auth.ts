@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import { JWT_SECRET } from '../config/constants';
 import { AppDataSource } from '../config/database';
 import { User } from '../db/entities/User';
 
@@ -14,7 +15,7 @@ export const authenticateJWT = async (req: AuthRequest, res: Response, next: Nex
     const token = authHeader.split(' ')[1];
 
     try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as { userId: string };
+      const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
       const userRepository = AppDataSource.getRepository(User);
       const user = await userRepository.findOneBy({ id: decoded.userId });
 

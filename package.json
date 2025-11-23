@@ -27,12 +27,12 @@
       "packages/*"
     ],
     "tools": [
-      "tools/test-utils",
       "tools/scripts"
     ]
   },
   "devDependencies": {
     "@faker-js/faker": "^8.4.1",
+    "@playwright/test": "^1.56.1",
     "@types/jest": "^30.0.0",
     "@types/minimatch": "^6.0.0",
     "@types/node": "^20.19.9",
@@ -57,7 +57,7 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-testing-library": "^6.2.0",
     "fs-extra": "^11.2.0",
-    "glob": "^10.5.0",
+    "glob": "^10.3.10",
     "husky": "^9.0.11",
     "inquirer": "^9.2.12",
     "lint-staged": "^15.2.2",
@@ -67,10 +67,11 @@
     "prettier": "^3.2.5",
     "tailwindcss": "^3.4.1",
     "tailwindcss-animate": "^1.0.7",
+    "tree-kill": "^1.2.2",
     "tsx": "^4.7.0",
     "turbo": "^1.12.6",
     "typescript": "^5.3.3",
-    "vite": "^5.4.21",
+    "vite": "^5.4.19",
     "vite-tsconfig-paths": "^4.3.1",
     "vitest": "^1.6.1"
   },
