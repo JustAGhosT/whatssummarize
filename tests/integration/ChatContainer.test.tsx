@@ -33,7 +33,6 @@ jest.mock('../../frontend/src/components/chat/Message', () => ({
     );
   })
 }));
-import { MessageProps } from '../../frontend/src/components/chat/Message';
 
 describe('ChatContainer Integration', () => {
   const currentUserId = 'user-1';
