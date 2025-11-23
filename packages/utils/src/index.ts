@@ -40,10 +40,16 @@ export function truncate(str: string, length: number): string {
 }
 
 /**
- * Generates a unique ID
+ * Generates a unique ID using cryptographically secure random values
  * @returns A unique ID string
  */
 export function generateId(): string {
+  // Use crypto.randomUUID for cryptographically secure random IDs
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  // Fallback for environments without crypto.randomUUID (should not happen in modern environments)
+  // This is only for legacy support and should be rare
   return Math.random().toString(36).substring(2, 9);
 }
 
