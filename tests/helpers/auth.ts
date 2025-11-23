@@ -13,7 +13,8 @@ type TestUser = {
 
 export async function createTestUser(): Promise<TestUser> {
   const testEmail = `test-${uuidv4()}@example.com`;
-  const testPassword = 'Test@1234';
+  // Use environment variable for test password to avoid hard-coded credentials
+  const testPassword = process.env.TEST_USER_PASSWORD || 'Test@1234';
   
   // Create user in Supabase
   const { data: authData, error: signUpError } = await supabase.auth.signUp({
