@@ -48,9 +48,10 @@ export function generateId(): string {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
     return crypto.randomUUID();
   }
-  // Fallback for environments without crypto.randomUUID (should not happen in modern environments)
-  // This is only for legacy support and should be rare
-  return Math.random().toString(36).substring(2, 9);
+  // Fallback for environments without crypto.randomUUID
+  // This should not happen in modern environments, but we throw an error
+  // rather than use insecure Math.random()
+  throw new Error('crypto.randomUUID is not available in this environment');
 }
 
 /**
