@@ -46,17 +46,19 @@ export function truncate(str: string, length: number): string {
  */
 export function generateId(): string {
   // Browser environment: use global crypto
-  if (typeof window !== 'undefined' && typeof crypto !== 'undefined' && crypto.randomUUID) {
+  if (typeof globalThis.window !== 'undefined' && typeof crypto !== 'undefined' && crypto.randomUUID) {
     return crypto.randomUUID();
   }
   
   // Node.js environment: import and use node:crypto
-  if (typeof window === 'undefined') {
+  if (typeof globalThis.window === 'undefined') {
     try {
       // Dynamic import for Node.js crypto module
-      const nodeCrypto = require('crypto');
+      const nodeCrypto = require('node:crypto');
       return nodeCrypto.randomUUID();
     } catch (error) {
+      // Log error for debugging and throw a descriptive error
+      console.error('Failed to load crypto module:', error);
       throw new Error('crypto.randomUUID is not available in this Node.js environment');
     }
   }
