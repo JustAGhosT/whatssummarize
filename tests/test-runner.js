@@ -30,6 +30,7 @@ const runCommand = (command, cwd = process.cwd()) => {
     console.log(`${colors.cyan}Running: ${command}${colors.reset}`);
     
     // Use spawn for better security - separates command from arguments
+    // NOSONAR: S4036 - PATH usage is intentional for test runner, commands are validated against allowlist
     const args = commandParts.slice(1);
     const child = spawn(baseCommand, args, { 
       cwd, 
@@ -130,6 +131,7 @@ const runTests = async () => {
       // Use spawn for better security - no shell injection risk
       // Note: npm command is resolved from PATH in test/dev environment
       // In production deployments, ensure PATH only contains trusted directories
+      // NOSONAR: S4036 - PATH usage is intentional for test runner, commands are validated against allowlist
       const serverProcess = spawn('npm', ['run', 'dev'], {
         shell: false,
         stdio: ['ignore', 'pipe', 'pipe']
