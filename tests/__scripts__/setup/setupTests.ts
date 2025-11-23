@@ -25,7 +25,7 @@ afterAll(() => {
 jest.mock('next/router', () => require('next-router-mock'));
 
 // Mock window.matchMedia
-Object.defineProperty(window, 'matchMedia', {
+Object.defineProperty(globalThis, 'matchMedia', {
   writable: true,
   value: jest.fn().mockImplementation(query => ({
     matches: false,
@@ -46,10 +46,10 @@ class ResizeObserver {
   disconnect() {}
 }
 
-window.ResizeObserver = ResizeObserver;
+globalThis.ResizeObserver = ResizeObserver;
 
 // Mock scrollTo
-window.scrollTo = jest.fn();
+globalThis.scrollTo = jest.fn();
 
 // Mock IntersectionObserver
 class IntersectionObserver {
@@ -58,24 +58,11 @@ class IntersectionObserver {
   unobserve = jest.fn();
 }
 
-Object.defineProperty(window, 'IntersectionObserver', {
+Object.defineProperty(globalThis, 'IntersectionObserver', {
   writable: true,
   configurable: true,
   value: IntersectionObserver,
 });
-
-// Set up MSW server
-beforeAll(() => server.listen({ onUnhandledRequest: 'warn' }));
-
-// Reset any request handlers that we may add during the tests,
-// so they don't affect other tests
-afterEach(() => {
-  cleanup();
-  server.resetHandlers();
-});
-
-// Clean up after the tests are finished
-afterAll(() => server.close());
 
 // Mock next-auth
 jest.mock('next-auth/react', () => {
