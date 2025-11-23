@@ -1,7 +1,6 @@
 {
   "mcpServers": {
     "filesystem": {
-      "type": "stdio",
       "command": "npx",
       "args": [
         "-y",
@@ -10,7 +9,6 @@
       ]
     },
     "github": {
-      "type": "stdio",
       "command": "npx",
       "args": [
         "-y",
@@ -21,7 +19,6 @@
       }
     },
     "git": {
-      "type": "stdio",
       "command": "npx",
       "args": [
         "-y",

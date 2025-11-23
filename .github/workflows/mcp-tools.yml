@@ -24,48 +24,56 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
         with:
-          dotnet-version: '9.0.x'
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@fe1e16a35f77f2d2f7a1012a6e7ac4b5f8f8e19c # v2.4.1
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install
 
       - name: Execute Build
         if: ${{ github.event.inputs.tool == 'build' }}
-        run: |
-          dotnet restore
-          dotnet build --configuration Release --no-restore
+        run: pnpm run build
 
       - name: Execute Tests
         if: ${{ github.event.inputs.tool == 'test' }}
-        run: |
-          dotnet test --configuration Release \
-            --logger "trx;LogFileName=test-results.trx" \
-            --collect:"XPlat Code Coverage"
+        run: pnpm run test
 
       - name: Execute Format
         if: ${{ github.event.inputs.tool == 'format' }}
         run: |
-          dotnet format --verify-no-changes
+          pnpm run lint
+          npx prettier --check "**/*.{js,jsx,ts,tsx,json,md,mdx,yml,yaml}"
 
       - name: Execute Architecture Analysis
         if: ${{ github.event.inputs.tool == 'analyze' }}
         run: |
-          dotnet tool install --global dotnet-architecturetest
-          dotnet architecturetest ./src
+          echo "Running code quality checks..."
+          pnpm run lint
+          pnpm run test:coverage
 
       - name: Deploy to Staging
         if: ${{ github.event.inputs.tool == 'deploy-staging' }}
         env:
-          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
-          # Azure deployment script
+          # Vercel deployment script
           echo "Deploying to staging..."
+          npx vercel --token=$VERCEL_TOKEN
 
       - name: Create Tool Result Comment
         if: always()
-        uses: actions/github-script@v7
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         with:
           script: |
             const tool = '${{ github.event.inputs.tool }}';

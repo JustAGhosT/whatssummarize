@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import { JWT_SECRET } from '../config/constants';
 import { AppDataSource } from '../config/database';
 import { User } from '../db/entities/User';
 import { UserRole } from '../db/entities/User';
@@ -41,7 +42,7 @@ export class AuthService {
     // Generate JWT token
     const token = jwt.sign(
       { userId: user.id, email: user.email, role: user.role },
-      process.env.JWT_SECRET || 'your-secret-key',
+      JWT_SECRET,
       { expiresIn: '24h' }
     );
 

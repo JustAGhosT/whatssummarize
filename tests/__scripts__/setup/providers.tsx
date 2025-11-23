@@ -3,7 +3,7 @@ import { ThemeProvider } from 'next-themes';
 import { SessionProvider } from 'next-auth/react';
 
 type AppProvidersProps = {
-  readonly children: ReactNode;
+  children: ReactNode;
 };
 
 export function AppProviders({ children }: AppProvidersProps) {
