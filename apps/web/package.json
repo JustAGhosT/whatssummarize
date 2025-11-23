@@ -19,9 +19,10 @@
   "dependencies": {
     "@whatssummarize/contexts": "workspace:^",
     "@whatssummarize/ui": "workspace:*",
-    "axios": "^1.10.0",
+    "antd": "^5.26.5",
+    "axios": "^1.12.0",
     "date-fns": "^4.1.0",
-    "next": "^15.4.6",
+    "next": "^16.0.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-dropzone": "^14.3.8"
