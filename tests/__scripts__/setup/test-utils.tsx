@@ -11,5 +11,4 @@ export * from '@testing-library/react';
 export { customRender as render };
 
 // Re-export userEvent with delay
-import userEvent from '@testing-library/user-event';
-export { userEvent };
+export { default as userEvent } from '@testing-library/user-event';

@@ -42,8 +42,8 @@ module.exports = {
     '/dist/',
     '/tests/',
     '/types/',
-    '\\.d\\.ts$',
-    'index\\.ts',
-    'main\\.tsx',
+    String.raw`\.d\.ts$`,
+    String.raw`index\.ts`,
+    String.raw`main\.tsx`,
   ],
 };

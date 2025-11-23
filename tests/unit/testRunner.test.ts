@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach, afterEach, beforeAll } from 'vitest';
-import type { Mock } from 'vitest';
 import { exec } from 'child_process';
 
 // Create a mock for child_process
