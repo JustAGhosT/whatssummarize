@@ -1,20 +1,23 @@
 // @ts-check
-const baseConfig = require('../../../jest.config.js');
 
 /** @type {import('ts-jest').JestConfigWithTsJest} */
 module.exports = {
-  ...baseConfig,
+  // Test environment
+  testEnvironment: 'jsdom',
+  
   // Common setup files
   setupFilesAfterEnv: [
-    ...(baseConfig.setupFilesAfterEnv || []),
-    '<rootDir>/tests/setupTests.ts',
+    '<rootDir>/tests/__scripts__/setup/setupTests.ts',
     '@testing-library/jest-dom',
   ],
+  
   // Common module name mapper
   moduleNameMapper: {
-    ...baseConfig.moduleNameMapper,
+    '^@/(.*)$': '<rootDir>/src/$1',
+    '^@/tests/(.*)$': '<rootDir>/tests/$1',
     '.(css|less|scss|sass)$': 'identity-obj-proxy',
   },
+  
   // Common transform settings
   transform: {
     '^.+\\.(ts|tsx)$': [
@@ -25,6 +28,7 @@ module.exports = {
       },
     ],
   },
+  
   // Common coverage settings
   collectCoverageFrom: [
     '**/*.{ts,tsx}',
