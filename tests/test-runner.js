@@ -13,7 +13,7 @@ const colors = {
 };
 
 // Helper function to run commands safely
-// Commands are from a controlled TEST_CONFIG object, not user input
+// Commands are validated against an allowlist to prevent arbitrary command execution
 const runCommand = (command, cwd = process.cwd()) => {
   return new Promise((resolve, reject) => {
     // Validate that command is from our controlled TEST_CONFIG
@@ -154,7 +154,15 @@ const runTests = async () => {
       } finally {
         // Ensure server is killed after tests
         try {
-          serverProcess.kill('SIGTERM');
+          if (serverProcess && !serverProcess.killed) {
+            serverProcess.kill('SIGTERM');
+            // Wait a bit for graceful shutdown
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            // Force kill if still running
+            if (!serverProcess.killed) {
+              serverProcess.kill('SIGKILL');
+            }
+          }
         } catch (e) {
           console.error('Error stopping server:', e);
         }
