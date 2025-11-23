@@ -27,7 +27,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = React.useState<Toast[]>([]);
 
   const addToast = React.useCallback((toast: Omit<Toast, 'id' | 'isOpen'>) => {
-    const id = Math.random().toString(36).substring(2, 9);
+    const id = crypto.randomUUID();
     const newToast = { ...toast, id, isOpen: true };
     
     setToasts(prev => [...prev.filter(t => t.id !== id), newToast].slice(-5));
@@ -76,7 +76,7 @@ export function useToast() {
 // Utility function
 export function toast(toast: Omit<Toast, 'id' | 'isOpen'>) {
   console.warn('Toast called outside of ToastProvider');
-  return Math.random().toString(36).substring(2, 9);
+  return crypto.randomUUID();
 }
 
 // No-op component for compatibility

@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import { JWT_SECRET } from '../config/constants';
 import { logger } from '../utils/logger.js';
 
 declare global {
@@ -20,8 +21,7 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
   }
 
   try {
-    const jwtSecret = process.env.JWT_SECRET || 'your-secret-key';
-    const user = jwt.verify(token, jwtSecret);
+    const user = jwt.verify(token, JWT_SECRET);
     req.user = user;
     next();
   } catch (error) {
