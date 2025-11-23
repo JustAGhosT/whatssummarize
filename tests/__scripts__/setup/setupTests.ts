@@ -40,10 +40,13 @@ Object.defineProperty(window, 'matchMedia', {
 });
 
 // Mock ResizeObserver
+// Empty methods are intentional - this is a minimal mock for testing environments
+// that don't support ResizeObserver. The methods do nothing because tests don't
+// need actual resize observation functionality.
 class ResizeObserver {
-  observe() {}
-  unobserve() {}
-  disconnect() {}
+  observe() {} // NOSONAR - intentionally empty mock
+  unobserve() {} // NOSONAR - intentionally empty mock
+  disconnect() {} // NOSONAR - intentionally empty mock
 }
 
 window.ResizeObserver = ResizeObserver;
