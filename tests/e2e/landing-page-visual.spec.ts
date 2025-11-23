@@ -14,7 +14,7 @@ test.describe('Landing Page Visual Structure', () => {
     const heroHeading = await page.locator('h1');
     await expect(heroHeading).toBeVisible();
     const fontSize = await heroHeading.evaluate((el) => getComputedStyle(el).fontSize);
-    expect(Number.parseFloat(fontSize)).toBeGreaterThanOrEqual(32); // Should be large
+    expect(parseFloat(fontSize)).toBeGreaterThanOrEqual(32); // Should be large
 
     // Hero section: description
     const heroDescription = await page.locator('p:has-text("AI-powered summaries")');

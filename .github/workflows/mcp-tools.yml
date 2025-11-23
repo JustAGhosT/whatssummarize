@@ -1,0 +1,90 @@
+name: MCP Tools
+
+on:
+  workflow_dispatch:
+    inputs:
+      tool:
+        description: 'Tool to run'
+        required: true
+        type: choice
+        options:
+          - build
+          - test
+          - format
+          - analyze
+          - deploy-staging
+
+      parameters:
+        description: 'Additional parameters (JSON)'
+        required: false
+        default: '{}'
+
+jobs:
+  execute-tool:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Execute Build
+        if: ${{ github.event.inputs.tool == 'build' }}
+        run: |
+          dotnet restore
+          dotnet build --configuration Release --no-restore
+
+      - name: Execute Tests
+        if: ${{ github.event.inputs.tool == 'test' }}
+        run: |
+          dotnet test --configuration Release \
+            --logger "trx;LogFileName=test-results.trx" \
+            --collect:"XPlat Code Coverage"
+
+      - name: Execute Format
+        if: ${{ github.event.inputs.tool == 'format' }}
+        run: |
+          dotnet format --verify-no-changes
+
+      - name: Execute Architecture Analysis
+        if: ${{ github.event.inputs.tool == 'analyze' }}
+        run: |
+          dotnet tool install --global dotnet-architecturetest
+          dotnet architecturetest ./src
+
+      - name: Deploy to Staging
+        if: ${{ github.event.inputs.tool == 'deploy-staging' }}
+        env:
+          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+        run: |
+          # Azure deployment script
+          echo "Deploying to staging..."
+
+      - name: Create Tool Result Comment
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const tool = '${{ github.event.inputs.tool }}';
+            const status = '${{ job.status }}';
+            const runUrl = '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}';
+
+            const comment = `## MCP Tool Execution Result
+
+            **Tool:** ${tool}
+            **Status:** ${status}
+            **Run:** [View Details](${runUrl})
+
+            Triggered via MCP Tools workflow.`;
+
+            // If this was triggered from a PR
+            if (context.payload.pull_request) {
+              await github.rest.issues.createComment({
+                ...context.repo,
+                issue_number: context.payload.pull_request.number,
+                body: comment
+              });
+            }

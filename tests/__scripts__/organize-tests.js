@@ -1,6 +1,6 @@
-const fs = require('node:fs');
-const path = require('node:path');
-const { promisify } = require('node:util');
+const fs = require('fs');
+const path = require('path');
+const { promisify } = require('util');
 
 const readdir = promisify(fs.readdir);
 const stat = promisify(fs.stat);
@@ -65,59 +65,62 @@ async function ensureDirectoryExists(dirPath) {
   }
 }
 
-async function moveWildcardFiles(dir, pattern, fullTargetPath) {
-  try {
-    const files = await readdir(dir);
-    const regex = new RegExp('^' + pattern.replace(/\*/g, '.*') + '$');
-    const matchedFiles = files.filter(file => regex.test(file));
-    
-    for (const file of matchedFiles) {
-      const sourceFile = path.join(dir, file);
-      const targetFile = path.join(fullTargetPath, file);
-      await moveFile(sourceFile, targetFile);
-    }
-  } catch (err) {
-    if (err.code !== 'ENOENT') {
-      console.error(`Error reading directory ${dir}:`, err);
-    }
-  }
-}
-
-async function moveFile(sourceFile, targetFile) {
-  try {
-    await rename(sourceFile, targetFile);
-    console.log(`Moved: ${sourceFile} -> ${targetFile}`);
-  } catch (err) {
-    if (err.code !== 'ENOENT') {
-      console.error(`Error moving ${sourceFile}:`, err);
-    }
-  }
-}
-
-async function processSingleSource(source, fullTargetPath) {
-  const fullSourcePath = path.join(TEST_ROOT, source);
-  
-  if (source.includes('*')) {
-    const dir = path.dirname(fullSourcePath);
-    const pattern = path.basename(fullSourcePath);
-    await moveWildcardFiles(dir, pattern, fullTargetPath);
-  } else {
-    const targetFile = path.join(fullTargetPath, path.basename(source));
-    await moveFile(fullSourcePath, targetFile);
-  }
-}
-
 async function moveFiles() {
   for (const [targetDir, sources] of Object.entries(TARGET_STRUCTURE)) {
     const fullTargetPath = path.join(TEST_ROOT, targetDir);
     await ensureDirectoryExists(fullTargetPath);
     
     for (const source of sources) {
-      await processSingleSource(source, fullTargetPath);
+      const fullSourcePath = path.join(TEST_ROOT, source);
+      
+      // Handle wildcards
+      if (source.includes('*')) {
+        const dir = path.dirname(fullSourcePath);
+        const pattern = path.basename(fullSourcePath);
+        
+        try {
+          const files = await readdir(dir);
+          const matchedFiles = files.filter(file => {
+            const regex = new RegExp('^' + pattern.replace(/\*/g, '.*') + '$');
+            return regex.test(file);
+          });
+          
+          for (const file of matchedFiles) {
+            const sourceFile = path.join(dir, file);
+            const targetFile = path.join(fullTargetPath, file);
+            
+            try {
+              await rename(sourceFile, targetFile);
+              console.log(`Moved: ${sourceFile} -> ${targetFile}`);
+            } catch (err) {
+              if (err.code !== 'ENOENT') {
+                console.error(`Error moving ${sourceFile}:`, err);
+              }
+            }
+          }
+        } catch (err) {
+          if (err.code !== 'ENOENT') {
+            console.error(`Error reading directory ${dir}:`, err);
+          }
+        }
+      } else {
+        // Handle single file/directory
+        try {
+          const targetFile = path.join(fullTargetPath, path.basename(source));
+          await rename(fullSourcePath, targetFile);
+          console.log(`Moved: ${fullSourcePath} -> ${targetFile}`);
+        } catch (err) {
+          if (err.code !== 'ENOENT') {
+            console.error(`Error moving ${fullSourcePath}:`, err);
+          }
+        }
+      }
     }
   }
   
+  // Remove empty directories
   await removeEmptyDirectories(TEST_ROOT);
+  
   console.log('Test directory organization complete!');
 }
 
