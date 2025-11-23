@@ -46,12 +46,12 @@ export function truncate(str: string, length: number): string {
  */
 export function generateId(): string {
   // Browser environment: use global crypto
-  if (typeof globalThis.window !== 'undefined' && typeof crypto !== 'undefined' && crypto.randomUUID) {
+  if (globalThis.window !== undefined && typeof crypto !== 'undefined' && crypto.randomUUID) {
     return crypto.randomUUID();
   }
   
   // Node.js environment: import and use node:crypto
-  if (typeof globalThis.window === 'undefined') {
+  if (globalThis.window === undefined) {
     try {
       // Dynamic import for Node.js crypto module
       const nodeCrypto = require('node:crypto');

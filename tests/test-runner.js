@@ -14,6 +14,8 @@ const colors = {
 
 // Helper function to run commands safely
 // Commands are validated against an allowlist to prevent arbitrary command execution
+// Note: Commands are resolved from PATH in test/dev environment
+// In production deployments, ensure PATH only contains trusted directories
 const runCommand = (command, cwd = process.cwd()) => {
   return new Promise((resolve, reject) => {
     // Validate that command is from our controlled TEST_CONFIG
@@ -126,6 +128,8 @@ const runTests = async () => {
       console.log(`\n${colors.cyan}=== Starting Development Server ===${colors.reset}`);
       
       // Use spawn for better security - no shell injection risk
+      // Note: npm command is resolved from PATH in test/dev environment
+      // In production deployments, ensure PATH only contains trusted directories
       const serverProcess = spawn('npm', ['run', 'dev'], {
         shell: false,
         stdio: ['ignore', 'pipe', 'pipe']
