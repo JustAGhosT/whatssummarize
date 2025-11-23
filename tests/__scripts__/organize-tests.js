@@ -65,56 +65,69 @@ async function ensureDirectoryExists(dirPath) {
   }
 }
 
+async function handleWildcardSource(source, fullTargetPath, TEST_ROOT) {
+  const fullSourcePath = path.join(TEST_ROOT, source);
+  const dir = path.dirname(fullSourcePath);
+  const pattern = path.basename(fullSourcePath);
+  
+  try {
+    const files = await readdir(dir);
+    const regex = new RegExp('^' + pattern.replaceAll('*', '.*') + '$');
+    const matchedFiles = files.filter(file => regex.test(file));
+    
+    await moveMatchedFiles(matchedFiles, dir, fullTargetPath);
+  } catch (err) {
+    if (err.code !== 'ENOENT') {
+      console.error(`Error reading directory ${dir}:`, err);
+    }
+  }
+}
+
+async function moveMatchedFiles(matchedFiles, sourceDir, targetDir) {
+  for (const file of matchedFiles) {
+    const sourceFile = path.join(sourceDir, file);
+    const targetFile = path.join(targetDir, file);
+    
+    try {
+      await rename(sourceFile, targetFile);
+      console.log(`Moved: ${sourceFile} -> ${targetFile}`);
+    } catch (err) {
+      if (err.code !== 'ENOENT') {
+        console.error(`Error moving ${sourceFile}:`, err);
+      }
+    }
+  }
+}
+
+async function handleSingleSource(source, fullTargetPath, TEST_ROOT) {
+  const fullSourcePath = path.join(TEST_ROOT, source);
+  
+  try {
+    const targetFile = path.join(fullTargetPath, path.basename(source));
+    await rename(fullSourcePath, targetFile);
+    console.log(`Moved: ${fullSourcePath} -> ${targetFile}`);
+  } catch (err) {
+    if (err.code !== 'ENOENT') {
+      console.error(`Error moving ${fullSourcePath}:`, err);
+    }
+  }
+}
+
+async function processSource(source, fullTargetPath, TEST_ROOT) {
+  if (source.includes('*')) {
+    await handleWildcardSource(source, fullTargetPath, TEST_ROOT);
+  } else {
+    await handleSingleSource(source, fullTargetPath, TEST_ROOT);
+  }
+}
+
 async function moveFiles() {
   for (const [targetDir, sources] of Object.entries(TARGET_STRUCTURE)) {
     const fullTargetPath = path.join(TEST_ROOT, targetDir);
     await ensureDirectoryExists(fullTargetPath);
     
     for (const source of sources) {
-      const fullSourcePath = path.join(TEST_ROOT, source);
-      
-      // Handle wildcards
-      if (source.includes('*')) {
-        const dir = path.dirname(fullSourcePath);
-        const pattern = path.basename(fullSourcePath);
-        
-        try {
-          const files = await readdir(dir);
-          const matchedFiles = files.filter(file => {
-            const regex = new RegExp('^' + pattern.replaceAll('*', '.*') + '$');
-            return regex.test(file);
-          });
-          
-          for (const file of matchedFiles) {
-            const sourceFile = path.join(dir, file);
-            const targetFile = path.join(fullTargetPath, file);
-            
-            try {
-              await rename(sourceFile, targetFile);
-              console.log(`Moved: ${sourceFile} -> ${targetFile}`);
-            } catch (err) {
-              if (err.code !== 'ENOENT') {
-                console.error(`Error moving ${sourceFile}:`, err);
-              }
-            }
-          }
-        } catch (err) {
-          if (err.code !== 'ENOENT') {
-            console.error(`Error reading directory ${dir}:`, err);
-          }
-        }
-      } else {
-        // Handle single file/directory
-        try {
-          const targetFile = path.join(fullTargetPath, path.basename(source));
-          await rename(fullSourcePath, targetFile);
-          console.log(`Moved: ${fullSourcePath} -> ${targetFile}`);
-        } catch (err) {
-          if (err.code !== 'ENOENT') {
-            console.error(`Error moving ${fullSourcePath}:`, err);
-          }
-        }
-      }
+      await processSource(source, fullTargetPath, TEST_ROOT);
     }
   }
   

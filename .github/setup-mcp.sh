@@ -8,7 +8,7 @@ pnpm add -g @modelcontextprotocol/server-github
 
 # Set up environment variables
 # Create .env file if it doesn't exist, and update variables without duplicates
-if [ ! -f .env ]; then
+if [[ ! -f .env ]]; then
   touch .env
 fi
 
