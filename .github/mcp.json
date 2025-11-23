@@ -1,7 +1,10 @@
 {
   "mcpServers": {
     "filesystem": {
+<<<<<<< HEAD
       "type": "stdio",
+=======
+>>>>>>> feat-stabilize-wave-1
       "command": "npx",
       "args": [
         "-y",
@@ -10,7 +13,10 @@
       ]
     },
     "github": {
+<<<<<<< HEAD
       "type": "stdio",
+=======
+>>>>>>> feat-stabilize-wave-1
       "command": "npx",
       "args": [
         "-y",
@@ -19,6 +25,7 @@
       "env": {
         "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
       }
+<<<<<<< HEAD
     },
     "git": {
       "type": "stdio",
@@ -30,3 +37,8 @@
     }
   }
 }
+=======
+    }
+  }
+}
+>>>>>>> feat-stabilize-wave-1
