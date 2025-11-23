@@ -44,18 +44,18 @@ export function truncate(str: string, length: number): string {
  * Works in both browser and Node.js environments
  * @returns A unique ID string
  */
-export function generateId(): string {
+export async function generateId(): Promise<string> {
   // Browser environment: use global crypto
   if (globalThis.window !== undefined && typeof crypto !== 'undefined' && crypto.randomUUID) {
     return crypto.randomUUID();
   }
   
-  // Node.js environment: import and use node:crypto
+  // Node.js environment: dynamically import node:crypto
   if (globalThis.window === undefined) {
     try {
-      // Dynamic import for Node.js crypto module
-      const nodeCrypto = require('node:crypto');
-      return nodeCrypto.randomUUID();
+      // Dynamic import for Node.js crypto module (ES module compatible)
+      const { randomUUID } = await import('node:crypto');
+      return randomUUID();
     } catch (error) {
       // Include original error information in the thrown error
       throw new Error(`crypto.randomUUID is not available in this Node.js environment: ${error instanceof Error ? error.message : String(error)}`);

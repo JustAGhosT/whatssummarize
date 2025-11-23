@@ -1,4 +1,26 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, Page } from '@playwright/test';
+
+/**
+ * Helper function to verify key elements are visible on the landing page
+ */
+async function verifyKeyElements(page: Page) {
+  await expect(page.locator('h1:has-text("Summarize Your WhatsApp Chats")')).toBeVisible();
+  await expect(page.locator('p:has-text("Get AI-powered summaries")')).toBeVisible();
+  await expect(page.locator('button:has-text("Sign In")')).toBeVisible();
+  await expect(page.locator('button:has-text("Get Started")')).toBeVisible();
+  await expect(page.locator('.version-badge')).toBeVisible();
+}
+
+/**
+ * Helper function to verify content centering
+ */
+async function verifyContentCentering(page: Page) {
+  const innerWrapper = await page.locator('div.flex.flex-col.justify-center.items-center.relative.z-10.flex-1.h-full.w-full.min-h-0');
+  const innerBox = await innerWrapper.boundingBox();
+  const viewport = page.viewportSize();
+  
+  expect(innerBox?.height).toBeGreaterThanOrEqual((viewport?.height ?? 0) * 0.95);
+}
 
 test.describe('Landing Page Comprehensive Tests', () => {
   test('displays correctly on desktop viewport', async ({ page }) => {
@@ -6,19 +28,8 @@ test.describe('Landing Page Comprehensive Tests', () => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
     
-    // Check all key elements are visible
-    await expect(page.locator('h1:has-text("Summarize Your WhatsApp Chats")')).toBeVisible();
-    await expect(page.locator('p:has-text("Get AI-powered summaries")')).toBeVisible();
-    await expect(page.locator('button:has-text("Sign In")')).toBeVisible();
-    await expect(page.locator('button:has-text("Get Started")')).toBeVisible();
-    await expect(page.locator('.version-badge')).toBeVisible();
-    
-    // Check content is centered
-    const innerWrapper = await page.locator('div.flex.flex-col.justify-center.items-center.relative.z-10.flex-1.h-full.w-full.min-h-0');
-    const innerBox = await innerWrapper.boundingBox();
-    const viewport = page.viewportSize();
-    
-    expect(innerBox?.height).toBeGreaterThanOrEqual((viewport?.height ?? 0) * 0.95);
+    await verifyKeyElements(page);
+    await verifyContentCentering(page);
   });
 
   test('displays correctly on tablet viewport', async ({ page }) => {
@@ -26,19 +37,8 @@ test.describe('Landing Page Comprehensive Tests', () => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
     
-    // Check all key elements are visible
-    await expect(page.locator('h1:has-text("Summarize Your WhatsApp Chats")')).toBeVisible();
-    await expect(page.locator('p:has-text("Get AI-powered summaries")')).toBeVisible();
-    await expect(page.locator('button:has-text("Sign In")')).toBeVisible();
-    await expect(page.locator('button:has-text("Get Started")')).toBeVisible();
-    await expect(page.locator('.version-badge')).toBeVisible();
-    
-    // Check content is centered
-    const innerWrapper = await page.locator('div.flex.flex-col.justify-center.items-center.relative.z-10.flex-1.h-full.w-full.min-h-0');
-    const innerBox = await innerWrapper.boundingBox();
-    const viewport = page.viewportSize();
-    
-    expect(innerBox?.height).toBeGreaterThanOrEqual((viewport?.height ?? 0) * 0.95);
+    await verifyKeyElements(page);
+    await verifyContentCentering(page);
   });
 
   test('displays correctly on mobile viewport', async ({ page }) => {
@@ -46,19 +46,8 @@ test.describe('Landing Page Comprehensive Tests', () => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
     
-    // Check all key elements are visible
-    await expect(page.locator('h1:has-text("Summarize Your WhatsApp Chats")')).toBeVisible();
-    await expect(page.locator('p:has-text("Get AI-powered summaries")')).toBeVisible();
-    await expect(page.locator('button:has-text("Sign In")')).toBeVisible();
-    await expect(page.locator('button:has-text("Get Started")')).toBeVisible();
-    await expect(page.locator('.version-badge')).toBeVisible();
-    
-    // Check content is centered
-    const innerWrapper = await page.locator('div.flex.flex-col.justify-center.items-center.relative.z-10.flex-1.h-full.w-full.min-h-0');
-    const innerBox = await innerWrapper.boundingBox();
-    const viewport = page.viewportSize();
-    
-    expect(innerBox?.height).toBeGreaterThanOrEqual((viewport?.height ?? 0) * 0.95);
+    await verifyKeyElements(page);
+    await verifyContentCentering(page);
   });
 
   test('content is properly centered horizontally and vertically', async ({ page }) => {
