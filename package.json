@@ -27,7 +27,6 @@
       "packages/*"
     ],
     "tools": [
-      "tools/test-utils",
       "tools/scripts"
     ]
   },
@@ -73,8 +72,7 @@
     "typescript": "^5.3.3",
     "vite": "^5.4.19",
     "vite-tsconfig-paths": "^4.3.1",
-    "vitest": "^1.6.1",
-    "seedrandom": "^3.0.5"
+    "vitest": "^1.6.1"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
@@ -84,8 +82,5 @@
     "*.{json,md,mdx,yml,yaml}": [
       "prettier --write"
     ]
-  },
-  "dependencies": {
-    "@supabase/ssr": "^0.6.1"
   }
 }

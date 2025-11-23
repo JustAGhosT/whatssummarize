@@ -29,8 +29,7 @@
       "@config/*": ["./packages/config/src/*"],
       "@utils/*": ["./packages/utils/src/*"],
       "@whatssummarize/contexts": ["./packages/contexts/src/index.ts"],
-      "@whatssummarize/contexts/*": ["./packages/contexts/src/*"],
-      "@test-utils/*": ["./tools/test-utils/src/*"]
+      "@whatssummarize/contexts/*": ["./packages/contexts/src/*"]
     },
 
     /* Type Checking */

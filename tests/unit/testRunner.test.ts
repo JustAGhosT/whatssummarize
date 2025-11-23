@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach, beforeAll } from 'vitest';
-import { exec } from 'node:child_process';
+import type { Mock } from 'vitest';
+import { exec } from 'child_process';
 
 // Create a mock for child_process
 const mockExec = vi.fn();

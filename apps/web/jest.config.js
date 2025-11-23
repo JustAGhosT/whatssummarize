@@ -10,7 +10,7 @@ const createJestConfig = nextJest({
 const customJestConfig = {
   // The root of your source code
   rootDir: '../../',
-  roots: ['<rootDir>/apps/web/src', '<rootDir>/tools/test-utils'],
+  roots: ['<rootDir>/apps/web/src'],
   
   // Test environment
   testEnvironment: 'jsdom',
@@ -28,7 +28,6 @@ const customJestConfig = {
     '^@utils/(.*)$': '<rootDir>/packages/utils/src/$1',
     '^@config/(.*)$': '<rootDir>/packages/config/src/$1',
     '^@/types/(.*)$': '<rootDir>/apps/web/src/types/$1',
-    '^@/tests/(.*)$': '<rootDir>/tools/test-utils/$1',
     '^@/styles/(.*)$': '<rootDir>/apps/web/src/styles/$1',
     '^@/public/(.*)$': '<rootDir>/apps/web/public/$1',
     '^@/hooks/(.*)$': '<rootDir>/apps/web/src/hooks/$1',

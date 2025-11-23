@@ -10,8 +10,8 @@
  *   --output=<path>   Output file path (default: tests/mocks/generated-test-data.json)
  */
 
-const fs = require('node:fs');
-const path = require('node:path');
+const fs = require('fs');
+const path = require('path');
 const { program } = require('commander');
 const { faker } = require('@faker-js/faker');
 
