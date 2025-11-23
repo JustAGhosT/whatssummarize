@@ -14,7 +14,8 @@ fi
 
 # Update or add GITHUB_TOKEN
 if grep -q "^GITHUB_TOKEN=" .env; then
-  sed -i "s|^GITHUB_TOKEN=.*|GITHUB_TOKEN=${GITHUB_TOKEN}|" .env
+  # Use a temporary file for cross-platform compatibility (works on both GNU and BSD sed)
+  sed "s|^GITHUB_TOKEN=.*|GITHUB_TOKEN=${GITHUB_TOKEN}|" .env > .env.tmp && mv .env.tmp .env
 else
   echo "GITHUB_TOKEN=${GITHUB_TOKEN}" >> .env
 fi

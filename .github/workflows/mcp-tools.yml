@@ -26,42 +26,50 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          dotnet-version: '9.0.x'
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install
 
       - name: Execute Build
         if: ${{ github.event.inputs.tool == 'build' }}
-        run: |
-          dotnet restore
-          dotnet build --configuration Release --no-restore
+        run: pnpm run build
 
       - name: Execute Tests
         if: ${{ github.event.inputs.tool == 'test' }}
-        run: |
-          dotnet test --configuration Release \
-            --logger "trx;LogFileName=test-results.trx" \
-            --collect:"XPlat Code Coverage"
+        run: pnpm run test
 
       - name: Execute Format
         if: ${{ github.event.inputs.tool == 'format' }}
         run: |
-          dotnet format --verify-no-changes
+          pnpm run lint
+          npx prettier --check "**/*.{js,jsx,ts,tsx,json,md,mdx,yml,yaml}"
 
       - name: Execute Architecture Analysis
         if: ${{ github.event.inputs.tool == 'analyze' }}
         run: |
-          dotnet tool install --global dotnet-architecturetest
-          dotnet architecturetest ./src
+          echo "Running code quality checks..."
+          pnpm run lint
+          pnpm run test:coverage
 
       - name: Deploy to Staging
         if: ${{ github.event.inputs.tool == 'deploy-staging' }}
         env:
-          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
-          # Azure deployment script
+          # Vercel deployment script
           echo "Deploying to staging..."
+          npx vercel --token=$VERCEL_TOKEN
 
       - name: Create Tool Result Comment
         if: always()
