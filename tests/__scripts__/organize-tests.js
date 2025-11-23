@@ -81,7 +81,7 @@ async function moveFiles() {
         try {
           const files = await readdir(dir);
           const matchedFiles = files.filter(file => {
-            const regex = new RegExp('^' + pattern.replace(/\*/g, '.*') + '$');
+            const regex = new RegExp('^' + pattern.replaceAll('*', '.*') + '$');
             return regex.test(file);
           });
           
