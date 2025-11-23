@@ -25,7 +25,7 @@ afterAll(() => {
 jest.mock('next/router', () => require('next-router-mock'));
 
 // Mock window.matchMedia
-Object.defineProperty(globalThis, 'matchMedia', {
+Object.defineProperty(window, 'matchMedia', {
   writable: true,
   value: jest.fn().mockImplementation(query => ({
     matches: false,
@@ -46,10 +46,10 @@ class ResizeObserver {
   disconnect() {}
 }
 
-globalThis.ResizeObserver = ResizeObserver;
+window.ResizeObserver = ResizeObserver;
 
 // Mock scrollTo
-globalThis.scrollTo = jest.fn();
+window.scrollTo = jest.fn();
 
 // Mock IntersectionObserver
 class IntersectionObserver {
@@ -58,7 +58,7 @@ class IntersectionObserver {
   unobserve = jest.fn();
 }
 
-Object.defineProperty(globalThis, 'IntersectionObserver', {
+Object.defineProperty(window, 'IntersectionObserver', {
   writable: true,
   configurable: true,
   value: IntersectionObserver,
