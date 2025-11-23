@@ -1,6 +1,7 @@
 const { spawn } = require('node:child_process');
 const path = require('node:path');
 const fs = require('node:fs');
+const treeKill = require('tree-kill');
 
 // Colors for console output
 const colors = {
@@ -161,9 +162,26 @@ const runTests = async () => {
         // Ensure server is killed after tests
         try {
           if (serverProcess && !serverProcess.killed) {
-            serverProcess.kill('SIGTERM');
+            // Use tree-kill for cross-platform process tree termination
+            await new Promise((resolve) => {
+              treeKill(serverProcess.pid, 'SIGTERM', (err) => {
+                if (err) {
+                  console.error('Error stopping server with SIGTERM:', err);
+                  // Try force kill as fallback
+                  treeKill(serverProcess.pid, 'SIGKILL', (killErr) => {
+                    if (killErr) {
+                      console.error('Error force stopping server:', killErr);
+                    }
+                    resolve();
+                  });
+                } else {
+                  resolve();
+                }
+              });
+            });
             // Wait a bit for graceful shutdown
             await new Promise(resolve => setTimeout(resolve, 1000));
+            serverProcess.kill('SIGTERM');
             // Force kill if still running
             if (!serverProcess.killed) {
               serverProcess.kill('SIGKILL');

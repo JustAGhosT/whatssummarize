@@ -69,7 +69,7 @@ const DashboardPage: React.FC = () => {
               </CardContent>
             </Card>
           ))}
-        </Grid>
+        </div>
 
         <Card>
           <CardHeader>
