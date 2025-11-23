@@ -27,7 +27,6 @@
       "packages/*"
     ],
     "tools": [
-      "tools/test-utils",
       "tools/scripts"
     ]
   },
