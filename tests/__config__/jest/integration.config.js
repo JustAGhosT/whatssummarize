@@ -47,8 +47,8 @@ module.exports = {
     '/dist/',
     '/tests/',
     '/types/',
-    '\.d\.ts$',
-    'index\.ts',
+    '\\.d\\.ts$',
+    'index\\.ts',
     'main\.tsx',
   ],
   // Setup for API mocking
