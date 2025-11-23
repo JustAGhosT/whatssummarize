@@ -98,7 +98,10 @@
   outline: none;
   color: var(--text-primary);
   font-size: 1rem;
-  placeholder-color: var(--text-tertiary);
+}
+
+.input::placeholder {
+  color: var(--text-tertiary);
 }
 
 .clearBtn {

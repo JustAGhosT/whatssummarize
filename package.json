@@ -33,6 +33,7 @@
   },
   "devDependencies": {
     "@faker-js/faker": "^8.4.1",
+    "@playwright/test": "^1.56.1",
     "@types/jest": "^30.0.0",
     "@types/minimatch": "^6.0.0",
     "@types/node": "^20.19.9",
@@ -72,7 +73,8 @@
     "typescript": "^5.3.3",
     "vite": "^5.4.19",
     "vite-tsconfig-paths": "^4.3.1",
-    "vitest": "^1.6.1"
+    "vitest": "^1.6.1",
+    "seedrandom": "^3.0.5"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
@@ -82,5 +84,8 @@
     "*.{json,md,mdx,yml,yaml}": [
       "prettier --write"
     ]
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.6.1"
   }
 }
