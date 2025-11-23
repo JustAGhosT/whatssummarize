@@ -58,9 +58,11 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (!user && request.nextUrl.pathname.startsWith('/dashboard')) {
+  // Redirect unauthenticated users to login
+  if (!user) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
+    url.searchParams.set('redirectTo', request.nextUrl.pathname)
     return NextResponse.redirect(url)
   }
 
@@ -72,5 +74,16 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*'],
+  matcher: [
+    '/dashboard/:path*',
+    '/admin/:path*',
+    '/personal/:path*',
+    '/groups/:path*',
+    '/settings/:path*',
+    '/notifications/:path*',
+    '/customize/:path*',
+    '/distribution/:path*',
+    '/cross-platform-groups/:path*',
+    '/moodboard/:path*',
+  ],
 }
