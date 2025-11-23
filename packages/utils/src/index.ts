@@ -57,9 +57,8 @@ export function generateId(): string {
       const nodeCrypto = require('node:crypto');
       return nodeCrypto.randomUUID();
     } catch (error) {
-      // Log error for debugging and throw a descriptive error
-      console.error('Failed to load crypto module:', error);
-      throw new Error('crypto.randomUUID is not available in this Node.js environment');
+      // Include original error information in the thrown error
+      throw new Error(`crypto.randomUUID is not available in this Node.js environment: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
   
