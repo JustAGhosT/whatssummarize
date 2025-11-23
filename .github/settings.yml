@@ -1,0 +1,70 @@
+repository:
+  name: Mystira.App
+  description: Interactive adventure platform for children with educational storytelling
+  topics:
+    - dotnet
+    - blazor
+    - azure
+    - clean-architecture
+    - education
+    - children
+    - pwa
+
+  private: false
+  has_issues: true
+  has_projects: true
+  has_wiki: true
+  has_downloads: true
+
+  default_branch: main
+
+  allow_squash_merge: true
+  allow_merge_commit: false
+  allow_rebase_merge: true
+
+  delete_branch_on_merge: true
+
+  enable_automated_security_fixes: true
+  enable_vulnerability_alerts: true
+
+labels:
+  - name: architecture
+    color: 0052cc
+    description: Architecture and design discussions
+
+  - name: security
+    color: d73a4a
+    description: Security vulnerability or concern
+
+  - name: coppa-compliance
+    color: fbca04
+    description: COPPA compliance related
+
+  - name: performance
+    color: a2eeef
+    description: Performance improvements
+
+  - name: ui-ux
+    color: 7057ff
+    description: User interface and experience
+
+branches:
+  - name: main
+    protection:
+      required_status_checks:
+        strict: true
+        contexts:
+          - build
+          - test
+          - security-scan
+
+      enforce_admins: true
+
+      required_pull_request_reviews:
+        required_approving_review_count: 1
+        dismiss_stale_reviews: true
+        require_code_owner_reviews: true
+
+      restrictions:
+        users: []
+        teams: []

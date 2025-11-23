@@ -1,0 +1,47 @@
+name: MCP Command Execution
+description: Execute MCP commands via GitHub Issues
+title: "[MCP]: "
+labels: ["mcp-command", "automation"]
+body:
+  - type: dropdown
+    id: command
+    attributes:
+      label: Command
+      description: Which MCP command to execute?
+      options:
+        - Create API Endpoint
+        - Create Use Case
+        - Create Domain Entity
+        - Run Architecture Check
+        - Generate Tests
+        - Deploy to Staging
+    validations:
+      required: true
+
+  - type: input
+    id: entity
+    attributes:
+      label: Entity Name
+      description: Name of the entity (if applicable)
+      placeholder: "GameSession"
+
+  - type: textarea
+    id: parameters
+    attributes:
+      label: Additional Parameters
+      description: JSON parameters for the command
+      placeholder: |
+        {
+          "action": "Create",
+          "includeTests": true
+        }
+
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: Confirmations
+      options:
+        - label: I have verified this follows architectural rules
+          required: true
+        - label: I have checked existing code for similar patterns
+          required: true

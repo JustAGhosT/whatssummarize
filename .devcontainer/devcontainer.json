@@ -1,0 +1,60 @@
+{
+  "name": "Mystira Development Environment",
+  "image": "mcr.microsoft.com/devcontainers/dotnet:9.0",
+
+  "features": {
+    "ghcr.io/devcontainers/features/azure-cli:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20"
+    }
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-dotnettools.csharp",
+        "ms-dotnettools.vscode-dotnet-runtime",
+        "ms-azuretools.vscode-docker",
+        "ms-vscode.vscode-node-azure-pack",
+        "GitHub.copilot",
+        "GitHub.copilot-chat"
+      ],
+      "settings": {
+        "dotnet.defaultSolution": "Mystira.App.sln",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+          "source.organizeImports": true
+        },
+        "github.copilot.enable": {
+          "*": true
+        }
+      }
+    },
+
+    "codespaces": {
+      "repositories": {
+        "phoenixvc/Mystira.App": {
+          "permissions": {
+            "contents": "write",
+            "pull_requests": "write",
+            "issues": "write"
+          }
+        }
+      }
+    }
+  },
+
+  "postCreateCommand": "dotnet restore && dotnet build",
+
+  "forwardPorts": [5000, 5001, 7071],
+
+  "mounts": [
+    "source=${localWorkspaceFolder}/.github/copilot-instructions.md,target=/workspace/.copilot/instructions.md,type=bind,consistency=cached"
+  ],
+
+  "remoteEnv": {
+    "ASPNETCORE_ENVIRONMENT": "Development",
+    "DOTNET_CLI_TELEMETRY_OPTOUT": "1"
+  }
+}
