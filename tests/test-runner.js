@@ -181,6 +181,11 @@ const runTests = async () => {
             });
             // Wait a bit for graceful shutdown
             await new Promise(resolve => setTimeout(resolve, 1000));
+            serverProcess.kill('SIGTERM');
+            // Force kill if still running
+            if (!serverProcess.killed) {
+              serverProcess.kill('SIGKILL');
+            }
           }
         } catch (e) {
           console.error('Error stopping server:', e);
