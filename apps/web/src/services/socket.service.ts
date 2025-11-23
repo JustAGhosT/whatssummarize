@@ -28,6 +28,8 @@ class SocketService {
   }
 
   private initialize() {
+    // SECURITY HOTSPOT: localStorage is vulnerable to XSS attacks
+    // TODO: Migrate to Supabase Auth which uses secure httpOnly cookies
     const token = localStorage.getItem('authToken');
     if (!token) return;
 
@@ -35,6 +37,8 @@ class SocketService {
   }
 
   private initializeSocket() {
+    // SECURITY HOTSPOT: localStorage is vulnerable to XSS attacks  
+    // TODO: Migrate to Supabase Auth which uses secure httpOnly cookies
     const token = localStorage.getItem('authToken');
     if (!token) return;
 

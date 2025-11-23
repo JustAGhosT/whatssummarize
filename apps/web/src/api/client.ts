@@ -28,6 +28,9 @@ class ApiClient {
 
   setAuthToken(token: string | null) {
     this.authToken = token;
+    // SECURITY HOTSPOT: localStorage is vulnerable to XSS attacks
+    // TODO: Migrate to Supabase Auth which uses secure httpOnly cookies
+    // This is legacy code that should be replaced with Supabase client authentication
     if (token) {
       localStorage.setItem('authToken', token);
     } else {
@@ -101,7 +104,9 @@ class ApiClient {
 
 export const apiClient = new ApiClient();
 
-// Initialize auth token from localStorage if it exists
+// SECURITY HOTSPOT: localStorage is vulnerable to XSS attacks
+// TODO: Migrate to Supabase Auth which uses secure httpOnly cookies
+// Initialize auth token from localStorage if it exists (legacy support)
 const savedToken = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
 if (savedToken) {
   apiClient.setAuthToken(savedToken);
