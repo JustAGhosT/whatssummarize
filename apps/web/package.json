@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@ant-design/icons": "^6.0.0",
+    "@supabase/ssr": "^0.6.1",
     "@whatssummarize/contexts": "workspace:^",
     "@whatssummarize/ui": "workspace:*",
     "antd": "^5.26.5",
