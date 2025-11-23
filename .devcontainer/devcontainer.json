@@ -1,30 +1,26 @@
 {
-  "name": "Mystira Development Environment",
-  "image": "mcr.microsoft.com/devcontainers/dotnet:9.0",
+  "name": "WhatsApp Conversation Summarizer Development Environment",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:20",
 
   "features": {
-    "ghcr.io/devcontainers/features/azure-cli:1": {},
-    "ghcr.io/devcontainers/features/github-cli:1": {},
-    "ghcr.io/devcontainers/features/node:1": {
-      "version": "20"
-    }
+    "ghcr.io/devcontainers/features/github-cli:1": {}
   },
 
   "customizations": {
     "vscode": {
       "extensions": [
-        "ms-dotnettools.csharp",
-        "ms-dotnettools.vscode-dotnet-runtime",
-        "ms-azuretools.vscode-docker",
-        "ms-vscode.vscode-node-azure-pack",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
         "GitHub.copilot",
-        "GitHub.copilot-chat"
+        "GitHub.copilot-chat",
+        "bradlc.vscode-tailwindcss"
       ],
       "settings": {
-        "dotnet.defaultSolution": "Mystira.App.sln",
         "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
         "editor.codeActionsOnSave": {
-          "source.organizeImports": true
+          "source.organizeImports": true,
+          "source.fixAll.eslint": true
         },
         "github.copilot.enable": {
           "*": true
@@ -34,7 +30,7 @@
 
     "codespaces": {
       "repositories": {
-        "phoenixvc/Mystira.App": {
+        "JustAGhosT/whatssummarize": {
           "permissions": {
             "contents": "write",
             "pull_requests": "write",
@@ -45,16 +41,15 @@
     }
   },
 
-  "postCreateCommand": "dotnet restore && dotnet build",
+  "postCreateCommand": "corepack enable && pnpm install && pnpm build",
 
-  "forwardPorts": [5000, 5001, 7071],
+  "forwardPorts": [3000, 3001],
 
   "mounts": [
     "source=${localWorkspaceFolder}/.github/copilot-instructions.md,target=/workspace/.copilot/instructions.md,type=bind,consistency=cached"
   ],
 
   "remoteEnv": {
-    "ASPNETCORE_ENVIRONMENT": "Development",
-    "DOTNET_CLI_TELEMETRY_OPTOUT": "1"
+    "NODE_ENV": "development"
   }
 }
