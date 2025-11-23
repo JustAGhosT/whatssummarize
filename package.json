@@ -82,8 +82,5 @@
     "*.{json,md,mdx,yml,yaml}": [
       "prettier --write"
     ]
-  },
-  "dependencies": {
-    "@supabase/ssr": "^0.7.0"
   }
 }

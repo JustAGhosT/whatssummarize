@@ -8,11 +8,12 @@ const generateTestMessages = (count: number) => {
   let timestamp = Date.now() - count * 60000; // Spread messages over time
   
   for (let i = 0; i < count; i++) {
+    // NOSONAR: Math.random() is safe here - only used for generating test data, not for security purposes
     const isFromMe = Math.random() > 0.5;
     messages.push({
       id: `msg-${i}`,
-      sender: isFromMe ? 'current-user' : `user-${Math.floor(Math.random() * 5) + 1}`,
-      content: `This is test message #${i + 1}. `.repeat(Math.floor(Math.random() * 5) + 1).trim(),
+      sender: isFromMe ? 'current-user' : `user-${Math.floor(Math.random() * 5) + 1}`, // NOSONAR: test data only
+      content: `This is test message #${i + 1}. `.repeat(Math.floor(Math.random() * 5) + 1).trim(), // NOSONAR: test data only
       timestamp: new Date(timestamp).toISOString(),
       isFromMe,
     });
