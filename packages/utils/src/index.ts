@@ -41,16 +41,28 @@ export function truncate(str: string, length: number): string {
 
 /**
  * Generates a unique ID using cryptographically secure random values
+ * Works in both browser and Node.js environments
  * @returns A unique ID string
  */
 export function generateId(): string {
-  // Use crypto.randomUUID for cryptographically secure random IDs
-  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+  // Browser environment: use global crypto
+  if (globalThis.window !== undefined && typeof crypto !== 'undefined' && crypto.randomUUID) {
     return crypto.randomUUID();
   }
-  // Fallback for environments without crypto.randomUUID
-  // This should not happen in modern environments, but we throw an error
-  // rather than use insecure Math.random()
+  
+  // Node.js environment: import and use node:crypto
+  if (globalThis.window === undefined) {
+    try {
+      // Dynamic import for Node.js crypto module
+      const nodeCrypto = require('node:crypto');
+      return nodeCrypto.randomUUID();
+    } catch (error) {
+      // Include original error information in the thrown error
+      throw new Error(`crypto.randomUUID is not available in this Node.js environment: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+  
+  // Fallback error for unsupported environments
   throw new Error('crypto.randomUUID is not available in this environment');
 }
 

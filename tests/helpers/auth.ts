@@ -13,7 +13,13 @@ type TestUser = {
 
 export async function createTestUser(): Promise<TestUser> {
   const testEmail = `test-${uuidv4()}@example.com`;
-  const testPassword = 'Test@1234';
+  // Use environment variable for test password to avoid hard-coded credentials
+  // Fallback is provided for local development only - in CI/CD, TEST_USER_PASSWORD must be set
+  const testPassword = process.env.TEST_USER_PASSWORD || 'Test@1234';
+  
+  if (!process.env.TEST_USER_PASSWORD && process.env.CI) {
+    throw new Error('TEST_USER_PASSWORD environment variable must be set in CI/CD environments');
+  }
   
   // Create user in Supabase
   const { data: authData, error: signUpError } = await supabase.auth.signUp({

@@ -1,6 +1,6 @@
-const { exec } = require('child_process');
-const path = require('path');
-const fs = require('fs');
+const { spawn } = require('node:child_process');
+const path = require('node:path');
+const fs = require('node:fs');
 
 // Colors for console output
 const colors = {
@@ -12,25 +12,60 @@ const colors = {
   blue: '\x1b[34m'
 };
 
-// Helper function to run commands
+// Helper function to run commands safely
+// Commands are validated against an allowlist to prevent arbitrary command execution
+// Note: Commands are resolved from PATH in test/dev environment
+// In production deployments, ensure PATH only contains trusted directories
 const runCommand = (command, cwd = process.cwd()) => {
   return new Promise((resolve, reject) => {
+    // Validate that command is from our controlled TEST_CONFIG
+    const allowedCommands = ['npm', 'npx', 'node', 'echo'];
+    const commandParts = command.trim().split(/\s+/);
+    const baseCommand = commandParts[0];
+    
+    if (!allowedCommands.includes(baseCommand)) {
+      return reject(new Error(`Command '${baseCommand}' is not in the allowed list`));
+    }
+    
     console.log(`${colors.cyan}Running: ${command}${colors.reset}`);
-    const child = exec(command, { cwd }, (error, stdout, stderr) => {
-      if (error) {
+    
+    // Use spawn for better security - separates command from arguments
+    // NOSONAR: S4036 - PATH usage is intentional for test runner, commands are validated against allowlist
+    const args = commandParts.slice(1);
+    const child = spawn(baseCommand, args, { 
+      cwd, 
+      shell: false, // Disable shell to prevent injection
+      stdio: ['ignore', 'pipe', 'pipe']
+    });
+    
+    let stdout = '';
+    let stderr = '';
+    
+    child.stdout.on('data', (data) => {
+      const text = data.toString();
+      stdout += text;
+      process.stdout.write(text);
+    });
+    
+    child.stderr.on('data', (data) => {
+      const text = data.toString();
+      stderr += text;
+      process.stderr.write(text);
+    });
+    
+    child.on('close', (code) => {
+      if (code !== 0) {
+        const error = new Error(`Command exited with code ${code}`);
         console.error(`${colors.red}Error: ${error.message}${colors.reset}`);
         return reject(error);
       }
-      if (stderr) {
-        console.error(stderr);
-      }
-      console.log(stdout);
       resolve({ stdout, stderr });
     });
-
-    // Forward child process output
-    child.stdout.pipe(process.stdout);
-    child.stderr.pipe(process.stderr);
+    
+    child.on('error', (error) => {
+      console.error(`${colors.red}Error: ${error.message}${colors.reset}`);
+      reject(error);
+    });
   });
 };
 
@@ -92,12 +127,21 @@ const runTests = async () => {
     // Start the development server for E2E tests
     if (fs.existsSync(path.join(process.cwd(), 'tests', 'e2e'))) {
       console.log(`\n${colors.cyan}=== Starting Development Server ===${colors.reset}`);
-      const serverProcess = exec('npm run dev');
+      
+      // Use spawn for better security - no shell injection risk
+      // Note: npm command is resolved from PATH in test/dev environment
+      // In production deployments, ensure PATH only contains trusted directories
+      // NOSONAR: S4036 - PATH usage is intentional for test runner, commands are validated against allowlist
+      const serverProcess = spawn('npm', ['run', 'dev'], {
+        shell: false,
+        stdio: ['ignore', 'pipe', 'pipe']
+      });
       
       // Forward server output to a buffer
       let serverOutput = '';
       serverProcess.stdout.on('data', (data) => {
         serverOutput += data.toString();
+        process.stdout.write(data);
       });
       
       serverProcess.stderr.on('data', (data) => {
@@ -116,7 +160,15 @@ const runTests = async () => {
       } finally {
         // Ensure server is killed after tests
         try {
-          process.kill(serverProcess.pid, 'SIGTERM');
+          if (serverProcess && !serverProcess.killed) {
+            serverProcess.kill('SIGTERM');
+            // Wait a bit for graceful shutdown
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            // Force kill if still running
+            if (!serverProcess.killed) {
+              serverProcess.kill('SIGKILL');
+            }
+          }
         } catch (e) {
           console.error('Error stopping server:', e);
         }
