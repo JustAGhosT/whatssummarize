@@ -10,6 +10,8 @@ import chatExportRoutes from './routes/chat-export.routes.js';
 import { logger } from './utils/logger.js';
 import { correlationMiddleware } from './middleware/correlation.js';
 import { metricsMiddleware, metrics } from './services/metrics.service.js';
+import { idempotencyMiddleware, deduplicationService } from './services/deduplication.service.js';
+import { getAllCircuitBreakerStats } from './services/circuit-breaker.service.js';
 
 export const createApp = (): Application => {
   const app = express();
@@ -47,6 +49,22 @@ export const createApp = (): Application => {
   // Metrics endpoint (for monitoring)
   app.get('/metrics', (_req: Request, res: Response) => {
     res.status(200).json(metrics.getSummary());
+  });
+
+  // Circuit breaker status endpoint
+  app.get('/circuit-breakers', (_req: Request, res: Response) => {
+    res.status(200).json({
+      circuitBreakers: getAllCircuitBreakerStats(),
+      deduplication: deduplicationService.getStats(),
+    });
+  });
+
+  // Idempotency middleware for POST/PUT/PATCH requests
+  app.use('/api', (req: Request, res: Response, next: NextFunction) => {
+    if (['POST', 'PUT', 'PATCH'].includes(req.method)) {
+      return idempotencyMiddleware(req, res, next);
+    }
+    next();
   });
 
   // API Routes

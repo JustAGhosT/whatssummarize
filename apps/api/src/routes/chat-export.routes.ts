@@ -3,6 +3,8 @@ import multer, { FileFilterCallback } from 'multer';
 import { authenticateToken } from '../middleware/auth.middleware.js';
 import { parseWhatsAppExport, isValidWhatsAppExport } from '../services/chat-export.service.js';
 import { logger } from '../utils/logger.js';
+import { deduplicationService } from '../services/deduplication.service.js';
+import { metrics } from '../services/metrics.service.js';
 
 declare global {
   namespace Express {
@@ -197,6 +199,9 @@ router.post(
   '/extension',
   authenticateToken,
   async (req, res) => {
+    const startTime = Date.now();
+    let success = false;
+
     try {
       const userId = req.user?.id;
       if (!userId) {
@@ -208,6 +213,7 @@ router.post(
       // Validate the chat data structure
       if (!isValidExtensionChatData(chatData)) {
         logger.warn(`Invalid extension chat data from user ${userId}`);
+        metrics.trackExtraction(false, 'chrome-extension');
         return res.status(400).json({
           error: 'Invalid chat data format. Please ensure the extension is up to date.'
         });
@@ -216,8 +222,21 @@ router.post(
       // Additional validation: check message count matches array length
       if (chatData.messageCount !== chatData.messages.length) {
         logger.warn(`Message count mismatch from user ${userId}: claimed ${chatData.messageCount}, got ${chatData.messages.length}`);
+        metrics.trackExtraction(false, 'chrome-extension');
         return res.status(400).json({
           error: 'Message count mismatch'
+        });
+      }
+
+      // Check for duplicate extraction (same chat within 5 minute window)
+      const extractionHash = deduplicationService.generateExtractionHash(chatData.chatId, userId, 5);
+      if (deduplicationService.isDuplicate(extractionHash)) {
+        const cachedResult = deduplicationService.getCachedResult<{ chatId: string }>(extractionHash);
+        logger.info(`Duplicate extraction detected for chat ${chatData.chatId} from user ${userId}`);
+        return res.status(200).json({
+          message: 'Chat data already received (duplicate)',
+          data: cachedResult || { chatId: chatData.chatId },
+          duplicate: true,
         });
       }
 
@@ -232,17 +251,26 @@ router.post(
       // TODO: Queue for AI summarization
       // await queueForSummarization(chatData, userId);
 
+      const result = {
+        chatId: chatData.chatId,
+        chatName: sanitizedChatName,
+        messageCount: chatData.messages.length,
+        receivedAt: new Date().toISOString(),
+      };
+
+      // Mark as processed for deduplication
+      deduplicationService.markProcessed(extractionHash, result);
+
+      success = true;
+      metrics.trackExtraction(true, 'chrome-extension', chatData.messages.length);
+
       res.status(200).json({
         message: 'Chat data received successfully',
-        data: {
-          chatId: chatData.chatId,
-          chatName: sanitizedChatName,
-          messageCount: chatData.messages.length,
-          receivedAt: new Date().toISOString(),
-        },
+        data: result,
       });
     } catch (error) {
       logger.error('Error processing extension chat data:', error);
+      metrics.trackExtraction(false, 'chrome-extension');
       const errorMessage =
         error instanceof Error ? error.message : 'Failed to process chat data';
       res.status(500).json({ error: errorMessage });
