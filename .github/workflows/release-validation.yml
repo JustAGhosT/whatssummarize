@@ -1,0 +1,349 @@
+name: Release Validation
+
+on:
+  # Run before releases
+  release:
+    types: [created]
+
+  # Run on workflow dispatch for testing
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to validate'
+        required: true
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+      skip_infra_check:
+        description: 'Skip infrastructure validation'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  id-token: write
+  contents: read
+  issues: write
+
+jobs:
+  # =============================================================================
+  # Validate Infrastructure Exists
+  # =============================================================================
+  validate-infrastructure:
+    name: Validate Infrastructure (${{ matrix.environment }})
+    runs-on: ubuntu-latest
+    if: ${{ !inputs.skip_infra_check }}
+    strategy:
+      matrix:
+        environment: ${{ github.event_name == 'workflow_dispatch' && fromJson(format('["{0}"]', github.event.inputs.environment)) || fromJson('["prod"]') }}
+    environment: ${{ matrix.environment }}
+
+    outputs:
+      validation_passed: ${{ steps.validate.outputs.passed }}
+      missing_resources: ${{ steps.validate.outputs.missing }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+
+      - name: Azure Login
+        uses: azure/login@cb79c773a3cfa27f31f25eb3f677781210c9ce3d # v1.6.1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Install jq
+        run: sudo apt-get install -y jq
+
+      - name: Validate Azure Resources
+        id: validate
+        run: |
+          ENV="${{ matrix.environment }}"
+          PROJECT="whatssummarize"
+          RG="rg-${PROJECT}-${ENV}"
+
+          echo "=============================================="
+          echo "Validating Azure Resources for Release"
+          echo "Environment: $ENV"
+          echo "Resource Group: $RG"
+          echo "=============================================="
+
+          MISSING=""
+          PASSED="true"
+
+          # Check Resource Group
+          echo "Checking resource group..."
+          if ! az group show --name "$RG" &>/dev/null; then
+            echo "❌ Resource group not found: $RG"
+            MISSING="${MISSING}resource-group,"
+            PASSED="false"
+          else
+            echo "✅ Resource group exists"
+          fi
+
+          # Check Key Vault
+          KV_NAME="kv${PROJECT}${ENV}"
+          KV_NAME="${KV_NAME//-/}"
+          echo "Checking Key Vault: $KV_NAME..."
+          if ! az keyvault show --name "$KV_NAME" &>/dev/null; then
+            echo "❌ Key Vault not found"
+            MISSING="${MISSING}key-vault,"
+            PASSED="false"
+          else
+            echo "✅ Key Vault exists"
+
+            # Check critical secrets
+            for secret in "azure-openai-api-key" "cosmos-db-key"; do
+              if ! az keyvault secret show --vault-name "$KV_NAME" --name "$secret" &>/dev/null; then
+                echo "⚠️  Secret missing: $secret"
+                MISSING="${MISSING}secret:${secret},"
+              else
+                echo "✅ Secret exists: $secret"
+              fi
+            done
+          fi
+
+          # Check Storage Account
+          STORAGE_NAME="st${PROJECT}${ENV}"
+          STORAGE_NAME="${STORAGE_NAME//-/}"
+          echo "Checking Storage Account: $STORAGE_NAME..."
+          if ! az storage account show --name "$STORAGE_NAME" --resource-group "$RG" &>/dev/null; then
+            echo "❌ Storage account not found"
+            MISSING="${MISSING}storage,"
+            PASSED="false"
+          else
+            echo "✅ Storage account exists"
+          fi
+
+          # Check Azure OpenAI
+          OPENAI_NAME="oai-${PROJECT}-${ENV}"
+          echo "Checking Azure OpenAI: $OPENAI_NAME..."
+          if ! az cognitiveservices account show --name "$OPENAI_NAME" --resource-group "$RG" &>/dev/null; then
+            echo "⚠️  Azure OpenAI not found (optional)"
+            MISSING="${MISSING}openai,"
+          else
+            echo "✅ Azure OpenAI exists"
+
+            # Check for GPT-4 deployment
+            if ! az cognitiveservices account deployment list --name "$OPENAI_NAME" --resource-group "$RG" -o json | jq -e '.[] | select(.name == "gpt-4")' &>/dev/null; then
+              echo "⚠️  GPT-4 deployment not found"
+              MISSING="${MISSING}openai-gpt4,"
+            else
+              echo "✅ GPT-4 deployment exists"
+            fi
+          fi
+
+          # Check Cosmos DB
+          COSMOS_NAME="cosmos-${PROJECT}-${ENV}"
+          echo "Checking Cosmos DB: $COSMOS_NAME..."
+          if ! az cosmosdb show --name "$COSMOS_NAME" --resource-group "$RG" &>/dev/null; then
+            echo "⚠️  Cosmos DB not found (optional)"
+            MISSING="${MISSING}cosmosdb,"
+          else
+            echo "✅ Cosmos DB exists"
+          fi
+
+          # Check Redis
+          REDIS_NAME="redis-${PROJECT}-${ENV}"
+          echo "Checking Redis Cache: $REDIS_NAME..."
+          if ! az redis show --name "$REDIS_NAME" --resource-group "$RG" &>/dev/null; then
+            echo "⚠️  Redis Cache not found (optional)"
+            MISSING="${MISSING}redis,"
+          else
+            echo "✅ Redis Cache exists"
+          fi
+
+          # Check App Insights
+          APPI_NAME="appi-${PROJECT}-${ENV}"
+          echo "Checking Application Insights: $APPI_NAME..."
+          if ! az monitor app-insights component show --app "$APPI_NAME" --resource-group "$RG" &>/dev/null; then
+            echo "❌ Application Insights not found"
+            MISSING="${MISSING}app-insights,"
+            PASSED="false"
+          else
+            echo "✅ Application Insights exists"
+          fi
+
+          # Check Container Apps
+          CAE_NAME="cae-${PROJECT}-${ENV}"
+          echo "Checking Container Apps Environment: $CAE_NAME..."
+          if ! az containerapp env show --name "$CAE_NAME" --resource-group "$RG" &>/dev/null; then
+            echo "❌ Container Apps Environment not found"
+            MISSING="${MISSING}container-apps-env,"
+            PASSED="false"
+          else
+            echo "✅ Container Apps Environment exists"
+
+            # Check API app
+            CA_NAME="ca-${PROJECT}-${ENV}-api"
+            if ! az containerapp show --name "$CA_NAME" --resource-group "$RG" &>/dev/null; then
+              echo "❌ API Container App not found"
+              MISSING="${MISSING}container-app-api,"
+              PASSED="false"
+            else
+              echo "✅ API Container App exists"
+            fi
+          fi
+
+          # Output results
+          echo ""
+          echo "=============================================="
+          echo "Validation Results"
+          echo "=============================================="
+          if [ "$PASSED" = "true" ]; then
+            echo "✅ All required resources exist"
+          else
+            echo "❌ Some required resources are missing"
+            echo "Missing: $MISSING"
+          fi
+
+          echo "passed=$PASSED" >> $GITHUB_OUTPUT
+          echo "missing=$MISSING" >> $GITHUB_OUTPUT
+
+      - name: Create Validation Report
+        if: always()
+        run: |
+          cat << EOF > validation-report.md
+          # Infrastructure Validation Report
+
+          **Environment:** ${{ matrix.environment }}
+          **Date:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          **Run ID:** ${{ github.run_id }}
+
+          ## Results
+
+          - **Passed:** ${{ steps.validate.outputs.passed }}
+          - **Missing Resources:** ${{ steps.validate.outputs.missing || 'None' }}
+
+          ## Required for Release
+
+          | Resource | Required | Status |
+          |----------|----------|--------|
+          | Resource Group | Yes | ${{ contains(steps.validate.outputs.missing, 'resource-group') && '❌ Missing' || '✅ OK' }} |
+          | Key Vault | Yes | ${{ contains(steps.validate.outputs.missing, 'key-vault') && '❌ Missing' || '✅ OK' }} |
+          | Storage Account | Yes | ${{ contains(steps.validate.outputs.missing, 'storage') && '❌ Missing' || '✅ OK' }} |
+          | App Insights | Yes | ${{ contains(steps.validate.outputs.missing, 'app-insights') && '❌ Missing' || '✅ OK' }} |
+          | Container Apps | Yes | ${{ contains(steps.validate.outputs.missing, 'container-apps') && '❌ Missing' || '✅ OK' }} |
+
+          ## Optional Resources
+
+          | Resource | Status |
+          |----------|--------|
+          | Azure OpenAI | ${{ contains(steps.validate.outputs.missing, 'openai,') && '⚠️ Not configured' || '✅ OK' }} |
+          | Cosmos DB | ${{ contains(steps.validate.outputs.missing, 'cosmosdb') && '⚠️ Not configured' || '✅ OK' }} |
+          | Redis Cache | ${{ contains(steps.validate.outputs.missing, 'redis') && '⚠️ Not configured' || '✅ OK' }} |
+          EOF
+
+          cat validation-report.md
+
+      - name: Upload Validation Report
+        uses: actions/upload-artifact@834a144ee995460fba8ed112a2fc961b36a5ec5a # v4.3.6
+        with:
+          name: validation-report-${{ matrix.environment }}
+          path: validation-report.md
+          retention-days: 30
+
+      - name: Fail if Required Resources Missing
+        if: steps.validate.outputs.passed == 'false'
+        run: |
+          echo "❌ Release validation failed! Required Azure resources are missing."
+          echo "Missing resources: ${{ steps.validate.outputs.missing }}"
+          echo ""
+          echo "Please deploy infrastructure first:"
+          echo "  ./infra/scripts/deploy.sh ${{ matrix.environment }}"
+          echo ""
+          echo "Or trigger the Infrastructure workflow manually."
+          exit 1
+
+  # =============================================================================
+  # Application Validation
+  # =============================================================================
+  validate-application:
+    name: Validate Application
+    runs-on: ubuntu-latest
+    needs: validate-infrastructure
+    if: always() && (needs.validate-infrastructure.result == 'success' || inputs.skip_infra_check)
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@fe02f16a352d659b7a8b369e36afe6af41e57315 # v4.0.0
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run linting
+        run: pnpm run lint
+
+      - name: Run tests
+        run: pnpm run test
+
+      - name: Build applications
+        run: pnpm run build
+
+      - name: Validate build outputs
+        run: |
+          echo "Checking build outputs..."
+
+          # Check web app build
+          if [ -d "apps/web/.next" ] || [ -d "apps/web/out" ]; then
+            echo "✅ Web app build exists"
+          else
+            echo "❌ Web app build not found"
+            exit 1
+          fi
+
+          # Check API build
+          if [ -d "apps/api/dist" ]; then
+            echo "✅ API build exists"
+          else
+            echo "❌ API build not found"
+            exit 1
+          fi
+
+          echo "✅ All build validations passed"
+
+  # =============================================================================
+  # Release Summary
+  # =============================================================================
+  release-summary:
+    name: Release Summary
+    runs-on: ubuntu-latest
+    needs: [validate-infrastructure, validate-application]
+    if: always()
+
+    steps:
+      - name: Generate Summary
+        run: |
+          echo "# Release Validation Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Infrastructure | ${{ needs.validate-infrastructure.result == 'success' && '✅ Passed' || (needs.validate-infrastructure.result == 'skipped' && '⏭️ Skipped' || '❌ Failed') }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Application | ${{ needs.validate-application.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ needs.validate-infrastructure.result }}" == "success" ] && [ "${{ needs.validate-application.result }}" == "success" ]; then
+            echo "## ✅ Ready for Release" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "## ❌ Not Ready for Release" >> $GITHUB_STEP_SUMMARY
+            echo "Please fix the failing checks before releasing." >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Fail if any check failed
+        if: needs.validate-infrastructure.result == 'failure' || needs.validate-application.result == 'failure'
+        run: |
+          echo "Release validation failed!"
+          exit 1

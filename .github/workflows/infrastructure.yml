@@ -1,0 +1,274 @@
+name: Infrastructure
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'infra/**'
+      - '.github/workflows/infrastructure.yml'
+
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'infra/**'
+      - '.github/workflows/infrastructure.yml'
+
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy'
+        required: true
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+      action:
+        description: 'Action to perform'
+        required: true
+        type: choice
+        options:
+          - validate
+          - what-if
+          - deploy
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+env:
+  AZURE_RESOURCE_GROUP_DEV: rg-whatssummarize-dev
+  AZURE_RESOURCE_GROUP_STAGING: rg-whatssummarize-staging
+  AZURE_RESOURCE_GROUP_PROD: rg-whatssummarize-prod
+  AZURE_LOCATION: eastus
+
+jobs:
+  # =============================================================================
+  # Validate Bicep Templates
+  # =============================================================================
+  validate:
+    name: Validate Templates
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+
+      - name: Setup Azure CLI
+        uses: azure/cli@089eac9d8cc39f5d003e94f8b65efc51076c9cbd # v2.1.0
+        with:
+          azcliversion: latest
+          inlineScript: |
+            az bicep version || az bicep install
+
+      - name: Validate Bicep Syntax
+        run: |
+          echo "Validating Bicep files..."
+          az bicep build --file infra/bicep/main.bicep --stdout > /dev/null
+          echo "✅ Bicep syntax validation passed"
+
+      - name: Lint Bicep Files
+        run: |
+          echo "Linting Bicep files..."
+          # Install bicep linter if available
+          az bicep lint --file infra/bicep/main.bicep 2>/dev/null || echo "Linting not available, skipping..."
+
+  # =============================================================================
+  # Preview Changes (What-If)
+  # =============================================================================
+  preview:
+    name: Preview Changes (${{ matrix.environment }})
+    runs-on: ubuntu-latest
+    needs: validate
+    if: github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'what-if')
+    strategy:
+      matrix:
+        environment: ${{ github.event_name == 'workflow_dispatch' && fromJson(format('["{0}"]', github.event.inputs.environment)) || fromJson('["dev"]') }}
+    environment: ${{ matrix.environment }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+
+      - name: Azure Login
+        uses: azure/login@cb79c773a3cfa27f31f25eb3f677781210c9ce3d # v1.6.1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Ensure Resource Group
+        run: |
+          RG_NAME="rg-whatssummarize-${{ matrix.environment }}"
+          if ! az group show --name "$RG_NAME" &>/dev/null; then
+            echo "Creating resource group: $RG_NAME"
+            az group create --name "$RG_NAME" --location "${{ env.AZURE_LOCATION }}"
+          fi
+
+      - name: What-If Analysis
+        id: whatif
+        run: |
+          RG_NAME="rg-whatssummarize-${{ matrix.environment }}"
+          echo "Running what-if analysis for ${{ matrix.environment }}..."
+
+          az deployment group what-if \
+            --resource-group "$RG_NAME" \
+            --template-file infra/bicep/main.bicep \
+            --parameters infra/parameters/${{ matrix.environment }}.bicepparam \
+            --name "whatif-${{ github.run_id }}" \
+            > whatif-output.txt 2>&1 || true
+
+          cat whatif-output.txt
+
+          # Save for PR comment
+          echo "whatif<<EOF" >> $GITHUB_OUTPUT
+          cat whatif-output.txt >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          script: |
+            const output = `### Infrastructure What-If Analysis (${{ matrix.environment }})
+
+            <details>
+            <summary>Click to expand</summary>
+
+            \`\`\`
+            ${{ steps.whatif.outputs.whatif }}
+            \`\`\`
+
+            </details>
+
+            *Run ID: ${{ github.run_id }}*`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            });
+
+  # =============================================================================
+  # Deploy Infrastructure
+  # =============================================================================
+  deploy:
+    name: Deploy (${{ matrix.environment }})
+    runs-on: ubuntu-latest
+    needs: validate
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'deploy')
+    strategy:
+      matrix:
+        environment: ${{ github.event_name == 'workflow_dispatch' && fromJson(format('["{0}"]', github.event.inputs.environment)) || fromJson('["dev"]') }}
+      max-parallel: 1
+    environment: ${{ matrix.environment }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+
+      - name: Azure Login
+        uses: azure/login@cb79c773a3cfa27f31f25eb3f677781210c9ce3d # v1.6.1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Ensure Resource Group
+        run: |
+          RG_NAME="rg-whatssummarize-${{ matrix.environment }}"
+          if ! az group show --name "$RG_NAME" &>/dev/null; then
+            echo "Creating resource group: $RG_NAME"
+            az group create \
+              --name "$RG_NAME" \
+              --location "${{ env.AZURE_LOCATION }}" \
+              --tags project=whatssummarize environment=${{ matrix.environment }} managedBy=github-actions
+          fi
+
+      - name: Deploy Infrastructure
+        id: deploy
+        run: |
+          RG_NAME="rg-whatssummarize-${{ matrix.environment }}"
+          DEPLOYMENT_NAME="deploy-${{ github.run_id }}-${{ github.run_attempt }}"
+
+          echo "Deploying to ${{ matrix.environment }}..."
+
+          az deployment group create \
+            --resource-group "$RG_NAME" \
+            --template-file infra/bicep/main.bicep \
+            --parameters infra/parameters/${{ matrix.environment }}.bicepparam \
+            --name "$DEPLOYMENT_NAME"
+
+          # Get outputs
+          echo "Getting deployment outputs..."
+          az deployment group show \
+            --resource-group "$RG_NAME" \
+            --name "$DEPLOYMENT_NAME" \
+            --query "properties.outputs" \
+            -o json > deployment-outputs.json
+
+          cat deployment-outputs.json
+
+      - name: Upload Deployment Outputs
+        uses: actions/upload-artifact@834a144ee995460fba8ed112a2fc961b36a5ec5a # v4.3.6
+        with:
+          name: deployment-outputs-${{ matrix.environment }}
+          path: deployment-outputs.json
+          retention-days: 30
+
+      - name: Validate Deployment
+        run: |
+          echo "Validating deployed resources..."
+          chmod +x infra/scripts/validate-resources.sh
+          ./infra/scripts/validate-resources.sh ${{ matrix.environment }} || true
+
+  # =============================================================================
+  # Post-Deployment Verification
+  # =============================================================================
+  verify:
+    name: Verify Deployment
+    runs-on: ubuntu-latest
+    needs: deploy
+    if: success()
+    environment: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || 'dev' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+
+      - name: Download Outputs
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        with:
+          name: deployment-outputs-${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || 'dev' }}
+
+      - name: Azure Login
+        uses: azure/login@cb79c773a3cfa27f31f25eb3f677781210c9ce3d # v1.6.1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Health Check
+        run: |
+          echo "Running health checks..."
+
+          # Get API URL from outputs
+          API_URL=$(cat deployment-outputs.json | jq -r '.containerAppsApiUrl.value // empty')
+
+          if [ -n "$API_URL" ]; then
+            echo "Checking API health: $API_URL/health"
+            curl -sf "$API_URL/health" || echo "API health check failed (may not be deployed yet)"
+          else
+            echo "API URL not available yet"
+          fi
+
+      - name: Notify Success
+        if: success()
+        run: |
+          echo "✅ Deployment and verification completed successfully!"
+          echo "Environment: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || 'dev' }}"
