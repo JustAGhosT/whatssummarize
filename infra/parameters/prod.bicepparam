@@ -7,28 +7,17 @@ param environment = 'prod'
 param projectName = 'whatssummarize'
 param location = 'eastus'
 
-// Enable all services for production
-param enableOpenAI = true
+// Enable services for production
+// Note: OpenAI disabled - configure Azure AI Foundry separately via Azure Portal
+param enableOpenAI = false
 param enableCosmosDB = true
 param enableRedis = true
 param enableContainerApps = true
 param enableStaticWebApps = true
 
-// OpenAI deployments with higher capacity for production
-param openAIDeployments = [
-  {
-    name: 'gpt-4'
-    model: 'gpt-4'
-    version: '0613'
-    capacity: 20
-  }
-  {
-    name: 'gpt-35-turbo'
-    model: 'gpt-35-turbo'
-    version: '0613'
-    capacity: 60
-  }
-]
+// OpenAI deployments (only used if enableOpenAI = true)
+// Configure Azure AI Foundry manually and set AZURE_OPENAI_* env vars
+param openAIDeployments = []
 
 param adminEmail = 'admin@whatssummarize.com'
 
