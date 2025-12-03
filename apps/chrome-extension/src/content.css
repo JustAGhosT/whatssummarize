@@ -1,0 +1,106 @@
+/**
+ * WhatsSummarize Chrome Extension Styles
+ *
+ * Design System Adherence:
+ * - Uses WhatsApp brand colors from Phase 0.5
+ * - Primary: #25D366
+ * - Secondary: #128C7E
+ * - Follows glassmorphism design pattern
+ */
+
+#whatssummarize-fab {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+#ws-extract-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+  color: white;
+  border: none;
+  border-radius: 24px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#ws-extract-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.5);
+}
+
+#ws-extract-btn:active {
+  transform: translateY(0);
+}
+
+#ws-extract-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+#ws-status {
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  font-size: 13px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+#ws-status.ws-hidden {
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+}
+
+.ws-status-info {
+  color: #333;
+}
+
+.ws-status-success {
+  color: #25D366;
+}
+
+.ws-status-error {
+  color: #dc2626;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  #ws-status {
+    background: rgba(30, 30, 30, 0.95);
+    color: #fff;
+  }
+
+  .ws-status-info {
+    color: #ccc;
+  }
+}
+
+/* Loading animation */
+@keyframes ws-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+#ws-extract-btn.ws-loading {
+  animation: ws-pulse 1.5s ease-in-out infinite;
+  pointer-events: none;
+}
