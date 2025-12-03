@@ -12,7 +12,6 @@ on:
           - test
           - format
           - analyze
-          - deploy-staging
 
       parameters:
         description: 'Additional parameters (JSON)'
@@ -59,17 +58,6 @@ jobs:
           echo "Running code quality checks..."
           pnpm run lint
           pnpm run test:coverage
-
-      - name: Deploy to Staging
-        if: ${{ github.event.inputs.tool == 'deploy-staging' }}
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-        run: |
-          # Vercel deployment script
-          echo "Deploying to staging..."
-          npx vercel --token=$VERCEL_TOKEN
 
       - name: Create Tool Result Comment
         if: always()

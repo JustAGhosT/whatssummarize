@@ -121,7 +121,7 @@ Based on shadcn/ui methodology with Radix UI primitives:
 #### DevOps & Infrastructure
 - **Package Manager:** pnpm 8.x
 - **Monorepo Tool:** Turborepo
-- **Deployment:** Vercel (frontend), Supabase (backend)
+- **Deployment:** Azure Container Apps (frontend and backend)
 - **CI/CD:** GitHub Actions (partial)
 - **Code Quality:** ESLint, Prettier, Husky, lint-staged
 
@@ -485,7 +485,7 @@ return () => card.removeEventListener('mousemove', mouseMoveHandler as EventList
 #### DOC-4: Deployment Guide
 **Severity:** High
 **Current State:** Basic setup in README
-**Required:** Production deployment checklist for Vercel + Supabase
+**Required:** Production deployment checklist for Azure Container Apps + Supabase
 
 #### DOC-5: Security Best Practices
 **Severity:** High

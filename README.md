@@ -323,21 +323,15 @@ See `docs/api/openapi.yaml` for complete API documentation.
 
 ## Deployment
 
-### Vercel (Frontend)
+### Azure (Full Stack)
 
-1. Connect your GitHub repository to Vercel
-2. Set environment variables in Vercel dashboard
-3. Deploy with `git push`
+The application is deployed on Azure using the Infrastructure workflow:
 
-### API Deployment
+1. Deploy infrastructure using the GitHub Actions Infrastructure workflow
+2. Configure environment variables in Azure Container Apps
+3. Deploy with `git push` to trigger the CI/CD pipeline
 
-The API can be deployed to:
-- Vercel Serverless Functions
-- Railway
-- Render
-- Docker containers
-
-See `docs/runbook.md` for detailed deployment instructions.
+See `infra/` directory for Bicep templates and `docs/runbook.md` for detailed deployment instructions.
 
 ---
 
@@ -400,7 +394,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - [shadcn/ui](https://ui.shadcn.com/) - UI component inspiration
 - [Supabase](https://supabase.com/) - Authentication and database
-- [Vercel](https://vercel.com/) - Hosting platform
+- [Azure](https://azure.microsoft.com/) - Cloud infrastructure platform
 - [OpenAI](https://openai.com/) / [Anthropic](https://anthropic.com/) - AI providers
 
 ---
