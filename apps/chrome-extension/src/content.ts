@@ -523,7 +523,7 @@ function parseTimestamp(timeText: string): string {
 
 function generateMessageId(): string {
   // Use crypto.getRandomValues() for cryptographically secure random values
-  const randomBytes = new Uint8Array(8);
+  const randomBytes = new Uint8Array(5);
   crypto.getRandomValues(randomBytes);
   const randomHex = Array.from(randomBytes, b => b.toString(16).padStart(2, '0')).join('');
   return 'msg_' + Date.now().toString(36) + randomHex;
