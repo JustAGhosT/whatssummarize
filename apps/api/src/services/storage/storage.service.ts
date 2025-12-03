@@ -60,6 +60,38 @@ export interface StorageServiceConfig {
 // =============================================================================
 
 /**
+ * Extract HTTP status code from various error formats
+ * Supports errors with status, statusCode, or response.status properties
+ */
+function getHttpStatusFromError(error: unknown): number | undefined {
+  if (error === null || typeof error !== 'object') {
+    return undefined;
+  }
+
+  const err = error as Record<string, unknown>;
+
+  // Direct status property (e.g., from custom errors)
+  if (typeof err.status === 'number') {
+    return err.status;
+  }
+
+  // statusCode property (e.g., from some HTTP libraries)
+  if (typeof err.statusCode === 'number') {
+    return err.statusCode;
+  }
+
+  // Nested response.status (e.g., from axios-like errors)
+  if (err.response && typeof err.response === 'object') {
+    const response = err.response as Record<string, unknown>;
+    if (typeof response.status === 'number') {
+      return response.status;
+    }
+  }
+
+  return undefined;
+}
+
+/**
  * Fetch with timeout support
  */
 async function fetchWithTimeout(
@@ -98,7 +130,8 @@ async function withRetry<T>(
       lastError = error as Error;
 
       // Don't retry on client errors (4xx) except rate limiting (429)
-      if (error instanceof Error && error.message.includes('4') && !error.message.includes('429')) {
+      const status = getHttpStatusFromError(error);
+      if (status !== undefined && status >= 400 && status < 500 && status !== 429) {
         throw error;
       }
 

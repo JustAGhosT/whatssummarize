@@ -233,7 +233,7 @@ run_what_if() {
 }
 
 confirm_deployment() {
-    if [ "$FORCE" = true ]; then
+    if [[ "$FORCE" = true ]]; then
         return 0
     fi
 
@@ -247,17 +247,17 @@ confirm_deployment() {
     echo ""
 
     # Extra warning for production
-    if [ "$ENVIRONMENT" = "prod" ]; then
+    if [[ "$ENVIRONMENT" = "prod" ]]; then
         echo -e "${RED}⚠️  WARNING: You are about to deploy to PRODUCTION!${NC}"
         echo ""
         read -p "Type 'yes' to confirm production deployment: " confirm
-        if [ "$confirm" != "yes" ]; then
+        if [[ "$confirm" != "yes" ]]; then
             log_warning "Deployment cancelled by user"
             exit 0
         fi
     else
         read -p "Proceed with deployment? (y/N): " confirm
-        if [ "$confirm" != "y" ] && [ "$confirm" != "Y" ]; then
+        if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
             log_warning "Deployment cancelled by user"
             exit 0
         fi
@@ -274,7 +274,7 @@ deploy_infrastructure() {
     log_info "Parameter File: $param_file"
     echo ""
 
-    if [ "$VALIDATE_ONLY" = true ]; then
+    if [[ "$VALIDATE_ONLY" = true ]]; then
         log_info "Validating deployment..."
         az deployment group validate \
             --resource-group "$RESOURCE_GROUP" \
@@ -286,13 +286,13 @@ deploy_infrastructure() {
         return
     fi
 
-    if [ "$WHAT_IF" = true ]; then
+    if [[ "$WHAT_IF" = true ]]; then
         run_what_if
         return
     fi
 
     # Default behavior: run what-if first, then deploy
-    if [ "$SKIP_WHAT_IF" = false ]; then
+    if [[ "$SKIP_WHAT_IF" = false ]]; then
         run_what_if
         confirm_deployment
     fi
@@ -420,7 +420,7 @@ main() {
     validate_templates
     echo ""
 
-    if [ "$VALIDATE_ONLY" = false ]; then
+    if [[ "$VALIDATE_ONLY" = false ]]; then
         ensure_resource_group
         echo ""
     fi
@@ -428,7 +428,7 @@ main() {
     deploy_infrastructure
     echo ""
 
-    if [ "$WHAT_IF" = false ] && [ "$VALIDATE_ONLY" = false ]; then
+    if [[ "$WHAT_IF" = false && "$VALIDATE_ONLY" = false ]]; then
         post_deployment
         echo ""
     fi
