@@ -14,6 +14,7 @@
 // - Azure Key Vault (secrets management)
 // - Azure Container Apps (API hosting)
 // - Azure Static Web Apps (frontend hosting)
+// - Azure Budget Alerts (cost management)
 // =============================================================================
 
 targetScope = 'resourceGroup'
@@ -51,6 +52,12 @@ param enableStaticWebApps bool = true
 
 @description('Administrator email for alerts')
 param adminEmail string = ''
+
+@description('Enable budget alerts')
+param enableBudgetAlerts bool = true
+
+@description('Monthly budget amount in USD')
+param monthlyBudgetAmount int = environment == 'prod' ? 500 : environment == 'staging' ? 200 : 100
 
 @description('OpenAI model deployments')
 param openAIDeployments array = [
@@ -203,6 +210,18 @@ module staticWebApp 'modules/static-web-app.bicep' = if (enableStaticWebApps) {
     location: location
     tags: tags
     apiUrl: enableContainerApps ? containerApps.outputs.apiUrl : ''
+  }
+}
+
+// Budget Alerts (Cost Management)
+module budgetAlerts 'modules/budget-alerts.bicep' = if (enableBudgetAlerts && !empty(adminEmail)) {
+  name: 'budget-${environment}'
+  params: {
+    name: 'budget-${resourcePrefix}'
+    amount: monthlyBudgetAmount
+    contactEmails: [adminEmail]
+    environment: environment
+    tags: tags
   }
 }
 
