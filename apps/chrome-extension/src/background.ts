@@ -342,9 +342,15 @@ async function queuePendingUpload(data: any): Promise<void> {
     attempts: 0,
   });
 
-  // Keep only last 20 pending uploads
+  // Keep only last 20 pending uploads, warn if dropping
+  let dropped = 0;
   while (pending.length > 20) {
     pending.shift();
+    dropped++;
+  }
+
+  if (dropped > 0) {
+    console.warn(`[Background] Queue full. Dropped ${dropped} oldest upload(s) to make room.`);
   }
 
   await chrome.storage.local.set({ [STORAGE_KEYS.pendingUploads]: pending });

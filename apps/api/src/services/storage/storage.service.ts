@@ -19,8 +19,18 @@
 
 import { promises as fs } from 'fs';
 import { join, dirname } from 'path';
+import { createHmac } from 'crypto';
 import { logger } from '../../utils/logger.js';
 import { getStorageProvider, getAzureBlobStorageConfig, type StorageProvider } from '../../config/azure/index.js';
+
+// =============================================================================
+// Constants
+// =============================================================================
+
+const AZURE_API_VERSION = '2023-11-03';
+const REQUEST_TIMEOUT_MS = 30000;
+const MAX_RETRIES = 3;
+const RETRY_DELAY_MS = 1000;
 
 // =============================================================================
 // Types
@@ -43,6 +53,97 @@ export interface UploadOptions {
 export interface StorageServiceConfig {
   provider?: StorageProvider;
   localBasePath?: string;
+}
+
+// =============================================================================
+// Helper Functions
+// =============================================================================
+
+/**
+ * Extract HTTP status code from various error formats
+ * Supports errors with status, statusCode, or response.status properties
+ */
+function getHttpStatusFromError(error: unknown): number | undefined {
+  if (error === null || typeof error !== 'object') {
+    return undefined;
+  }
+
+  const err = error as Record<string, unknown>;
+
+  // Direct status property (e.g., from custom errors)
+  if (typeof err.status === 'number') {
+    return err.status;
+  }
+
+  // statusCode property (e.g., from some HTTP libraries)
+  if (typeof err.statusCode === 'number') {
+    return err.statusCode;
+  }
+
+  // Nested response.status (e.g., from axios-like errors)
+  if (err.response && typeof err.response === 'object') {
+    const response = err.response as Record<string, unknown>;
+    if (typeof response.status === 'number') {
+      return response.status;
+    }
+  }
+
+  return undefined;
+}
+
+/**
+ * Fetch with timeout support
+ */
+async function fetchWithTimeout(
+  url: string,
+  options: RequestInit,
+  timeoutMs: number = REQUEST_TIMEOUT_MS
+): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+    return response;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+/**
+ * Retry helper with exponential backoff
+ */
+async function withRetry<T>(
+  fn: () => Promise<T>,
+  maxRetries: number = MAX_RETRIES,
+  baseDelayMs: number = RETRY_DELAY_MS
+): Promise<T> {
+  let lastError: Error | undefined;
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error as Error;
+
+      // Don't retry on client errors (4xx) except rate limiting (429)
+      const status = getHttpStatusFromError(error);
+      if (status !== undefined && status >= 400 && status < 500 && status !== 429) {
+        throw error;
+      }
+
+      if (attempt < maxRetries) {
+        const delay = baseDelayMs * Math.pow(2, attempt);
+        logger.warn(`[StorageService] Retry attempt ${attempt + 1}/${maxRetries} after ${delay}ms`);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
+  }
+
+  throw lastError;
 }
 
 // =============================================================================
@@ -260,16 +361,20 @@ export class StorageService {
       );
     }
 
-    const response = await fetch(authUrl, {
-      method: 'PUT',
-      headers,
-      body: buffer,
-    });
+    const response = await withRetry(async () => {
+      const res = await fetchWithTimeout(authUrl, {
+        method: 'PUT',
+        headers,
+        body: buffer,
+      });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Azure Blob upload failed: ${response.status} - ${errorText}`);
-    }
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(`Azure Blob upload failed: ${res.status} - ${errorText}`);
+      }
+
+      return res;
+    });
 
     logger.info(`[StorageService] Uploaded to Azure: ${key}`);
 
@@ -492,6 +597,7 @@ export class StorageService {
     const canonicalizedResource = `/${accountName}/${containerName}/${blobName}`;
 
     // Build string to sign (Blob service format)
+    // https://docs.microsoft.com/rest/api/storageservices/authorize-with-shared-key#blob-queue-and-file-services-shared-key-lite-and-table-service-shared-key-lite-authorization
     const contentLength = headers['Content-Length'] || '';
     const contentType = headers['Content-Type'] || '';
 
