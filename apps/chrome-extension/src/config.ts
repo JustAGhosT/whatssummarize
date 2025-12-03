@@ -90,6 +90,30 @@ export const STORAGE_KEYS = {
   pendingUploads: 'pendingUploads',
 };
 
+// =============================================================================
+// Correlation ID Generation
+// =============================================================================
+
+/**
+ * Generate a unique correlation ID for tracing requests
+ */
+export function generateCorrelationId(): string {
+  const timestamp = Date.now().toString(36);
+  const random = Math.random().toString(36).substring(2, 14);
+  return `ext_${timestamp}_${random}`;
+}
+
+/**
+ * Get headers to include with API requests for tracing
+ */
+export function getTracingHeaders(): Record<string, string> {
+  return {
+    'x-correlation-id': generateCorrelationId(),
+    'x-source': 'chrome-extension',
+    'x-extension-version': chrome.runtime.getManifest().version,
+  };
+}
+
 // Default settings
 export interface ExtensionSettings {
   autoExtract: boolean;

@@ -14,6 +14,7 @@ import {
   STORAGE_KEYS,
   RATE_LIMIT_CONFIG,
   DEFAULT_SETTINGS,
+  getTracingHeaders,
   type ExtensionMessage,
   type ExtensionResponse,
   type ExtensionSettings,
@@ -135,13 +136,14 @@ async function sendChatData(chatData: any): Promise<ExtensionResponse> {
       return { success: false, error: 'Rate limited. Queued for later.' };
     }
 
-    // Send with retry
+    // Send with retry (include tracing headers for distributed tracing)
     const config = await getApiConfig();
     const result = await fetchWithRetry(`${config.apiUrl}/api/chat-export/extension`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${stored[STORAGE_KEYS.authToken]}`,
+        ...getTracingHeaders(),
       },
       body: JSON.stringify(chatData),
     });

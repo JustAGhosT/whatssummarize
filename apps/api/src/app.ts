@@ -8,27 +8,45 @@ import authRoutes from './routes/auth.routes.js';
 import groupRoutes from './routes/group.routes.js';
 import chatExportRoutes from './routes/chat-export.routes.js';
 import { logger } from './utils/logger.js';
+import { correlationMiddleware } from './middleware/correlation.js';
+import { metricsMiddleware, metrics } from './services/metrics.service.js';
 
 export const createApp = (): Application => {
   const app = express();
 
-  // Middleware
+  // Correlation ID middleware (must be first to capture all requests)
+  app.use(correlationMiddleware);
+
+  // Metrics middleware (after correlation for proper context)
+  app.use(metricsMiddleware);
+
+  // Security middleware
   app.use(helmet());
   app.use(cors({
     origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-    credentials: true
+    credentials: true,
+    exposedHeaders: ['x-correlation-id', 'x-request-id'],
   }));
   app.use(json());
   app.use(urlencoded({ extended: true }));
-  
-  // Logging
+
+  // Logging (skip in production as we have structured logging)
   if (process.env.NODE_ENV === 'development') {
     app.use(morgan('dev'));
   }
 
   // Health check endpoint
   app.get('/health', (_req: Request, res: Response) => {
-    res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+    res.status(200).json({
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development',
+    });
+  });
+
+  // Metrics endpoint (for monitoring)
+  app.get('/metrics', (_req: Request, res: Response) => {
+    res.status(200).json(metrics.getSummary());
   });
 
   // API Routes
