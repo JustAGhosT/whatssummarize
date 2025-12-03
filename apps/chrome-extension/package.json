@@ -1,0 +1,21 @@
+{
+  "name": "@whatssummarize/chrome-extension",
+  "version": "1.0.0",
+  "private": true,
+  "description": "WhatsSummarize Chrome Extension for WhatsApp Web",
+  "scripts": {
+    "build": "tsc && npm run copy-assets",
+    "build:prod": "NODE_ENV=production tsc && npm run copy-assets",
+    "watch": "tsc --watch",
+    "copy-assets": "cp -r src/*.css dist/ 2>/dev/null || true",
+    "package": "npm run build:prod && cd dist && zip -r ../whatssummarize-extension.zip .",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@anthropic-ai/sdk": "^0.18.0",
+    "@anthropic-ai/tokenizer": "^0.0.4",
+    "@types/chrome": "^0.0.260",
+    "typescript": "^5.3.0"
+  }
+}

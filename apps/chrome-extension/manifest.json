@@ -2,15 +2,19 @@
   "manifest_version": 3,
   "name": "WhatsSummarize - WhatsApp Chat Analyzer",
   "version": "1.0.0",
-  "description": "Extract and analyze your WhatsApp Web conversations with AI-powered summaries",
+  "description": "Extract and analyze your WhatsApp Web conversations with AI-powered summaries. Get instant insights, key topics, and intelligent summaries.",
 
   "permissions": [
     "storage",
-    "activeTab"
+    "activeTab",
+    "alarms",
+    "notifications"
   ],
 
   "host_permissions": [
-    "https://web.whatsapp.com/*"
+    "https://web.whatsapp.com/*",
+    "https://api.whatssummarize.com/*",
+    "http://localhost:3001/*"
   ],
 
   "action": {
@@ -20,7 +24,8 @@
       "32": "icons/icon32.png",
       "48": "icons/icon48.png",
       "128": "icons/icon128.png"
-    }
+    },
+    "default_title": "WhatsSummarize"
   },
 
   "icons": {
@@ -33,21 +38,29 @@
   "content_scripts": [
     {
       "matches": ["https://web.whatsapp.com/*"],
-      "js": ["src/content.js"],
+      "js": ["dist/content.js"],
       "css": ["src/content.css"],
       "run_at": "document_idle"
     }
   ],
 
   "background": {
-    "service_worker": "src/background.js",
+    "service_worker": "dist/background.js",
     "type": "module"
   },
 
+  "options_page": "options/options.html",
+
   "web_accessible_resources": [
     {
-      "resources": ["icons/*"],
+      "resources": ["icons/*", "assets/*"],
       "matches": ["https://web.whatsapp.com/*"]
     }
-  ]
+  ],
+
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  },
+
+  "minimum_chrome_version": "102"
 }

@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WhatsSummarize Settings</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f8f9fa;
+      min-height: 100vh;
+      color: #333;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .header h1 {
+      font-size: 24px;
+      color: #25D366;
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .card h2 {
+      font-size: 16px;
+      color: #333;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .setting-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .setting-row:last-child {
+      border-bottom: none;
+    }
+
+    .setting-info {
+      flex: 1;
+    }
+
+    .setting-info label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 4px;
+      cursor: pointer;
+    }
+
+    .setting-info p {
+      font-size: 12px;
+      color: #666;
+    }
+
+    .setting-control {
+      margin-left: 16px;
+    }
+
+    /* Toggle Switch */
+    .toggle {
+      position: relative;
+      width: 48px;
+      height: 26px;
+    }
+
+    .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background: #ccc;
+      border-radius: 26px;
+      transition: 0.3s;
+    }
+
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 3px;
+      bottom: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: 0.3s;
+    }
+
+    .toggle input:checked + .toggle-slider {
+      background: #25D366;
+    }
+
+    .toggle input:checked + .toggle-slider:before {
+      transform: translateX(22px);
+    }
+
+    /* Select */
+    select {
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+      background: white;
+      cursor: pointer;
+      min-width: 120px;
+    }
+
+    select:focus {
+      outline: none;
+      border-color: #25D366;
+    }
+
+    /* Input */
+    input[type="text"],
+    input[type="number"],
+    input[type="url"] {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+      margin-top: 8px;
+    }
+
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    input[type="url"]:focus {
+      outline: none;
+      border-color: #25D366;
+      box-shadow: 0 0 0 3px rgba(37, 211, 102, 0.1);
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: #25D366;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #128C7E;
+    }
+
+    .btn-secondary {
+      background: #f0f0f0;
+      color: #333;
+    }
+
+    .btn-secondary:hover {
+      background: #e0e0e0;
+    }
+
+    .btn-danger {
+      background: #dc2626;
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #b91c1c;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    /* Status Messages */
+    .status {
+      padding: 12px;
+      border-radius: 6px;
+      margin-top: 16px;
+      font-size: 14px;
+      display: none;
+    }
+
+    .status.show {
+      display: block;
+    }
+
+    .status.success {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .status.error {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    /* Stats */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .stat-item {
+      text-align: center;
+      padding: 16px;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #25D366;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #666;
+      margin-top: 4px;
+    }
+
+    /* History */
+    .history-list {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .history-item:last-child {
+      border-bottom: none;
+    }
+
+    .history-name {
+      font-weight: 500;
+    }
+
+    .history-meta {
+      font-size: 12px;
+      color: #666;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      margin-top: 40px;
+      color: #666;
+      font-size: 12px;
+    }
+
+    .footer a {
+      color: #25D366;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>WhatsSummarize Settings</h1>
+      <p>Configure your chat extraction preferences</p>
+    </div>
+
+    <!-- Account Section -->
+    <div class="card" id="accountSection">
+      <h2>Account</h2>
+      <div id="loggedOut" style="display: none;">
+        <p style="color: #666; margin-bottom: 16px;">Sign in to sync your extractions and access summaries.</p>
+        <button class="btn btn-primary" id="loginBtn">Sign In</button>
+      </div>
+      <div id="loggedIn" style="display: none;">
+        <div class="setting-row">
+          <div class="setting-info">
+            <label id="userEmail">user@example.com</label>
+            <p>Connected account</p>
+          </div>
+          <button class="btn btn-secondary" id="logoutBtn">Sign Out</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- General Settings -->
+    <div class="card">
+      <h2>General</h2>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <label for="showNotifications">Show Notifications</label>
+          <p>Display status notifications after extraction</p>
+        </div>
+        <div class="setting-control">
+          <label class="toggle">
+            <input type="checkbox" id="showNotifications">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <label for="extractMediaMetadata">Extract Media Info</label>
+          <p>Include metadata for images, videos, and documents</p>
+        </div>
+        <div class="setting-control">
+          <label class="toggle">
+            <input type="checkbox" id="extractMediaMetadata">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <label for="theme">Theme</label>
+          <p>Extension interface appearance</p>
+        </div>
+        <div class="setting-control">
+          <select id="theme">
+            <option value="auto">Auto</option>
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Advanced Settings -->
+    <div class="card">
+      <h2>Advanced</h2>
+
+      <div class="setting-row" style="flex-direction: column; align-items: stretch;">
+        <div class="setting-info">
+          <label for="apiEndpoint">Custom API Endpoint</label>
+          <p>Override the default API server (leave empty for default)</p>
+        </div>
+        <input type="url" id="apiEndpoint" placeholder="https://api.yourdomain.com">
+      </div>
+
+      <div class="setting-row">
+        <div class="setting-info">
+          <label for="maxStoredExtractions">Max Stored Extractions</label>
+          <p>Number of extractions to keep in history</p>
+        </div>
+        <div class="setting-control">
+          <select id="maxStoredExtractions">
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+            <option value="200">200</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="card">
+      <h2>Statistics</h2>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-value" id="totalExtractions">0</div>
+          <div class="stat-label">Total Extractions</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="pendingUploads">0</div>
+          <div class="stat-label">Pending Uploads</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="totalMessages">0</div>
+          <div class="stat-label">Messages Extracted</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Extractions -->
+    <div class="card">
+      <h2>Recent Extractions</h2>
+      <div class="history-list" id="historyList">
+        <p style="color: #666; text-align: center; padding: 20px;">No extractions yet</p>
+      </div>
+    </div>
+
+    <!-- Data Management -->
+    <div class="card">
+      <h2>Data Management</h2>
+      <div class="button-row">
+        <button class="btn btn-secondary" id="retryPending">Retry Pending Uploads</button>
+        <button class="btn btn-danger" id="clearData">Clear All Data</button>
+      </div>
+      <div class="status" id="statusMessage"></div>
+    </div>
+
+    <div class="footer">
+      <p>WhatsSummarize Extension v<span id="version">1.0.0</span></p>
+      <p><a href="#" id="helpLink">Help</a> | <a href="#" id="privacyLink">Privacy Policy</a></p>
+    </div>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>

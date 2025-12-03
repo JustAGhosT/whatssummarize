@@ -1,18 +1,31 @@
 /**
- * AI Summary Service - POC Implementation
+ * AI Summary Service - Production-Ready Implementation
  *
  * FEATURE-1: AI-Powered Summary Generation
  *
- * This service provides chat summarization using AI providers (OpenAI/Anthropic Claude)
- * Designed to be provider-agnostic for flexibility in choosing AI backends.
+ * This service provides chat summarization using multiple AI providers:
+ * - Azure AI Foundry (Azure OpenAI Service)
+ * - OpenAI API (Direct)
+ * - Anthropic Claude API
+ *
+ * Provider Selection Priority:
+ * 1. Azure AI Foundry (if AZURE_OPENAI_ENDPOINT configured)
+ * 2. OpenAI (if OPENAI_API_KEY configured)
+ * 3. Anthropic (if ANTHROPIC_API_KEY configured)
+ * 4. Mock (fallback for development)
  *
  * Integration Points:
- * - Connects to OpenAI API or Anthropic Claude API
+ * - Connects to Azure OpenAI, OpenAI API, or Anthropic Claude API
  * - Used by chat-export routes for summary generation
  * - Supports streaming responses for real-time feedback
  *
- * TODO: Production Hardening
- * - Add retry logic with exponential backoff
+ * Production Features:
+ * - Retry logic with exponential backoff
+ * - Request timeout handling
+ * - Error categorization and logging
+ * - Provider health checking
+ *
+ * TODO: Additional Hardening
  * - Implement request queuing and rate limiting
  * - Add response caching for similar queries
  * - Implement cost tracking and budget limits
@@ -60,7 +73,7 @@ export interface SummaryResult {
   sentiment?: 'positive' | 'neutral' | 'negative';
   generatedAt: Date;
   tokensUsed?: number;
-  provider: 'openai' | 'anthropic' | 'mock';
+  provider: 'azure' | 'openai' | 'anthropic' | 'mock';
 }
 
 export interface StreamCallback {
@@ -71,6 +84,12 @@ export interface StreamCallback {
 
 // AI Provider Configuration
 const AI_CONFIG = {
+  azure: {
+    endpoint: process.env.AZURE_OPENAI_ENDPOINT, // e.g., https://your-resource.openai.azure.com
+    apiKey: process.env.AZURE_OPENAI_API_KEY,
+    deploymentName: process.env.AZURE_OPENAI_DEPLOYMENT || 'gpt-4',
+    apiVersion: process.env.AZURE_OPENAI_API_VERSION || '2024-02-15-preview',
+  },
   openai: {
     apiKey: process.env.OPENAI_API_KEY,
     model: process.env.OPENAI_MODEL || 'gpt-4-turbo-preview',
@@ -83,13 +102,78 @@ const AI_CONFIG = {
   },
 };
 
+// Retry configuration for production resilience
+const RETRY_CONFIG = {
+  maxRetries: 3,
+  baseDelayMs: 1000,
+  maxDelayMs: 10000,
+  timeoutMs: 30000,
+};
+
 /**
  * Determines which AI provider to use based on configuration
+ * Priority: Azure > OpenAI > Anthropic > Mock
  */
-function getActiveProvider(): 'openai' | 'anthropic' | 'mock' {
+function getActiveProvider(): 'azure' | 'openai' | 'anthropic' | 'mock' {
+  if (AI_CONFIG.azure.endpoint && AI_CONFIG.azure.apiKey) return 'azure';
   if (AI_CONFIG.openai.apiKey) return 'openai';
   if (AI_CONFIG.anthropic.apiKey) return 'anthropic';
   return 'mock';
+}
+
+/**
+ * Retry helper with exponential backoff
+ */
+async function withRetry<T>(
+  fn: () => Promise<T>,
+  options: { maxRetries?: number; baseDelayMs?: number; maxDelayMs?: number } = {}
+): Promise<T> {
+  const { maxRetries = RETRY_CONFIG.maxRetries, baseDelayMs = RETRY_CONFIG.baseDelayMs, maxDelayMs = RETRY_CONFIG.maxDelayMs } = options;
+
+  let lastError: Error | undefined;
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error as Error;
+
+      // Don't retry on client errors (4xx) except rate limiting (429)
+      if (error instanceof Error && error.message.includes('4') && !error.message.includes('429')) {
+        throw error;
+      }
+
+      if (attempt < maxRetries) {
+        const delay = Math.min(baseDelayMs * Math.pow(2, attempt), maxDelayMs);
+        logger.warn(`[SummaryService] Retry attempt ${attempt + 1}/${maxRetries} after ${delay}ms`);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
+  }
+
+  throw lastError;
+}
+
+/**
+ * Fetch with timeout wrapper
+ */
+async function fetchWithTimeout(
+  url: string,
+  options: RequestInit,
+  timeoutMs: number = RETRY_CONFIG.timeoutMs
+): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+    return response;
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
 
 /**
@@ -137,11 +221,28 @@ function formatMessagesForAI(messages: ChatMessage[]): string {
  * Main Summary Service Class
  */
 export class SummaryService {
-  private provider: 'openai' | 'anthropic' | 'mock';
+  private provider: 'azure' | 'openai' | 'anthropic' | 'mock';
 
   constructor() {
     this.provider = getActiveProvider();
     logger.info(`[SummaryService] Using AI provider: ${this.provider}`);
+
+    // Log provider configuration (without secrets)
+    if (this.provider === 'azure') {
+      logger.info(`[SummaryService] Azure endpoint: ${AI_CONFIG.azure.endpoint}`);
+      logger.info(`[SummaryService] Azure deployment: ${AI_CONFIG.azure.deploymentName}`);
+    }
+  }
+
+  /**
+   * Get current provider info for health checks
+   */
+  getProviderInfo(): { provider: string; configured: boolean; endpoint?: string } {
+    return {
+      provider: this.provider,
+      configured: this.provider !== 'mock',
+      endpoint: this.provider === 'azure' ? AI_CONFIG.azure.endpoint : undefined,
+    };
   }
 
   /**
@@ -176,15 +277,18 @@ export class SummaryService {
         };
       }
 
-      // Generate summary based on provider
+      // Generate summary based on provider with retry logic
       let result: SummaryResult;
 
       switch (this.provider) {
+        case 'azure':
+          result = await withRetry(() => this.generateWithAzure(filteredMessages, options));
+          break;
         case 'openai':
-          result = await this.generateWithOpenAI(filteredMessages, options);
+          result = await withRetry(() => this.generateWithOpenAI(filteredMessages, options));
           break;
         case 'anthropic':
-          result = await this.generateWithAnthropic(filteredMessages, options);
+          result = await withRetry(() => this.generateWithAnthropic(filteredMessages, options));
           break;
         default:
           result = await this.generateMockSummary(filteredMessages, options);
@@ -233,7 +337,70 @@ export class SummaryService {
   }
 
   /**
-   * OpenAI API Integration
+   * Azure AI Foundry (Azure OpenAI) Integration
+   *
+   * Uses Azure OpenAI Service with your deployed models.
+   * Supports all GPT-4 and GPT-3.5 deployments.
+   *
+   * Required Environment Variables:
+   * - AZURE_OPENAI_ENDPOINT: Your Azure OpenAI resource endpoint
+   * - AZURE_OPENAI_API_KEY: Your Azure OpenAI API key
+   * - AZURE_OPENAI_DEPLOYMENT: Your deployment name (default: gpt-4)
+   * - AZURE_OPENAI_API_VERSION: API version (default: 2024-02-15-preview)
+   */
+  private async generateWithAzure(
+    messages: ChatMessage[],
+    options: SummaryOptions
+  ): Promise<SummaryResult> {
+    const systemPrompt = buildSystemPrompt(options);
+    const chatContent = formatMessagesForAI(messages);
+
+    const endpoint = AI_CONFIG.azure.endpoint!;
+    const deploymentName = AI_CONFIG.azure.deploymentName;
+    const apiVersion = AI_CONFIG.azure.apiVersion;
+
+    // Azure OpenAI API URL format
+    const url = `${endpoint}/openai/deployments/${deploymentName}/chat/completions?api-version=${apiVersion}`;
+
+    logger.debug(`[SummaryService] Azure request to: ${url}`);
+
+    const response = await fetchWithTimeout(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'api-key': AI_CONFIG.azure.apiKey!,
+      },
+      body: JSON.stringify({
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: `Please summarize this conversation:\n\n${chatContent}` },
+        ],
+        max_tokens: options.maxLength || 1000,
+        temperature: 0.7,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      logger.error(`[SummaryService] Azure API error: ${response.status} - ${errorText}`);
+      throw new Error(`Azure OpenAI API error (${response.status}): ${errorText}`);
+    }
+
+    const data = await response.json();
+    const summary = data.choices[0]?.message?.content || 'Unable to generate summary';
+
+    logger.debug(`[SummaryService] Azure response received, tokens: ${data.usage?.total_tokens}`);
+
+    return {
+      summary,
+      generatedAt: new Date(),
+      tokensUsed: data.usage?.total_tokens,
+      provider: 'azure',
+    };
+  }
+
+  /**
+   * OpenAI API Integration (Direct)
    */
   private async generateWithOpenAI(
     messages: ChatMessage[],
@@ -242,7 +409,7 @@ export class SummaryService {
     const systemPrompt = buildSystemPrompt(options);
     const chatContent = formatMessagesForAI(messages);
 
-    const response = await fetch(AI_CONFIG.openai.endpoint, {
+    const response = await fetchWithTimeout(AI_CONFIG.openai.endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -285,7 +452,7 @@ export class SummaryService {
     const systemPrompt = buildSystemPrompt(options);
     const chatContent = formatMessagesForAI(messages);
 
-    const response = await fetch(AI_CONFIG.anthropic.endpoint, {
+    const response = await fetchWithTimeout(AI_CONFIG.anthropic.endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
