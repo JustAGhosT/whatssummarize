@@ -71,7 +71,7 @@ graph TD
 
 ## Deployment
 
-- Vercel for frontend deployment
+- Azure Container Apps for frontend and backend deployment
 - Supabase for backend services
 - CI/CD pipeline for automated testing and deployment
 - Environment-specific configurations

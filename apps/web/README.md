@@ -80,7 +80,7 @@ src/
 
 ## Deployment
 
-The easiest way to deploy this application is to use [Vercel](https://vercel.com/), the creators of Next.js.
+The application is deployed on Azure using Container Apps. See the main repository README for deployment instructions.
 
 ## Environment Variables
 
