@@ -21,6 +21,8 @@ import {
   getConfig,
   type ExtensionMessage,
   type ExtensionResponse,
+  type SetAuthTokenMessage,
+  type CheckStatusData,
 } from './config';
 
 // =============================================================================
@@ -636,23 +638,29 @@ function handleMessage(
         .catch(error => sendResponse({ success: false, error: error.message }));
       return true;
 
-    case 'CHECK_STATUS':
+    case 'CHECK_STATUS': {
       const chatList = querySelector(SELECTORS.primary.chatList, SELECTORS.fallback.chatList);
-      sendResponse({
-        success: true,
-        data: {
-          isWhatsAppWeb: true,
-          isLoggedIn: !!chatList,
-          isExtracting: state.isExtracting,
-        },
-      });
+      const statusData: CheckStatusData = {
+        isWhatsAppWeb: true,
+        isLoggedIn: !!chatList,
+        isExtracting: state.isExtracting,
+      };
+      sendResponse({ success: true, data: statusData });
       break;
+    }
 
-    case 'SET_AUTH_TOKEN':
-      authToken = message.token;
-      chrome.storage.local.set({ [STORAGE_KEYS.authToken]: message.token });
+    case 'SET_AUTH_TOKEN': {
+      const typedMessage = message as SetAuthTokenMessage;
+      // Validate token is string or null
+      if (typedMessage.token !== null && typeof typedMessage.token !== 'string') {
+        sendResponse({ success: false, error: 'Token must be a string or null' });
+        break;
+      }
+      authToken = typedMessage.token;
+      chrome.storage.local.set({ [STORAGE_KEYS.authToken]: typedMessage.token });
       sendResponse({ success: true });
       break;
+    }
 
     default:
       sendResponse({ success: false, error: 'Unknown action' });

@@ -486,23 +486,87 @@ export class StorageService {
       throw new Error(`Azure Blob list failed: ${response.status}`);
     }
 
-    // Parse XML response (simplified - use proper XML parser in production)
     const text = await response.text();
+    return this.parseAzureBlobListXml(text);
+  }
+
+  /**
+   * Safely parse Azure Blob Storage list XML response
+   * Uses a simple state-machine parser instead of regex for security and reliability
+   */
+  private parseAzureBlobListXml(xml: string): StorageFile[] {
     const files: StorageFile[] = [];
 
-    // Basic regex parsing for POC - use xml2js or similar in production
-    const blobMatches = text.matchAll(/<Blob>[\s\S]*?<Name>(.*?)<\/Name>[\s\S]*?<Content-Length>(\d+)<\/Content-Length>[\s\S]*?<Last-Modified>(.*?)<\/Last-Modified>[\s\S]*?<\/Blob>/g);
+    // Simple iterative parser - safer than regex for XML
+    let pos = 0;
 
-    for (const match of blobMatches) {
+    while (pos < xml.length) {
+      // Find next <Blob> tag
+      const blobStart = xml.indexOf('<Blob>', pos);
+      if (blobStart === -1) break;
+
+      const blobEnd = xml.indexOf('</Blob>', blobStart);
+      if (blobEnd === -1) break;
+
+      const blobContent = xml.slice(blobStart, blobEnd);
+
+      // Extract Name
+      const name = this.extractXmlElement(blobContent, 'Name');
+      if (!name) {
+        pos = blobEnd + 7;
+        continue;
+      }
+
+      // Extract Content-Length
+      const contentLength = this.extractXmlElement(blobContent, 'Content-Length');
+      const size = contentLength ? parseInt(contentLength, 10) : 0;
+
+      // Extract Last-Modified
+      const lastModified = this.extractXmlElement(blobContent, 'Last-Modified');
+
+      // Extract Content-Type if available
+      const contentType = this.extractXmlElement(blobContent, 'Content-Type') || 'application/octet-stream';
+
       files.push({
-        key: match[1],
-        size: parseInt(match[2], 10),
-        contentType: 'application/octet-stream',
-        lastModified: new Date(match[3]),
+        key: this.decodeXmlEntities(name),
+        size: isNaN(size) ? 0 : size,
+        contentType,
+        lastModified: lastModified ? new Date(lastModified) : new Date(),
       });
+
+      pos = blobEnd + 7;
     }
 
     return files;
+  }
+
+  /**
+   * Extract text content from an XML element
+   */
+  private extractXmlElement(xml: string, tagName: string): string | null {
+    const openTag = `<${tagName}>`;
+    const closeTag = `</${tagName}>`;
+
+    const startIdx = xml.indexOf(openTag);
+    if (startIdx === -1) return null;
+
+    const contentStart = startIdx + openTag.length;
+    const endIdx = xml.indexOf(closeTag, contentStart);
+    if (endIdx === -1) return null;
+
+    return xml.slice(contentStart, endIdx);
+  }
+
+  /**
+   * Decode common XML entities
+   */
+  private decodeXmlEntities(text: string): string {
+    return text
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&apos;/g, "'");
   }
 
   private buildAzureBlobUrl(accountName: string, containerName: string, blobName: string): string {
@@ -555,6 +619,7 @@ export class StorageService {
     ].join('\n');
 
     // Create HMAC-SHA256 signature
+    const { createHmac } = require('crypto');
     const decodedKey = Buffer.from(accountKey, 'base64');
     const signature = createHmac('sha256', decodedKey)
       .update(stringToSign, 'utf8')

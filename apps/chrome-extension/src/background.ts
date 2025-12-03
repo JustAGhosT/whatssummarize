@@ -14,9 +14,15 @@ import {
   STORAGE_KEYS,
   RATE_LIMIT_CONFIG,
   DEFAULT_SETTINGS,
+  getTracingHeaders,
   type ExtensionMessage,
   type ExtensionResponse,
   type ExtensionSettings,
+  type LoginMessage,
+  type UpdateSettingsMessage,
+  type SendChatDataMessage,
+  type OpenDashboardMessage,
+  type SetAuthTokenMessage,
 } from './config';
 
 // =============================================================================
@@ -54,17 +60,27 @@ async function handleMessage(message: ExtensionMessage, sender: chrome.runtime.M
   console.log('[Background] Received message:', message.action);
 
   switch (message.action) {
-    case 'SEND_CHAT_DATA':
-      return await sendChatData(message.data);
+    case 'SEND_CHAT_DATA': {
+      const typedMessage = message as SendChatDataMessage;
+      return await sendChatData(typedMessage.data);
+    }
 
-    case 'OPEN_DASHBOARD':
-      return await openDashboard(message.path);
+    case 'OPEN_DASHBOARD': {
+      const typedMessage = message as OpenDashboardMessage;
+      return await openDashboard(typedMessage.path);
+    }
 
     case 'GET_AUTH_STATUS':
       return await getAuthStatus();
 
-    case 'LOGIN':
-      return await handleLogin(message.email, message.password);
+    case 'LOGIN': {
+      const typedMessage = message as LoginMessage;
+      // Validate required fields
+      if (!typedMessage.email || !typedMessage.password) {
+        return { success: false, error: 'Email and password are required' };
+      }
+      return await handleLogin(typedMessage.email, typedMessage.password);
+    }
 
     case 'LOGOUT':
       return await handleLogout();
@@ -72,14 +88,25 @@ async function handleMessage(message: ExtensionMessage, sender: chrome.runtime.M
     case 'GET_SETTINGS':
       return await getSettings();
 
-    case 'UPDATE_SETTINGS':
-      return await updateSettings(message.settings);
+    case 'UPDATE_SETTINGS': {
+      const typedMessage = message as UpdateSettingsMessage;
+      if (!typedMessage.settings || typeof typedMessage.settings !== 'object') {
+        return { success: false, error: 'Settings object is required' };
+      }
+      return await updateSettings(typedMessage.settings);
+    }
 
     case 'RETRY_PENDING_UPLOADS':
       return await retryPendingUploads();
 
     case 'CLEAR_PENDING_UPLOADS':
       return await clearPendingUploads();
+
+    case 'GET_CURRENT_CHAT':
+    case 'CHECK_STATUS':
+    case 'SET_AUTH_TOKEN':
+      // These are handled by content script, not background
+      return { success: false, error: 'Action handled by content script' };
 
     default:
       return { success: false, error: 'Unknown action' };
@@ -109,13 +136,14 @@ async function sendChatData(chatData: any): Promise<ExtensionResponse> {
       return { success: false, error: 'Rate limited. Queued for later.' };
     }
 
-    // Send with retry
+    // Send with retry (include tracing headers for distributed tracing)
     const config = await getApiConfig();
     const result = await fetchWithRetry(`${config.apiUrl}/api/chat-export/extension`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${stored[STORAGE_KEYS.authToken]}`,
+        ...getTracingHeaders(),
       },
       body: JSON.stringify(chatData),
     });
