@@ -19,8 +19,18 @@
 
 import { promises as fs } from 'fs';
 import { join, dirname } from 'path';
+import { createHmac } from 'crypto';
 import { logger } from '../../utils/logger.js';
 import { getStorageProvider, getAzureBlobStorageConfig, type StorageProvider } from '../../config/azure/index.js';
+
+// =============================================================================
+// Constants
+// =============================================================================
+
+const AZURE_API_VERSION = '2023-11-03';
+const REQUEST_TIMEOUT_MS = 30000;
+const MAX_RETRIES = 3;
+const RETRY_DELAY_MS = 1000;
 
 // =============================================================================
 // Types
@@ -43,6 +53,64 @@ export interface UploadOptions {
 export interface StorageServiceConfig {
   provider?: StorageProvider;
   localBasePath?: string;
+}
+
+// =============================================================================
+// Helper Functions
+// =============================================================================
+
+/**
+ * Fetch with timeout support
+ */
+async function fetchWithTimeout(
+  url: string,
+  options: RequestInit,
+  timeoutMs: number = REQUEST_TIMEOUT_MS
+): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+    return response;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+/**
+ * Retry helper with exponential backoff
+ */
+async function withRetry<T>(
+  fn: () => Promise<T>,
+  maxRetries: number = MAX_RETRIES,
+  baseDelayMs: number = RETRY_DELAY_MS
+): Promise<T> {
+  let lastError: Error | undefined;
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error as Error;
+
+      // Don't retry on client errors (4xx) except rate limiting (429)
+      if (error instanceof Error && error.message.includes('4') && !error.message.includes('429')) {
+        throw error;
+      }
+
+      if (attempt < maxRetries) {
+        const delay = baseDelayMs * Math.pow(2, attempt);
+        logger.warn(`[StorageService] Retry attempt ${attempt + 1}/${maxRetries} after ${delay}ms`);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
+  }
+
+  throw lastError;
 }
 
 // =============================================================================
@@ -260,16 +328,20 @@ export class StorageService {
       );
     }
 
-    const response = await fetch(authUrl, {
-      method: 'PUT',
-      headers,
-      body: buffer,
-    });
+    const response = await withRetry(async () => {
+      const res = await fetchWithTimeout(authUrl, {
+        method: 'PUT',
+        headers,
+        body: buffer,
+      });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Azure Blob upload failed: ${response.status} - ${errorText}`);
-    }
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(`Azure Blob upload failed: ${res.status} - ${errorText}`);
+      }
+
+      return res;
+    });
 
     logger.info(`[StorageService] Uploaded to Azure: ${key}`);
 
@@ -404,6 +476,11 @@ export class StorageService {
     return `https://${accountName}.blob.core.windows.net/${containerName}/${blobName}`;
   }
 
+  /**
+   * Create Azure SharedKey authentication header using HMAC-SHA256
+   *
+   * @see https://docs.microsoft.com/rest/api/storageservices/authorize-with-shared-key
+   */
   private createAzureAuthHeader(
     method: string,
     accountName: string,
@@ -412,45 +489,85 @@ export class StorageService {
     accountKey: string,
     headers: Record<string, string>
   ): string {
-    // Note: This is a placeholder. Production code should use Azure SDK
-    // or implement proper SharedKey authentication
-    logger.warn('[StorageService] Using simplified Azure auth - use Azure SDK in production');
-    return `SharedKey ${accountName}:placeholder`;
+    // Build canonicalized headers (x-ms-* headers, sorted alphabetically)
+    const canonicalizedHeaders = Object.keys(headers)
+      .filter(key => key.toLowerCase().startsWith('x-ms-'))
+      .sort()
+      .map(key => `${key.toLowerCase()}:${headers[key].trim()}`)
+      .join('\n');
+
+    // Build canonicalized resource
+    const canonicalizedResource = `/${accountName}/${containerName}/${blobName}`;
+
+    // Build string to sign (Blob service format)
+    // https://docs.microsoft.com/rest/api/storageservices/authorize-with-shared-key#blob-queue-and-file-services-shared-key-lite-and-table-service-shared-key-lite-authorization
+    const contentLength = headers['Content-Length'] || '';
+    const contentType = headers['Content-Type'] || '';
+
+    const stringToSign = [
+      method,                              // HTTP Verb
+      '',                                  // Content-Encoding
+      '',                                  // Content-Language
+      contentLength,                       // Content-Length
+      '',                                  // Content-MD5
+      contentType,                         // Content-Type
+      '',                                  // Date (empty when x-ms-date is used)
+      '',                                  // If-Modified-Since
+      '',                                  // If-Match
+      '',                                  // If-None-Match
+      '',                                  // If-Unmodified-Since
+      '',                                  // Range
+      canonicalizedHeaders,                // Canonicalized headers
+      canonicalizedResource,               // Canonicalized resource
+    ].join('\n');
+
+    // Create HMAC-SHA256 signature
+    const decodedKey = Buffer.from(accountKey, 'base64');
+    const signature = createHmac('sha256', decodedKey)
+      .update(stringToSign, 'utf8')
+      .digest('base64');
+
+    return `SharedKey ${accountName}:${signature}`;
   }
 
   // ===========================================================================
-  // AWS S3 Implementation (Placeholder)
+  // AWS S3 Implementation
   // ===========================================================================
+  // NOTE: AWS S3 requires @aws-sdk/client-s3 package. Install it if you need S3 support.
+  // npm install @aws-sdk/client-s3
+
+  private assertS3NotImplemented(): never {
+    const message =
+      '[StorageService] AWS S3 is configured but not implemented. ' +
+      'Either install @aws-sdk/client-s3 and implement S3 methods, ' +
+      'or switch to Azure Blob Storage or local filesystem. ' +
+      'Set STORAGE_PROVIDER=local to use local storage instead.';
+    logger.error(message);
+    throw new Error(message);
+  }
 
   private async uploadToS3(key: string, data: Buffer | string, options: UploadOptions): Promise<StorageFile> {
-    // TODO: Implement AWS S3 upload using AWS SDK
-    logger.warn('[StorageService] AWS S3 not fully implemented, falling back to local');
-    return this.uploadToLocal(key, data, options);
+    this.assertS3NotImplemented();
   }
 
   private async downloadFromS3(key: string): Promise<Buffer> {
-    logger.warn('[StorageService] AWS S3 not fully implemented, falling back to local');
-    return this.downloadFromLocal(key);
+    this.assertS3NotImplemented();
   }
 
   private async deleteFromS3(key: string): Promise<void> {
-    logger.warn('[StorageService] AWS S3 not fully implemented, falling back to local');
-    return this.deleteFromLocal(key);
+    this.assertS3NotImplemented();
   }
 
   private getS3Url(key: string, expiresIn: number): string {
-    logger.warn('[StorageService] AWS S3 not fully implemented');
-    return this.getLocalUrl(key);
+    this.assertS3NotImplemented();
   }
 
   private async existsInS3(key: string): Promise<boolean> {
-    logger.warn('[StorageService] AWS S3 not fully implemented');
-    return this.existsInLocal(key);
+    this.assertS3NotImplemented();
   }
 
   private async listInS3(prefix: string): Promise<StorageFile[]> {
-    logger.warn('[StorageService] AWS S3 not fully implemented');
-    return this.listInLocal(prefix);
+    this.assertS3NotImplemented();
   }
 }
 

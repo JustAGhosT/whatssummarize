@@ -83,10 +83,23 @@ var resourcePrefix = '${projectName}-${environment}'
 var resourcePrefixClean = replace(resourcePrefix, '-', '')
 
 // SKUs based on environment
-var cosmosDBSku = environment == 'prod' ? 'Standard' : 'Standard'
+// Cosmos DB: Serverless for dev (pay-per-request), Provisioned for prod
+var cosmosDBThroughput = environment == 'prod' ? 1000 : 400
+var cosmosDBAutoscale = environment == 'prod'
+
+// Redis: Basic (no SLA) for dev, Standard (SLA) for prod
 var redisSku = environment == 'prod' ? 'Standard' : 'Basic'
 var redisFamily = environment == 'prod' ? 'C' : 'C'
 var redisCapacity = environment == 'prod' ? 1 : 0
+
+// Storage: Standard for dev, Premium for prod (optional)
+var storageSkuName = environment == 'prod' ? 'Standard_GRS' : 'Standard_LRS'
+
+// Container Apps: Production uses more resources
+var containerAppCpu = environment == 'prod' ? '1.0' : '0.5'
+var containerAppMemory = environment == 'prod' ? '2.0Gi' : '1.0Gi'
+var containerAppMinReplicas = environment == 'prod' ? 2 : 0
+var containerAppMaxReplicas = environment == 'prod' ? 10 : 3
 
 // =============================================================================
 // Modules
@@ -111,6 +124,7 @@ module storage 'modules/storage.bicep' = {
     name: 'st${resourcePrefixClean}'
     location: location
     tags: tags
+    sku: storageSkuName
     containerNames: ['chat-exports', 'user-uploads', 'summaries']
     enableVersioning: environment == 'prod'
   }
@@ -192,6 +206,11 @@ module containerApps 'modules/container-apps.bicep' = if (enableContainerApps) {
     redisHostname: enableRedis ? redis.outputs.hostname : ''
     storageAccountName: storage.outputs.name
     openAIEndpoint: enableOpenAI ? openAI.outputs.endpoint : ''
+    // Environment-specific scaling
+    apiCpu: containerAppCpu
+    apiMemory: containerAppMemory
+    minReplicas: containerAppMinReplicas
+    maxReplicas: containerAppMaxReplicas
   }
 }
 
