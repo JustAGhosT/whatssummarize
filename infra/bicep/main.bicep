@@ -83,9 +83,23 @@ var resourcePrefix = '${projectName}-${environment}'
 var resourcePrefixClean = replace(resourcePrefix, '-', '')
 
 // SKUs based on environment
-// Cosmos DB: Serverless for dev (pay-per-request), Provisioned for prod
-var cosmosDBThroughput = environment == 'prod' ? 1000 : 400
-var cosmosDBAutoscale = environment == 'prod'
+module cosmosDB 'modules/cosmos-db.bicep' = if (enableCosmosDB) {
+  name: 'cosmosdb-${environment}'
+  params: {
+    name: 'cosmos-${resourcePrefix}'
+    location: location
+    tags: tags
+    databaseName: projectName
+    throughput: cosmosDBThroughput
+    enableAutoscale: cosmosDBAutoscale
+    containers: [
+      {
+        name: 'users'
+        partitionKey: '/id'
+      }
+    ]
+  }
+}
 
 // Redis: Basic (no SLA) for dev, Standard (SLA) for prod
 var redisSku = environment == 'prod' ? 'Standard' : 'Basic'
