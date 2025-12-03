@@ -24,8 +24,10 @@ infra/
 │   ├── staging.bicepparam      # Staging environment (create as needed)
 │   └── prod.bicepparam         # Production environment
 └── scripts/
-    ├── deploy.sh               # Deployment script
-    └── validate-resources.sh   # Validation script
+    ├── deploy.ps1              # PowerShell deployment (recommended)
+    ├── deploy.sh               # Bash deployment script
+    ├── validate-resources.ps1  # PowerShell validation
+    └── validate-resources.sh   # Bash validation script
 ```
 
 ## Azure Resources
@@ -65,48 +67,61 @@ infra/
 
 ## Quick Start
 
-### Deploy Development Environment
+### Deploy Development Environment (PowerShell - Recommended)
 
-```bash
+```powershell
 # From repository root
 cd infra/scripts
 
-# Validate templates first
-./deploy.sh dev --validate-only
+# Deploy (what-if runs automatically first, then prompts for confirmation)
+./deploy.ps1 -Environment dev
 
-# Preview changes
-./deploy.sh dev --what-if
+# Skip what-if and deploy directly
+./deploy.ps1 -Environment dev -SkipWhatIf -Force
 
-# Deploy
-./deploy.sh dev
+# Only run what-if analysis
+./deploy.ps1 -Environment dev -WhatIfOnly
+
+# Validate templates only
+./deploy.ps1 -Environment dev -ValidateOnly
 ```
 
 ### Deploy Production Environment
 
-```bash
-# Preview production changes
-./deploy.sh prod --what-if
+```powershell
+# Deploy to production (what-if + confirmation by default)
+./deploy.ps1 -Environment prod
 
-# Deploy to production
-./deploy.sh prod
+# Preview production changes only
+./deploy.ps1 -Environment prod -WhatIfOnly
+```
+
+### Bash Alternative
+
+```bash
+./deploy.sh dev                    # Deploy to dev
+./deploy.sh prod --what-if         # Preview production changes
+./deploy.sh staging --validate-only # Validate staging templates
 ```
 
 ## Deployment Options
 
 ### Using Scripts (Recommended)
 
+```powershell
+# PowerShell (what-if is automatic)
+./scripts/deploy.ps1 -Environment <env>              # Full deploy with what-if
+./scripts/deploy.ps1 -Environment <env> -WhatIfOnly  # Preview only
+./scripts/deploy.ps1 -Environment <env> -ValidateOnly # Validate templates
+./scripts/validate-resources.ps1 -Environment <env>  # Validate resources
+```
+
 ```bash
-# Validate templates
-./scripts/deploy.sh <environment> --validate-only
-
-# Preview changes (what-if)
-./scripts/deploy.sh <environment> --what-if
-
-# Deploy
-./scripts/deploy.sh <environment>
-
-# Validate deployed resources
-./scripts/validate-resources.sh <environment>
+# Bash alternative
+./scripts/deploy.sh <environment>                    # Deploy
+./scripts/deploy.sh <environment> --what-if          # Preview
+./scripts/deploy.sh <environment> --validate-only    # Validate
+./scripts/validate-resources.sh <environment>        # Validate resources
 ```
 
 ### Using Azure CLI Directly

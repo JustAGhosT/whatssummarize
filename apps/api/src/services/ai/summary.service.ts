@@ -88,7 +88,8 @@ const AI_CONFIG = {
     endpoint: process.env.AZURE_OPENAI_ENDPOINT, // e.g., https://your-resource.openai.azure.com
     apiKey: process.env.AZURE_OPENAI_API_KEY,
     deploymentName: process.env.AZURE_OPENAI_DEPLOYMENT || 'gpt-4',
-    apiVersion: process.env.AZURE_OPENAI_API_VERSION || '2024-02-15-preview',
+    // API version is optional for newer Azure AI Foundry deployments
+    apiVersion: process.env.AZURE_OPENAI_API_VERSION || undefined,
   },
   openai: {
     apiKey: process.env.OPENAI_API_KEY,
@@ -346,7 +347,9 @@ export class SummaryService {
    * - AZURE_OPENAI_ENDPOINT: Your Azure OpenAI resource endpoint
    * - AZURE_OPENAI_API_KEY: Your Azure OpenAI API key
    * - AZURE_OPENAI_DEPLOYMENT: Your deployment name (default: gpt-4)
-   * - AZURE_OPENAI_API_VERSION: API version (default: 2024-02-15-preview)
+   *
+   * Optional Environment Variables:
+   * - AZURE_OPENAI_API_VERSION: API version (optional for newer Foundry deployments)
    */
   private async generateWithAzure(
     messages: ChatMessage[],
@@ -359,8 +362,9 @@ export class SummaryService {
     const deploymentName = AI_CONFIG.azure.deploymentName;
     const apiVersion = AI_CONFIG.azure.apiVersion;
 
-    // Azure OpenAI API URL format
-    const url = `${endpoint}/openai/deployments/${deploymentName}/chat/completions?api-version=${apiVersion}`;
+    // Azure OpenAI API URL format (api-version is optional for newer Foundry deployments)
+    const baseUrl = `${endpoint}/openai/deployments/${deploymentName}/chat/completions`;
+    const url = apiVersion ? `${baseUrl}?api-version=${apiVersion}` : baseUrl;
 
     logger.debug(`[SummaryService] Azure request to: ${url}`);
 
