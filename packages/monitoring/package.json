@@ -1,0 +1,24 @@
+{
+  "name": "@whatssummarize/monitoring",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Error monitoring and observability package for WhatsSummarize",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {},
+  "peerDependencies": {
+    "@sentry/node": "^7.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@sentry/node": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

@@ -1,0 +1,306 @@
+/**
+ * WhatsSummarize Chrome Extension Styles (Production)
+ *
+ * Design System Adherence:
+ * - Uses WhatsApp brand colors from Phase 0.5
+ * - Primary: #25D366
+ * - Secondary: #128C7E
+ * - Follows glassmorphism design pattern
+ * - Supports dark mode
+ */
+
+/* =============================================================================
+   Container
+   ============================================================================= */
+
+#whatssummarize-fab {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* =============================================================================
+   Floating Action Button
+   ============================================================================= */
+
+.ws-fab-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+  color: white;
+  border: none;
+  border-radius: 24px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ws-fab-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.5);
+}
+
+.ws-fab-btn:active {
+  transform: translateY(0);
+}
+
+.ws-fab-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.ws-fab-btn svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.ws-fab-text {
+  white-space: nowrap;
+}
+
+/* =============================================================================
+   Status Indicator
+   ============================================================================= */
+
+.ws-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.98);
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(12px);
+  transition: all 0.3s ease;
+  max-width: 280px;
+}
+
+.ws-status.ws-hidden {
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+}
+
+/* Status icon */
+.ws-status-icon {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.ws-status-info .ws-status-icon {
+  background: #3b82f6;
+}
+
+.ws-status-success .ws-status-icon {
+  background: #25D366;
+}
+
+.ws-status-error .ws-status-icon {
+  background: #dc2626;
+}
+
+.ws-status-loading .ws-status-icon {
+  background: transparent;
+}
+
+/* Status text colors */
+.ws-status-info {
+  color: #333;
+}
+
+.ws-status-success {
+  color: #065f46;
+  background: rgba(209, 250, 229, 0.95);
+}
+
+.ws-status-error {
+  color: #991b1b;
+  background: rgba(254, 226, 226, 0.95);
+}
+
+.ws-status-loading {
+  color: #1e40af;
+  background: rgba(219, 234, 254, 0.95);
+}
+
+/* =============================================================================
+   Progress Bar
+   ============================================================================= */
+
+.ws-progress {
+  width: 200px;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+  transition: opacity 0.3s ease;
+}
+
+.ws-progress.ws-hidden {
+  opacity: 0;
+}
+
+.ws-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #25D366 0%, #34d058 100%);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+  width: 0%;
+}
+
+/* =============================================================================
+   Spinner Animation
+   ============================================================================= */
+
+.ws-spinner {
+  width: 14px !important;
+  height: 14px !important;
+  border: 2px solid rgba(30, 64, 175, 0.2);
+  border-top-color: #1e40af;
+  border-radius: 50%;
+  animation: ws-spin 0.8s linear infinite;
+}
+
+@keyframes ws-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* =============================================================================
+   Loading State
+   ============================================================================= */
+
+.ws-fab-btn.ws-loading {
+  animation: ws-pulse 1.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes ws-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* =============================================================================
+   Dark Mode Support
+   ============================================================================= */
+
+@media (prefers-color-scheme: dark) {
+  .ws-status {
+    background: rgba(38, 38, 38, 0.98);
+    color: #e5e5e5;
+  }
+
+  .ws-status-info {
+    color: #d1d5db;
+  }
+
+  .ws-status-success {
+    background: rgba(6, 78, 59, 0.95);
+    color: #a7f3d0;
+  }
+
+  .ws-status-error {
+    background: rgba(127, 29, 29, 0.95);
+    color: #fca5a5;
+  }
+
+  .ws-status-loading {
+    background: rgba(30, 58, 138, 0.95);
+    color: #93c5fd;
+  }
+
+  .ws-progress {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+/* =============================================================================
+   Mobile/Responsive Adjustments
+   ============================================================================= */
+
+@media (max-width: 768px) {
+  #whatssummarize-fab {
+    bottom: 16px;
+    right: 16px;
+  }
+
+  .ws-fab-btn {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+
+  .ws-fab-text {
+    display: none;
+  }
+
+  .ws-status {
+    max-width: 220px;
+    font-size: 12px;
+  }
+
+  .ws-progress {
+    width: 150px;
+  }
+}
+
+/* =============================================================================
+   Accessibility
+   ============================================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .ws-fab-btn,
+  .ws-status,
+  .ws-progress-bar {
+    transition: none;
+  }
+
+  .ws-spinner {
+    animation: none;
+  }
+
+  .ws-fab-btn.ws-loading {
+    animation: none;
+  }
+}
+
+/* Focus states for keyboard navigation */
+.ws-fab-btn:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(37, 211, 102, 0.5);
+}
+
+/* =============================================================================
+   High Contrast Mode
+   ============================================================================= */
+
+@media (forced-colors: active) {
+  .ws-fab-btn {
+    border: 2px solid currentColor;
+  }
+
+  .ws-status {
+    border: 1px solid currentColor;
+  }
+}
