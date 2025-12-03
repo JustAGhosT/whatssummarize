@@ -98,7 +98,9 @@ async function withRetry<T>(
       lastError = error as Error;
 
       // Don't retry on client errors (4xx) except rate limiting (429)
-      if (error instanceof Error && error.message.includes('4') && !error.message.includes('429')) {
+      // Check if the error has a status property (from fetch Response)
+      const status = (error as any).status || (error as any).statusCode || (error as any).response?.status;
+      if (typeof status === 'number' && status >= 400 && status < 500 && status !== 429) {
         throw error;
       }
 
