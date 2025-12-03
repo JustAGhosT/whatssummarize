@@ -278,4 +278,4 @@ This document outlines potential enhancements, features, and improvements that c
 
 ---
 
-*Last updated: December 2024*
+Last updated: December 2024
