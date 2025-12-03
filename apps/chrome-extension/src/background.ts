@@ -34,14 +34,8 @@ interface RateLimitState {
   resetTime: number;
 }
 
-// =============================================================================
-// State
-// =============================================================================
-
-const rateLimitState: RateLimitState = {
-  apiCallCount: 0,
-  resetTime: Date.now() + 60000,
-};
+// Storage key for persistent rate limiting
+const RATE_LIMIT_STORAGE_KEY = 'ws_rate_limit_state';
 
 // =============================================================================
 // Message Handler
@@ -107,8 +101,9 @@ async function sendChatData(chatData: any): Promise<ExtensionResponse> {
       return { success: false, error: 'Not authenticated. Please log in first.' };
     }
 
-    // Check rate limiting
-    if (!checkApiRateLimit()) {
+    // Check rate limiting (persistent across service worker restarts)
+    const canProceed = await checkApiRateLimit();
+    if (!canProceed) {
       // Queue for later
       await queuePendingUpload(chatData);
       return { success: false, error: 'Rate limited. Queued for later.' };
@@ -150,7 +145,8 @@ async function fetchWithRetry(url: string, options: RequestInit, maxRetries: num
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      rateLimitState.apiCallCount++;
+      // Track API call count persistently
+      await incrementApiCallCount();
 
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000);
@@ -318,9 +314,15 @@ async function queuePendingUpload(data: any): Promise<void> {
     attempts: 0,
   });
 
-  // Keep only last 20 pending uploads
+  // Keep only last 20 pending uploads, warn if dropping
+  let dropped = 0;
   while (pending.length > 20) {
     pending.shift();
+    dropped++;
+  }
+
+  if (dropped > 0) {
+    console.warn(`[Background] Queue full. Dropped ${dropped} oldest upload(s) to make room.`);
   }
 
   await chrome.storage.local.set({ [STORAGE_KEYS.pendingUploads]: pending });
@@ -409,18 +411,45 @@ async function trackExtractionHistory(chatData: any): Promise<void> {
 }
 
 // =============================================================================
-// Rate Limiting
+// Rate Limiting (Persistent across service worker restarts)
 // =============================================================================
 
-function checkApiRateLimit(): boolean {
+/**
+ * Get rate limit state from persistent storage
+ */
+async function getRateLimitState(): Promise<RateLimitState> {
+  const stored = await chrome.storage.local.get([RATE_LIMIT_STORAGE_KEY]);
+  const state = stored[RATE_LIMIT_STORAGE_KEY] as RateLimitState | undefined;
+
   const now = Date.now();
 
-  if (now > rateLimitState.resetTime) {
-    rateLimitState.apiCallCount = 0;
-    rateLimitState.resetTime = now + 60000;
+  // Return existing state or create new one
+  if (state && now < state.resetTime) {
+    return state;
   }
 
-  return rateLimitState.apiCallCount < RATE_LIMIT_CONFIG.maxApiCallsPerMinute;
+  // Reset if expired or doesn't exist
+  return {
+    apiCallCount: 0,
+    resetTime: now + 60000, // 1 minute window
+  };
+}
+
+/**
+ * Increment API call count with persistence
+ */
+async function incrementApiCallCount(): Promise<void> {
+  const state = await getRateLimitState();
+  state.apiCallCount++;
+  await chrome.storage.local.set({ [RATE_LIMIT_STORAGE_KEY]: state });
+}
+
+/**
+ * Check if API rate limit allows another call (persistent)
+ */
+async function checkApiRateLimit(): Promise<boolean> {
+  const state = await getRateLimitState();
+  return state.apiCallCount < RATE_LIMIT_CONFIG.maxApiCallsPerMinute;
 }
 
 // =============================================================================
