@@ -28,8 +28,11 @@ param tags object = {}
 @allowed(['Monthly', 'Quarterly', 'Annually'])
 param timeGrain string = 'Monthly'
 
-@description('Start date for the budget (YYYY-MM-DD format)')
-param startDate string = '${utcNow('yyyy')}-${utcNow('MM')}-01'
+@description('Current date for budget calculation (passed from parent to ensure consistency)')
+param currentDate string = utcNow('yyyy-MM-01')
+
+// Derive startDate from the single currentDate value to avoid race conditions
+var startDate = currentDate
 
 // =============================================================================
 // Variables

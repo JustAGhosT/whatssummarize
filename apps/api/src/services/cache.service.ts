@@ -20,12 +20,15 @@
  * }
  */
 
-import { createClient, RedisClientType } from 'redis';
 import { logger } from '../utils/logger.js';
 import { getCorrelationContext } from '../middleware/correlation.js';
 import { CACHE_TTL } from '../config/constants.js';
 import { CircuitBreaker, getCircuitBreaker } from './circuit-breaker.service.js';
 import { metrics } from './metrics.service.js';
+
+// Dynamic import for Redis to handle cases where it's not installed
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type RedisClientType = any;
 
 // =============================================================================
 // Types
@@ -133,10 +136,12 @@ class MemoryCache {
 // =============================================================================
 
 class CacheService {
-  private redisClient: RedisClientType | null = null;
+  private redisClient: RedisClientType = null;
   private memoryCache: MemoryCache;
   private circuitBreaker: CircuitBreaker;
   private isRedisConnected: boolean = false;
+  private isInitialized: boolean = false;
+  private initPromise: Promise<void> | null = null;
   private stats: CacheStats = {
     hits: 0,
     misses: 0,
@@ -158,7 +163,18 @@ class CacheService {
       successThreshold: 2,
     });
 
-    this.initRedis();
+    // Start initialization but don't block constructor
+    this.initPromise = this.initRedis();
+  }
+
+  /**
+   * Ensure Redis is initialized before operations
+   */
+  private async ensureInitialized(): Promise<void> {
+    if (this.isInitialized) return;
+    if (this.initPromise) {
+      await this.initPromise;
+    }
   }
 
   /**
@@ -169,11 +185,30 @@ class CacheService {
 
     if (!redisUrl) {
       logger.info('Redis URL not configured, using in-memory cache');
+      this.isInitialized = true;
       return;
     }
 
     try {
-      this.redisClient = createClient({ url: redisUrl });
+      // Dynamic import to handle cases where redis is not installed
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-require-imports
+      let redis: any = null;
+      try {
+        // Use eval to prevent TypeScript from analyzing the import
+        redis = await (eval('import("redis")') as Promise<any>);
+      } catch {
+        logger.warn('Redis package not installed, using in-memory cache');
+        this.isInitialized = true;
+        return;
+      }
+
+      if (!redis || !redis.createClient) {
+        logger.warn('Redis module invalid, using in-memory cache');
+        this.isInitialized = true;
+        return;
+      }
+
+      this.redisClient = redis.createClient({ url: redisUrl });
 
       this.redisClient.on('connect', () => {
         logger.info('Redis connected');
@@ -182,7 +217,7 @@ class CacheService {
         this.stats.connected = true;
       });
 
-      this.redisClient.on('error', (err) => {
+      this.redisClient.on('error', (err: Error) => {
         logger.error('Redis connection error', { error: err.message });
         this.stats.errors++;
       });
@@ -199,6 +234,8 @@ class CacheService {
         error: error instanceof Error ? error.message : 'Unknown error',
       });
       this.redisClient = null;
+    } finally {
+      this.isInitialized = true;
     }
   }
 
@@ -214,6 +251,7 @@ class CacheService {
    * Get a value from cache
    */
   async get<T>(key: string, options: CacheOptions = {}): Promise<T | null> {
+    await this.ensureInitialized();
     const fullKey = this.buildKey(key, options.namespace);
     const startTime = Date.now();
 
@@ -319,6 +357,7 @@ class CacheService {
 
   /**
    * Delete all keys matching a pattern
+   * Uses SCAN instead of KEYS to avoid blocking Redis
    */
   async deletePattern(pattern: string, namespace?: string): Promise<number> {
     const fullPattern = this.buildKey(pattern, namespace);
@@ -327,15 +366,26 @@ class CacheService {
       let deleted = this.memoryCache.deletePattern(fullPattern);
 
       if (this.isRedisConnected && this.redisClient) {
-        const keys = await this.circuitBreaker.execute(async () => {
-          return await this.redisClient!.keys(fullPattern);
+        // Use SCAN instead of KEYS to avoid blocking Redis
+        const keysToDelete: string[] = [];
+
+        await this.circuitBreaker.execute(async () => {
+          let cursor = 0;
+          do {
+            const result = await this.redisClient!.scan(cursor, {
+              MATCH: fullPattern,
+              COUNT: 100,
+            });
+            cursor = result.cursor;
+            keysToDelete.push(...result.keys);
+          } while (cursor !== 0);
         });
 
-        if (keys.length > 0) {
+        if (keysToDelete.length > 0) {
           await this.circuitBreaker.execute(async () => {
-            await this.redisClient!.del(keys);
+            await this.redisClient!.del(keysToDelete);
           });
-          deleted = keys.length;
+          deleted = keysToDelete.length;
         }
       }
 
@@ -397,15 +447,28 @@ class CacheService {
 
   /**
    * Clear all caches
+   * Uses SCAN instead of KEYS to avoid blocking Redis
    */
   async clear(): Promise<void> {
     this.memoryCache.clear();
 
     if (this.isRedisConnected && this.redisClient) {
       try {
-        const keys = await this.redisClient.keys(`${this.keyPrefix}*`);
-        if (keys.length > 0) {
-          await this.redisClient.del(keys);
+        // Use SCAN instead of KEYS to avoid blocking Redis
+        const keysToDelete: string[] = [];
+        let cursor = 0;
+
+        do {
+          const result = await this.redisClient.scan(cursor, {
+            MATCH: `${this.keyPrefix}*`,
+            COUNT: 100,
+          });
+          cursor = result.cursor;
+          keysToDelete.push(...result.keys);
+        } while (cursor !== 0);
+
+        if (keysToDelete.length > 0) {
+          await this.redisClient.del(keysToDelete);
         }
       } catch (error) {
         logger.error('Failed to clear Redis cache', {

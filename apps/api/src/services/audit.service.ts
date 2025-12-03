@@ -503,11 +503,17 @@ import { Request, Response, NextFunction } from 'express';
  */
 export function auditMiddleware(req: Request, res: Response, next: NextFunction): void {
   // Store original end function
-  const originalEnd = res.end;
+  const originalEnd = res.end.bind(res);
 
-  // Override end to capture response
-  res.end = function (chunk?: any, encoding?: any, cb?: any) {
-    // Restore original end
+  // Override end to capture response with proper typing
+  // res.end has multiple overloads, we handle them all
+  res.end = function (
+    this: Response,
+    chunkOrCb?: Buffer | string | (() => void),
+    encodingOrCb?: BufferEncoding | (() => void),
+    cb?: () => void
+  ): Response {
+    // Restore original end immediately to prevent double-calling
     res.end = originalEnd;
 
     // Log the request (non-blocking)
@@ -529,9 +535,17 @@ export function auditMiddleware(req: Request, res: Response, next: NextFunction)
       },
     }).catch(() => {}); // Silent fail for audit
 
-    // Call original end
-    return originalEnd.call(this, chunk, encoding, cb);
-  };
+    // Call original end with proper argument handling
+    if (typeof chunkOrCb === 'function') {
+      return originalEnd(chunkOrCb);
+    } else if (typeof encodingOrCb === 'function') {
+      return originalEnd(chunkOrCb as Buffer | string | undefined, encodingOrCb);
+    } else if (encodingOrCb !== undefined) {
+      return originalEnd(chunkOrCb as Buffer | string | undefined, encodingOrCb, cb);
+    } else {
+      return originalEnd(chunkOrCb as Buffer | string | undefined, cb);
+    }
+  } as typeof res.end;
 
   next();
 }

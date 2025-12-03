@@ -5,10 +5,95 @@
  * Includes selector management and extension configuration.
  */
 
-import { Router, Request, Response } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import { logger } from '../utils/logger.js';
 import { cacheService } from '../services/cache.service.js';
 import { CACHE_TTL } from '../config/constants.js';
+import { extensionRateLimit, selectorReportRateLimit } from '../middleware/rate-limit.js';
+
+// =============================================================================
+// Input Validation
+// =============================================================================
+
+interface ValidationError {
+  field: string;
+  message: string;
+}
+
+function validateSelectorReport(body: any): ValidationError[] {
+  const errors: ValidationError[] = [];
+
+  if (body.discovered !== undefined && typeof body.discovered !== 'object') {
+    errors.push({ field: 'discovered', message: 'must be an object' });
+  }
+
+  if (body.userAgent !== undefined && typeof body.userAgent !== 'string') {
+    errors.push({ field: 'userAgent', message: 'must be a string' });
+  }
+
+  if (body.userAgent && body.userAgent.length > 500) {
+    errors.push({ field: 'userAgent', message: 'must be less than 500 characters' });
+  }
+
+  if (body.timestamp !== undefined) {
+    const date = new Date(body.timestamp);
+    if (isNaN(date.getTime())) {
+      errors.push({ field: 'timestamp', message: 'must be a valid ISO date string' });
+    }
+  }
+
+  return errors;
+}
+
+function validateSelectorUpdate(body: any): ValidationError[] {
+  const errors: ValidationError[] = [];
+
+  if (!body.primary && !body.fallback) {
+    errors.push({ field: 'body', message: 'primary or fallback selectors required' });
+  }
+
+  const validateSelectorSet = (set: any, name: string) => {
+    if (set && typeof set !== 'object') {
+      errors.push({ field: name, message: 'must be an object' });
+      return;
+    }
+
+    if (set) {
+      for (const [key, value] of Object.entries(set)) {
+        if (typeof value !== 'string') {
+          errors.push({ field: `${name}.${key}`, message: 'must be a string' });
+        }
+        if (typeof value === 'string' && value.length > 500) {
+          errors.push({ field: `${name}.${key}`, message: 'must be less than 500 characters' });
+        }
+      }
+    }
+  };
+
+  validateSelectorSet(body.primary, 'primary');
+  validateSelectorSet(body.fallback, 'fallback');
+
+  if (body.version !== undefined && typeof body.version !== 'string') {
+    errors.push({ field: 'version', message: 'must be a string' });
+  }
+
+  return errors;
+}
+
+function validationMiddleware(validator: (body: any) => ValidationError[]) {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    const errors = validator(req.body);
+    if (errors.length > 0) {
+      res.status(400).json({
+        error: 'Validation failed',
+        code: 'VALIDATION_ERROR',
+        details: errors,
+      });
+      return;
+    }
+    next();
+  };
+}
 
 const router = Router();
 
@@ -88,7 +173,7 @@ const MAX_REPORTS = 100;
  * @description Get current WhatsApp Web selectors
  * @access Public (extension use)
  */
-router.get('/selectors', async (req: Request, res: Response) => {
+router.get('/selectors', extensionRateLimit, async (req: Request, res: Response): Promise<void> => {
   try {
     const extensionVersion = req.headers['x-extension-version'] as string;
 
@@ -97,7 +182,8 @@ router.get('/selectors', async (req: Request, res: Response) => {
     const cached = await cacheService.get<SelectorConfig>(cacheKey);
 
     if (cached) {
-      return res.json({ selectors: cached });
+      res.json({ selectors: cached });
+      return;
     }
 
     // Cache and return
@@ -115,7 +201,11 @@ router.get('/selectors', async (req: Request, res: Response) => {
  * @description Report discovered selectors from extension
  * @access Public (extension use)
  */
-router.post('/selectors/report', async (req: Request, res: Response) => {
+router.post(
+  '/selectors/report',
+  selectorReportRateLimit,
+  validationMiddleware(validateSelectorReport),
+  async (req: Request, res: Response) => {
   try {
     const report: SelectorReport = {
       discovered: req.body.discovered || {},
@@ -147,7 +237,7 @@ router.post('/selectors/report', async (req: Request, res: Response) => {
  * @description Get selector reports (admin only)
  * @access Private (would need admin auth)
  */
-router.get('/selectors/reports', async (req: Request, res: Response) => {
+router.get('/selectors/reports', extensionRateLimit, async (_req: Request, res: Response) => {
   // In production, this would require admin authentication
   try {
     res.json({
@@ -165,58 +255,57 @@ router.get('/selectors/reports', async (req: Request, res: Response) => {
  * @description Update selectors (admin only)
  * @access Private (would need admin auth)
  */
-router.put('/selectors', async (req: Request, res: Response) => {
-  // In production, this would require admin authentication
-  try {
-    const { primary, fallback, version } = req.body;
+router.put(
+  '/selectors',
+  extensionRateLimit,
+  validationMiddleware(validateSelectorUpdate),
+  async (req: Request, res: Response) => {
+    // In production, this would require admin authentication
+    try {
+      const { primary, fallback, version } = req.body;
 
-    if (!primary && !fallback) {
-      return res.status(400).json({ error: 'primary or fallback selectors required' });
+      // Update selectors
+      if (primary) {
+        selectorConfig.primary = { ...selectorConfig.primary, ...primary };
+      }
+      if (fallback) {
+        selectorConfig.fallback = { ...selectorConfig.fallback, ...fallback };
+      }
+      if (version) {
+        selectorConfig.version = version;
+      }
+
+      selectorConfig.updatedAt = new Date().toISOString();
+
+      // Invalidate cache
+      await cacheService.deletePattern('selectors:*');
+
+      logger.info('Selectors updated', {
+        version: selectorConfig.version,
+        updatedFields: {
+          primary: primary ? Object.keys(primary) : [],
+          fallback: fallback ? Object.keys(fallback) : [],
+        },
+      });
+
+      res.json({
+        success: true,
+        selectors: selectorConfig,
+      });
+    } catch (error) {
+      logger.error('Error updating selectors:', error);
+      res.status(500).json({ error: 'Failed to update selectors' });
     }
-
-    // Update selectors
-    if (primary) {
-      selectorConfig.primary = { ...selectorConfig.primary, ...primary };
-    }
-    if (fallback) {
-      selectorConfig.fallback = { ...selectorConfig.fallback, ...fallback };
-    }
-    if (version) {
-      selectorConfig.version = version;
-    }
-
-    selectorConfig.updatedAt = new Date().toISOString();
-
-    // Invalidate cache
-    await cacheService.deletePattern('selectors:*');
-
-    logger.info('Selectors updated', {
-      version: selectorConfig.version,
-      updatedFields: {
-        primary: primary ? Object.keys(primary) : [],
-        fallback: fallback ? Object.keys(fallback) : [],
-      },
-    });
-
-    res.json({
-      success: true,
-      selectors: selectorConfig,
-    });
-  } catch (error) {
-    logger.error('Error updating selectors:', error);
-    res.status(500).json({ error: 'Failed to update selectors' });
   }
-});
+);
 
 /**
  * @route GET /api/extension/config
  * @description Get extension configuration
  * @access Public
  */
-router.get('/config', async (req: Request, res: Response) => {
+router.get('/config', extensionRateLimit, async (_req: Request, res: Response) => {
   try {
-    const extensionVersion = req.headers['x-extension-version'] as string;
-
     res.json({
       minVersion: '1.0.0',
       latestVersion: '1.0.0',
