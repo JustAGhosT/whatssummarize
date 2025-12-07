@@ -98,10 +98,11 @@ For deploying to Azure infrastructure:
 
 ## 📚 Documentation
 
+*   [Azure Setup Guide](docs/AZURE_SETUP.md): Configure Azure credentials for GitHub Actions deployment.
 *   [Implementation Plan](docs/IMPLEMENTATION_PLAN.md): Roadmap for upcoming refactors and features.
 *   [Technical Debt Registry](docs/TECHNICAL_DEBT.md): Known issues and tracking.
 *   [Code Review Analysis](docs/CODE_REVIEW_ANALYSIS.md): Deep dive into the codebase state.
-*   [Architecture](docs/architecture.md)
+*   [Architecture](docs/architecture.md): System architecture overview.
 
 ---
 
