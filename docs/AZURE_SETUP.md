@@ -171,11 +171,23 @@ For specific resource operations, you may need additional roles:
 
 ### Required Secrets
 
+**Option A: Individual Secrets (Recommended)**
+
 | Secret Name | Value | Description |
 |-------------|-------|-------------|
 | `AZURE_CLIENT_ID` | `<application-client-id>` | The Application (client) ID from Step 1 |
 | `AZURE_TENANT_ID` | `<directory-tenant-id>` | The Directory (tenant) ID from Step 1 |
 | `AZURE_SUBSCRIPTION_ID` | `<subscription-id>` | Your Azure subscription ID |
+
+**Option B: JSON Secret (For backward compatibility)**
+
+Alternatively, you can use a single `AZURE_CREDENTIALS` secret with JSON format:
+
+| Secret Name | Value | Description |
+|-------------|-------|-------------|
+| `AZURE_CREDENTIALS` | `{"clientId":"...","tenantId":"...","subscriptionId":"..."}` | JSON containing all credentials |
+
+The workflows will automatically parse the JSON to extract the individual values.
 
 ### How to Get These Values
 
@@ -296,16 +308,17 @@ Examples:
 - For PR: `repo:<your-github-username-or-org>/whatssummarize:pull_request`
 - For env: `repo:<your-github-username-or-org>/whatssummarize:environment:dev`
 
-### Workflow Fails with "Login failed"
+### Workflow Fails with "Login failed" or "Not all values are present"
 
 **Common causes:**
 1. Secrets not configured correctly
 2. Missing `id-token: write` permission in workflow
 3. Federated credentials not set up for the correct branch/environment
+4. Malformed `AZURE_CREDENTIALS` JSON if using that option
 
 **Debug steps:**
 ```yaml
-- name: Debug Secrets
+- name: Debug Secrets (for individual secrets)
   run: |
     echo "Client ID length: ${#AZURE_CLIENT_ID}"
     echo "Tenant ID length: ${#AZURE_TENANT_ID}"
@@ -314,6 +327,23 @@ Examples:
     AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
     AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
     AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+- name: Debug Secrets (for JSON secret)
+  run: |
+    echo "Parsing AZURE_CREDENTIALS..."
+    CLIENT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.clientId')
+    TENANT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.tenantId')
+    SUBSCRIPTION_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.subscriptionId')
+    echo "Client ID length: ${#CLIENT_ID}"
+    echo "Tenant ID length: ${#TENANT_ID}"
+    echo "Subscription ID length: ${#SUBSCRIPTION_ID}"
+```
+
+**Verify JSON format:**
+If using `AZURE_CREDENTIALS`, ensure the JSON is valid:
+```bash
+# Test locally
+echo '{"clientId":"xxx","tenantId":"yyy","subscriptionId":"zzz"}' | jq .
 ```
 
 ## Security Best Practices
@@ -370,12 +400,18 @@ az deployment group what-if \
 
 If you previously used `AZURE_CREDENTIALS` JSON secret:
 
+### Option 1: Use OIDC (Recommended)
+
 1. Delete the old `AZURE_CREDENTIALS` secret
 2. Follow steps 1-4 above to configure OIDC
 3. Update workflows to use the new authentication method (already done in this repo)
 4. Test thoroughly in dev environment before deploying to production
 
-The legacy format looked like:
+### Option 2: Parse JSON Secret (Current Implementation)
+
+If you need to keep using the `AZURE_CREDENTIALS` JSON secret format, the workflows automatically parse it to extract the required values:
+
+1. Create an `AZURE_CREDENTIALS` secret with the following JSON format:
 ```json
 {
   "clientId": "...",
@@ -386,4 +422,11 @@ The legacy format looked like:
 }
 ```
 
-**Note**: This format is deprecated and should not be used. OIDC is the recommended approach.
+2. The workflow will automatically extract:
+   - `clientId` → used as `client-id`
+   - `tenantId` → used as `tenant-id`
+   - `subscriptionId` → used as `subscription-id`
+
+3. This approach is compatible with OIDC authentication when the service principal has federated credentials configured
+
+**Note**: Using individual secrets (`AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`) is preferred for better security and visibility, but the JSON format is supported for backward compatibility.
