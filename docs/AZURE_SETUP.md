@@ -171,7 +171,11 @@ For specific resource operations, you may need additional roles:
 
 ### Required Secrets
 
-**Option A: Individual Secrets (Recommended)**
+Choose one of the following options:
+
+**Option A: Individual Secrets (Preferred for New Setups)**
+
+Best for new repository setups as it provides better visibility and security:
 
 | Secret Name | Value | Description |
 |-------------|-------|-------------|
@@ -179,15 +183,15 @@ For specific resource operations, you may need additional roles:
 | `AZURE_TENANT_ID` | `<directory-tenant-id>` | The Directory (tenant) ID from Step 1 |
 | `AZURE_SUBSCRIPTION_ID` | `<subscription-id>` | Your Azure subscription ID |
 
-**Option B: JSON Secret (For backward compatibility)**
+**Option B: JSON Secret (Currently Implemented)**
 
-Alternatively, you can use a single `AZURE_CREDENTIALS` secret with JSON format:
+Use this option if you already have an `AZURE_CREDENTIALS` secret configured:
 
 | Secret Name | Value | Description |
 |-------------|-------|-------------|
 | `AZURE_CREDENTIALS` | `{"clientId":"...","tenantId":"...","subscriptionId":"..."}` | JSON containing all credentials |
 
-The workflows will automatically parse the JSON to extract the individual values.
+The workflows will automatically parse the JSON to extract the individual values, with validation to ensure all required fields are present.
 
 ### How to Get These Values
 

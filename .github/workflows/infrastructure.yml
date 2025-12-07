@@ -93,14 +93,27 @@ jobs:
       - name: Parse Azure Credentials
         id: azure-creds
         run: |
-          echo "Parsing Azure credentials from AZURE_CREDENTIALS secret..."
           CLIENT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.clientId')
           TENANT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.tenantId')
           SUBSCRIPTION_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.subscriptionId')
+          
+          # Validate that parsing succeeded
+          if [ "$CLIENT_ID" = "null" ] || [ -z "$CLIENT_ID" ]; then
+            echo "Error: Failed to parse clientId from AZURE_CREDENTIALS"
+            exit 1
+          fi
+          if [ "$TENANT_ID" = "null" ] || [ -z "$TENANT_ID" ]; then
+            echo "Error: Failed to parse tenantId from AZURE_CREDENTIALS"
+            exit 1
+          fi
+          if [ "$SUBSCRIPTION_ID" = "null" ] || [ -z "$SUBSCRIPTION_ID" ]; then
+            echo "Error: Failed to parse subscriptionId from AZURE_CREDENTIALS"
+            exit 1
+          fi
+          
           echo "client-id=$CLIENT_ID" >> $GITHUB_OUTPUT
           echo "tenant-id=$TENANT_ID" >> $GITHUB_OUTPUT
           echo "subscription-id=$SUBSCRIPTION_ID" >> $GITHUB_OUTPUT
-
       - name: Azure Login
         uses: azure/login@cb79c773a3cfa27f31f25eb3f677781210c9ce3d # v1.6.1
         with:
@@ -184,14 +197,27 @@ jobs:
       - name: Parse Azure Credentials
         id: azure-creds
         run: |
-          echo "Parsing Azure credentials from AZURE_CREDENTIALS secret..."
           CLIENT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.clientId')
           TENANT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.tenantId')
           SUBSCRIPTION_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.subscriptionId')
+          
+          # Validate that parsing succeeded
+          if [ "$CLIENT_ID" = "null" ] || [ -z "$CLIENT_ID" ]; then
+            echo "Error: Failed to parse clientId from AZURE_CREDENTIALS"
+            exit 1
+          fi
+          if [ "$TENANT_ID" = "null" ] || [ -z "$TENANT_ID" ]; then
+            echo "Error: Failed to parse tenantId from AZURE_CREDENTIALS"
+            exit 1
+          fi
+          if [ "$SUBSCRIPTION_ID" = "null" ] || [ -z "$SUBSCRIPTION_ID" ]; then
+            echo "Error: Failed to parse subscriptionId from AZURE_CREDENTIALS"
+            exit 1
+          fi
+          
           echo "client-id=$CLIENT_ID" >> $GITHUB_OUTPUT
           echo "tenant-id=$TENANT_ID" >> $GITHUB_OUTPUT
           echo "subscription-id=$SUBSCRIPTION_ID" >> $GITHUB_OUTPUT
-
       - name: Azure Login
         uses: azure/login@cb79c773a3cfa27f31f25eb3f677781210c9ce3d # v1.6.1
         with:
@@ -269,14 +295,27 @@ jobs:
       - name: Parse Azure Credentials
         id: azure-creds
         run: |
-          echo "Parsing Azure credentials from AZURE_CREDENTIALS secret..."
           CLIENT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.clientId')
           TENANT_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.tenantId')
           SUBSCRIPTION_ID=$(echo '${{ secrets.AZURE_CREDENTIALS }}' | jq -r '.subscriptionId')
+          
+          # Validate that parsing succeeded
+          if [ "$CLIENT_ID" = "null" ] || [ -z "$CLIENT_ID" ]; then
+            echo "Error: Failed to parse clientId from AZURE_CREDENTIALS"
+            exit 1
+          fi
+          if [ "$TENANT_ID" = "null" ] || [ -z "$TENANT_ID" ]; then
+            echo "Error: Failed to parse tenantId from AZURE_CREDENTIALS"
+            exit 1
+          fi
+          if [ "$SUBSCRIPTION_ID" = "null" ] || [ -z "$SUBSCRIPTION_ID" ]; then
+            echo "Error: Failed to parse subscriptionId from AZURE_CREDENTIALS"
+            exit 1
+          fi
+          
           echo "client-id=$CLIENT_ID" >> $GITHUB_OUTPUT
           echo "tenant-id=$TENANT_ID" >> $GITHUB_OUTPUT
           echo "subscription-id=$SUBSCRIPTION_ID" >> $GITHUB_OUTPUT
-
       - name: Azure Login
         uses: azure/login@cb79c773a3cfa27f31f25eb3f677781210c9ce3d # v1.6.1
         with:
