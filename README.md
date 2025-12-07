@@ -87,14 +87,22 @@ For a detailed analysis, see [Technology Stack Assessment](docs/PHASE_1_TECH_STA
     pnpm dev
     ```
 
+### Azure Deployment (Optional)
+
+For deploying to Azure infrastructure:
+*   **Prerequisites**: Azure subscription and Azure CLI
+*   **Setup Guide**: See [Azure Setup Guide](docs/AZURE_SETUP.md) for configuring GitHub Actions with OIDC authentication
+*   **Infrastructure**: See [Infrastructure Guide](infra/README.md) for deployment instructions
+
 ---
 
 ## 📚 Documentation
 
+*   [Azure Setup Guide](docs/AZURE_SETUP.md): Configure Azure credentials for GitHub Actions deployment.
 *   [Implementation Plan](docs/IMPLEMENTATION_PLAN.md): Roadmap for upcoming refactors and features.
 *   [Technical Debt Registry](docs/TECHNICAL_DEBT.md): Known issues and tracking.
 *   [Code Review Analysis](docs/CODE_REVIEW_ANALYSIS.md): Deep dive into the codebase state.
-*   [Architecture](docs/architecture.md)
+*   [Architecture](docs/architecture.md): System architecture overview.
 
 ---
 
