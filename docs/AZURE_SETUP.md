@@ -59,7 +59,7 @@ OIDC allows GitHub Actions to authenticate to Azure without storing secrets.
 3. Click **Add credential**
 4. Select **GitHub Actions deploying Azure resources**
 5. Fill in the details:
-   - **Organization**: Your GitHub username or organization (e.g., `JustAGhosT`)
+   - **Organization**: Your GitHub username or organization (e.g., `myorganization`)
    - **Repository**: `whatssummarize`
    - **Entity type**: Choose one:
      - **Branch** (for main branch deployments): `main`
@@ -82,7 +82,7 @@ SUBSCRIPTION_ID=$(az account show --query id -o tsv)
 APP_ID="<your-application-client-id>"
 
 # Replace with your GitHub username or organization
-GITHUB_ORG="<your-github-username-or-org>"  # e.g., JustAGhosT
+GITHUB_ORG="<your-github-username-or-org>"  # e.g., myorganization
 GITHUB_REPO="whatssummarize"
 
 # For main branch deployments
@@ -291,12 +291,10 @@ az role assignment create \
 
 The subject format is: `repo:<GITHUB_ORG>/<GITHUB_REPO>:<entity_type>`
 
-Examples:
-- For main: `repo:JustAGhosT/whatssummarize:ref:refs/heads/main`
-- For PR: `repo:JustAGhosT/whatssummarize:pull_request`
-- For env: `repo:JustAGhosT/whatssummarize:environment:dev`
-
-Replace `JustAGhosT` with your GitHub username/organization.
+Examples (replace `myorg` with your actual GitHub username or organization):
+- For main: `repo:myorg/whatssummarize:ref:refs/heads/main`
+- For PR: `repo:myorg/whatssummarize:pull_request`
+- For env: `repo:myorg/whatssummarize:environment:dev`
 
 ### Workflow Fails with "Login failed"
 
