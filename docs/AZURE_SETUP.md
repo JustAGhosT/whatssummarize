@@ -38,15 +38,14 @@ az login
 # Set your subscription
 az account set --subscription "<your-subscription-id>"
 
-# Create service principal
+# Create service principal with Contributor role
 az ad sp create-for-rbac \
   --name "whatssummarize-github-actions" \
   --role contributor \
-  --scopes /subscriptions/<your-subscription-id> \
-  --sdk-auth
+  --scopes /subscriptions/<your-subscription-id>
 
-# Note: The --sdk-auth flag is deprecated but shows you the format
-# We'll use OIDC instead (see next steps)
+# Note: This creates the service principal but we won't use client secrets.
+# We'll configure OIDC (federated credentials) in the next step instead.
 ```
 
 ## Step 2: Configure Federated Credentials (OIDC)
@@ -60,7 +59,7 @@ OIDC allows GitHub Actions to authenticate to Azure without storing secrets.
 3. Click **Add credential**
 4. Select **GitHub Actions deploying Azure resources**
 5. Fill in the details:
-   - **Organization**: `JustAGhosT` (or your GitHub username/org)
+   - **Organization**: Your GitHub username or organization (e.g., `JustAGhosT`)
    - **Repository**: `whatssummarize`
    - **Entity type**: Choose one:
      - **Branch** (for main branch deployments): `main`
@@ -82,55 +81,59 @@ SUBSCRIPTION_ID=$(az account show --query id -o tsv)
 # Get the application ID (from step 1)
 APP_ID="<your-application-client-id>"
 
+# Replace with your GitHub username or organization
+GITHUB_ORG="<your-github-username-or-org>"  # e.g., JustAGhosT
+GITHUB_REPO="whatssummarize"
+
 # For main branch deployments
 az ad app federated-credential create \
   --id $APP_ID \
-  --parameters '{
-    "name": "github-actions-main",
-    "issuer": "https://token.actions.githubusercontent.com",
-    "subject": "repo:JustAGhosT/whatssummarize:ref:refs/heads/main",
-    "audiences": ["api://AzureADTokenExchange"]
-  }'
+  --parameters "{
+    \"name\": \"github-actions-main\",
+    \"issuer\": \"https://token.actions.githubusercontent.com\",
+    \"subject\": \"repo:${GITHUB_ORG}/${GITHUB_REPO}:ref:refs/heads/main\",
+    \"audiences\": [\"api://AzureADTokenExchange\"]
+  }"
 
 # For pull requests
 az ad app federated-credential create \
   --id $APP_ID \
-  --parameters '{
-    "name": "github-actions-pr",
-    "issuer": "https://token.actions.githubusercontent.com",
-    "subject": "repo:JustAGhosT/whatssummarize:pull_request",
-    "audiences": ["api://AzureADTokenExchange"]
-  }'
+  --parameters "{
+    \"name\": \"github-actions-pr\",
+    \"issuer\": \"https://token.actions.githubusercontent.com\",
+    \"subject\": \"repo:${GITHUB_ORG}/${GITHUB_REPO}:pull_request\",
+    \"audiences\": [\"api://AzureADTokenExchange\"]
+  }"
 
 # For dev environment
 az ad app federated-credential create \
   --id $APP_ID \
-  --parameters '{
-    "name": "github-actions-dev",
-    "issuer": "https://token.actions.githubusercontent.com",
-    "subject": "repo:JustAGhosT/whatssummarize:environment:dev",
-    "audiences": ["api://AzureADTokenExchange"]
-  }'
+  --parameters "{
+    \"name\": \"github-actions-dev\",
+    \"issuer\": \"https://token.actions.githubusercontent.com\",
+    \"subject\": \"repo:${GITHUB_ORG}/${GITHUB_REPO}:environment:dev\",
+    \"audiences\": [\"api://AzureADTokenExchange\"]
+  }"
 
 # For staging environment
 az ad app federated-credential create \
   --id $APP_ID \
-  --parameters '{
-    "name": "github-actions-staging",
-    "issuer": "https://token.actions.githubusercontent.com",
-    "subject": "repo:JustAGhosT/whatssummarize:environment:staging",
-    "audiences": ["api://AzureADTokenExchange"]
-  }'
+  --parameters "{
+    \"name\": \"github-actions-staging\",
+    \"issuer\": \"https://token.actions.githubusercontent.com\",
+    \"subject\": \"repo:${GITHUB_ORG}/${GITHUB_REPO}:environment:staging\",
+    \"audiences\": [\"api://AzureADTokenExchange\"]
+  }"
 
 # For prod environment
 az ad app federated-credential create \
   --id $APP_ID \
-  --parameters '{
-    "name": "github-actions-prod",
-    "issuer": "https://token.actions.githubusercontent.com",
-    "subject": "repo:JustAGhosT/whatssummarize:environment:prod",
-    "audiences": ["api://AzureADTokenExchange"]
-  }'
+  --parameters "{
+    \"name\": \"github-actions-prod\",
+    \"issuer\": \"https://token.actions.githubusercontent.com\",
+    \"subject\": \"repo:${GITHUB_ORG}/${GITHUB_REPO}:environment:prod\",
+    \"audiences\": [\"api://AzureADTokenExchange\"]
+  }"
 ```
 
 ## Step 3: Assign Azure Permissions
@@ -233,20 +236,25 @@ jobs:
 
 ### Verify Permissions
 
-```bash
-# Login with service principal
-az login --service-principal \
-  -u <client-id> \
-  -p <client-secret> \
-  --tenant <tenant-id>
+Test that the service principal has the correct permissions:
 
-# Test resource group creation
+```bash
+# Login using Azure CLI (not service principal)
+az login
+
+# List role assignments for the service principal
+az role assignment list --assignee <client-id>
+
+# Create a test resource group to verify permissions
 az group create \
   --name rg-test-permissions \
   --location eastus
 
-# Clean up
+# Clean up test resource group
 az group delete --name rg-test-permissions --yes
+
+# Note: The GitHub Actions workflow will use OIDC to authenticate automatically.
+# You don't need to authenticate with client secrets.
 ```
 
 ## Troubleshooting
@@ -279,10 +287,16 @@ az role assignment create \
 
 **Cause**: Incorrect federated credential configuration.
 
-**Solution**: Verify the subject claim matches your repo/branch/environment exactly:
+**Solution**: Verify the subject claim matches your repo/branch/environment exactly.
+
+The subject format is: `repo:<GITHUB_ORG>/<GITHUB_REPO>:<entity_type>`
+
+Examples:
 - For main: `repo:JustAGhosT/whatssummarize:ref:refs/heads/main`
 - For PR: `repo:JustAGhosT/whatssummarize:pull_request`
 - For env: `repo:JustAGhosT/whatssummarize:environment:dev`
+
+Replace `JustAGhosT` with your GitHub username/organization.
 
 ### Workflow Fails with "Login failed"
 
