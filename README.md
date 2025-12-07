@@ -87,6 +87,13 @@ For a detailed analysis, see [Technology Stack Assessment](docs/PHASE_1_TECH_STA
     pnpm dev
     ```
 
+### Azure Deployment (Optional)
+
+For deploying to Azure infrastructure:
+*   **Prerequisites**: Azure subscription and Azure CLI
+*   **Setup Guide**: See [Azure Setup Guide](docs/AZURE_SETUP.md) for configuring GitHub Actions with OIDC authentication
+*   **Infrastructure**: See [Infrastructure Guide](infra/README.md) for deployment instructions
+
 ---
 
 ## 📚 Documentation
