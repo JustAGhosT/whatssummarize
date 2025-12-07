@@ -41,7 +41,7 @@ This is a **monorepo** managed with `pnpm` and `Turbo`, following a modular arch
 - **Build Tool**: Turbo (monorepo orchestration)
 - **CI/CD**: GitHub Actions
 - **Code Quality**: ESLint, Prettier, SonarCloud
-- **Deployment**: Vercel (optional, can be toggled)
+- **Deployment**: Azure Container Apps
 
 ## Project Structure
 
@@ -319,7 +319,7 @@ export async function submitForm(formData: FormData) {
 
 ## Important Notes
 
-- The Vercel deployment workflow is **disabled by default** (see README)
+- Deployment is handled via Azure Container Apps (see infra/ directory)
 - Focus is currently on Chrome extension development
 - WhatsApp integration is the primary feature
 - Multi-platform support (Telegram, Discord) is planned but not yet implemented
