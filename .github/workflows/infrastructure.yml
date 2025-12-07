@@ -56,31 +56,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
-      - name: Create Azure Config Directory
+      - name: Install Bicep CLI
         run: |
-          mkdir -p "${{ runner.temp }}/.azure"
-          echo "Azure config directory created at: ${{ runner.temp }}/.azure"
-
-      - name: Setup Azure CLI
-        env:
-          AZURE_CONFIG_DIR: ${{ runner.temp }}/.azure
-        uses: azure/cli@089eac9d8cc39f5d003e94f8b65efc51076c9cbd # v2.1.0
-        with:
-          azcliversion: latest
-          inlineScript: |
-            az bicep version || az bicep install
+          az bicep install
+          az config set bicep.use_binary_from_path=false
 
       - name: Validate Bicep Syntax
-        env:
-          AZURE_CONFIG_DIR: ${{ runner.temp }}/.azure
         run: |
           echo "Validating Bicep files..."
           az bicep build --file infra/bicep/main.bicep --stdout > /dev/null
           echo "✅ Bicep syntax validation passed"
 
       - name: Lint Bicep Files
-        env:
-          AZURE_CONFIG_DIR: ${{ runner.temp }}/.azure
         run: |
           echo "Linting Bicep files..."
           # Install bicep linter if available

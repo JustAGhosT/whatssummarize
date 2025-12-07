@@ -67,3 +67,4 @@ logs
 .temp
 .tmp
 actionlint
+infra/bicep/*.json
