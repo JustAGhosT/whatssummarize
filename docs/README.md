@@ -277,7 +277,7 @@ Found an error or unclear section?
 | Metric          | Status                 |
 | --------------- | ---------------------- |
 | Total Documents | 20+                    |
-| Last Updated    | December 2024          |
+| Last Updated    | December 2025          |
 | Coverage        | ~85% of major features |
 | Maintenance     | Active                 |
 
@@ -312,6 +312,6 @@ Found an error or unclear section?
 
 _This documentation index is maintained by the WhatsSummarize team. For questions or suggestions, please open an issue._
 
-**Last Updated:** December 2024  
+**Last Updated:** December 2025  
 **Maintained By:** Core Team  
 **Status:** Active Development
