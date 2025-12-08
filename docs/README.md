@@ -1,6 +1,8 @@
-# Documentation Index
+# ConvoLens Documentation Index
 
-Welcome to the WhatsSummarize documentation. This directory contains comprehensive guides, technical specifications, and strategic planning documents for the WhatsApp conversation analysis platform.
+Welcome to the **ConvoLens** documentation (formerly WhatsSummarize). This directory contains comprehensive guides, technical specifications, and strategic planning documents for our conversation analysis platform.
+
+> **Rebranding Notice:** We've selected ConvoLens as our new brand name! See the [ConvoLens Brand Guide](../NAMING_RECOMMENDATIONS.md) for details.
 
 ---
 
@@ -44,25 +46,26 @@ Welcome to the WhatsSummarize documentation. This directory contains comprehensi
 
 ---
 
-## 🎯 Branding & Naming
+## 🎯 ConvoLens Branding
 
-### 📌 Quick Access
+### 📌 Brand Resources
 
-- **[Naming Recommendations](../NAMING_RECOMMENDATIONS.md)** ⭐ - Quick reference guide with top 3 name suggestions
-- **[Program Name Suggestions](PROGRAM_NAME_SUGGESTIONS.md)** - Comprehensive naming analysis
+- **[ConvoLens Brand Guide](../NAMING_RECOMMENDATIONS.md)** ⭐ - Complete brand identity and implementation guide
+- **[Name Selection Analysis](PROGRAM_NAME_SUGGESTIONS.md)** - Comprehensive evaluation of 18 name options
 
-### What's Inside
+### Brand Identity
 
-The naming documentation provides:
+**Selected Name:** ConvoLens (Score: 46/50)
 
-- **Top 3 Recommended Names** with scoring (out of 50, converted from 80-point scale via formula: `(Total / 80) × 50`)
-- **Summary table** of 8 additional options
-- **Brand identity concepts** (logo, colors, voice) for each candidate
-- **Implementation roadmap** for rebranding
-- **15+ name options** with detailed rationale
-- **8-factor scoring methodology** (each factor scored 1-10, max 80 points): Clarity, Memorability, Brandability, Domain Availability, Target Fit, Scalability, Uniqueness, Professional Appeal
-- **Competitive positioning** vs Buffer, Hootsuite, CoSchedule
-- **Rebranding guidelines** and cost estimates
+The ConvoLens brand provides:
+
+- **Complete Brand Identity** - Colors, logo concepts, voice guidelines
+- **Implementation Roadmap** - 5-phase plan over 12 weeks
+- **Budget Guidance** - Three tiers from $3k to $100k+
+- **Tagline:** "See Your Conversations Clearly"
+- **Colors:** Deep Purple (#6B46C1) + Bright Cyan (#06B6D4) + Soft Lavender (#C4B5FD)
+- **Philosophy:** Focus, clarity, and insight through data visualization
+- **Platform Strategy:** Multi-platform (WhatsApp, Telegram, Discord, etc.)
 
 ---
 
@@ -115,12 +118,12 @@ The naming documentation provides:
 
 ### Strategy & Planning
 
-| Document                                               | Description                |
-| ------------------------------------------------------ | -------------------------- |
-| [Roadmap](ROADMAP.md)                                  | Long-term product vision   |
-| [Future Considerations](FUTURE_CONSIDERATIONS.md)      | Ideas for exploration      |
-| [Naming Recommendations](../NAMING_RECOMMENDATIONS.md) | Brand naming analysis      |
-| [Code Review Analysis](CODE_REVIEW_ANALYSIS.md)        | Codebase health assessment |
+| Document                                              | Description                      |
+| ----------------------------------------------------- | -------------------------------- |
+| [Roadmap](ROADMAP.md)                                 | Long-term product vision         |
+| [Future Considerations](FUTURE_CONSIDERATIONS.md)     | Ideas for exploration            |
+| [ConvoLens Brand Guide](../NAMING_RECOMMENDATIONS.md) | Complete brand identity (⭐ NEW) |
+| [Code Review Analysis](CODE_REVIEW_ANALYSIS.md)       | Codebase health assessment       |
 
 ---
 
@@ -133,7 +136,7 @@ The naming documentation provides:
 - **Add a new feature** → [Implementation Plan](IMPLEMENTATION_PLAN.md)
 - **Fix a bug** → [Technical Debt Registry](TECHNICAL_DEBT.md)
 - **Write tests** → [Testing Strategy](TESTING_STRATEGY.md)
-- **Rebrand the product** → [Naming Recommendations](../NAMING_RECOMMENDATIONS.md)
+- **Rebrand the product** → [ConvoLens Brand Guide](../NAMING_RECOMMENDATIONS.md) ✅
 - **Use the platform** → [User Guide](USER_GUIDE.md)
 - **Monitor production** → [Observability](OBSERVABILITY.md) + [Runbook](runbook.md)
 - **Understand tech choices** → [Phase 1 Tech Stack](PHASE_1_TECH_STACK.md)
@@ -265,7 +268,8 @@ Found an error or unclear section?
 
 ### Recently Added
 
-- ✅ Naming recommendations and comprehensive analysis
+- ✅ **ConvoLens brand selection and implementation guide** (December 2025)
+- ✅ Comprehensive name analysis (18 options evaluated)
 - ✅ Azure setup guide with OIDC
 - ✅ Testing strategy documentation
 - ✅ Observability guidelines
@@ -298,7 +302,7 @@ Found an error or unclear section?
 1. Vision: [Roadmap](ROADMAP.md)
 2. Current State: [Code Review Analysis](CODE_REVIEW_ANALYSIS.md)
 3. Planning: [Implementation Plan](IMPLEMENTATION_PLAN.md)
-4. Branding: [Naming Recommendations](../NAMING_RECOMMENDATIONS.md)
+4. **Branding: [ConvoLens Brand Guide](../NAMING_RECOMMENDATIONS.md)** ⭐
 5. Users: [User Guide](USER_GUIDE.md)
 
 ### For DevOps Engineers
@@ -310,8 +314,8 @@ Found an error or unclear section?
 
 ---
 
-_This documentation index is maintained by the WhatsSummarize team. For questions or suggestions, please open an issue._
+_This documentation index is maintained by the ConvoLens team. For questions or suggestions, please open an issue._
 
 **Last Updated:** December 2025  
 **Maintained By:** Core Team  
-**Status:** Active Development
+**Status:** Active Development | Rebranding to ConvoLens

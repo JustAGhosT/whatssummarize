@@ -1,23 +1,35 @@
-# WhatsSummarize - WhatsApp Conversation Analyzer
+# ConvoLens (formerly WhatsSummarize)
+
+> **Note:** We're rebranding to ConvoLens! This platform is in the process of transitioning from "WhatsSummarize" to our new name. [Learn more about the rebrand →](NAMING_RECOMMENDATIONS.md)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Next.js](https://img.shields.io/badge/Next.js%2015-000000?style=flat&logo=nextdotjs&logoColor=white)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-007ACC?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-3.4-38B2AC?style=flat&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 
-A comprehensive platform for analyzing and summarizing WhatsApp conversations using AI-powered tools. Upload chat exports, gain insights, and get intelligent summaries of your messaging history.
+A comprehensive platform for analyzing and summarizing conversations across messaging platforms using AI-powered tools. Upload chat exports, gain insights, and get intelligent summaries of your messaging history.
+
+**"See Your Conversations Clearly"** - The ConvoLens tagline embodies our mission to bring clarity and insight to your communication patterns.
 
 ---
 
 ## 🚀 Project Overview
 
-**WhatsSummarize** allows users to unlock insights from their WhatsApp conversation history. By uploading standard `.txt` export files, users can visualize communication patterns, activity levels, and generate AI-driven qualitative summaries.
+**ConvoLens** (formerly WhatsSummarize) allows users to unlock insights from their conversation history across messaging platforms. By uploading standard `.txt` export files, users can visualize communication patterns, activity levels, and generate AI-driven qualitative summaries.
+
+### Brand Identity
+
+- **Name:** ConvoLens
+- **Tagline:** "See Your Conversations Clearly"
+- **Colors:** Deep Purple (#6B46C1) + Bright Cyan (#06B6D4)
+- **Philosophy:** Focus, clarity, and insight through the "lens" of data
 
 ### Core Value Proposition
 
 - **Privacy-First:** Secure data handling with encryption.
 - **AI-Powered:** Deep insights using OpenAI/Anthropic (Topics, Sentiment, Summaries).
 - **User-Centric:** Simple upload flow and dashboard visualizations.
+- **Platform-Agnostic:** Starting with WhatsApp, expanding to Telegram, Discord, and more.
 
 ---
 
@@ -49,14 +61,15 @@ For a detailed analysis, see [Technology Stack Assessment](docs/PHASE_1_TECH_STA
 
 ## 🎨 Design System
 
-**Target Identity:** `shadcn/ui` + Tailwind CSS.
+**ConvoLens Brand Identity** following `shadcn/ui` + Tailwind CSS principles.
 
-- **Primary Color:** WhatsApp Green (`#25D366`)
-- **Secondary Color:** Teal (`#128C7E`)
+- **Primary Color:** Deep Purple (`#6B46C1`) - Wisdom, insight, premium
+- **Secondary Color:** Bright Cyan (`#06B6D4`) - Clarity, technology, trust
+- **Accent Color:** Soft Lavender (`#C4B5FD`) - Approachability, calm
 - **Font:** Inter
-- **Visual Style:** Glassmorphism, Rounded Corners (8px), Dark Mode Support.
+- **Visual Style:** Lens/focus metaphor, clean lines, modern gradients, dark mode support
 
-> **Note:** The project is currently in a hybrid state, transitioning from Ant Design to a pure Tailwind/Shadcn system.
+> **Note:** The project is currently in a hybrid state, transitioning from Ant Design to a pure Tailwind/Shadcn system with ConvoLens branding.
 
 ---
 
@@ -108,7 +121,8 @@ For deploying to Azure infrastructure:
 ## 📚 Documentation
 
 - [Documentation Index](docs/README.md): Complete guide to all documentation.
-- [Naming Recommendations](NAMING_RECOMMENDATIONS.md): Brand naming analysis and recommendations.
+- [**ConvoLens Brand Guide**](NAMING_RECOMMENDATIONS.md): Our new brand identity and implementation roadmap. ⭐
+- [Program Name Analysis](docs/PROGRAM_NAME_SUGGESTIONS.md): Comprehensive analysis of all name options evaluated.
 - [Azure Setup Guide](docs/AZURE_SETUP.md): Configure Azure credentials for GitHub Actions deployment.
 - [Implementation Plan](docs/IMPLEMENTATION_PLAN.md): Roadmap for upcoming refactors and features.
 - [Technical Debt Registry](docs/TECHNICAL_DEBT.md): Known issues and tracking.
