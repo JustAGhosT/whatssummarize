@@ -55,12 +55,12 @@ Welcome to the WhatsSummarize documentation. This directory contains comprehensi
 
 The naming documentation provides:
 
-- **Top 3 Recommended Names** with scoring (out of 50)
+- **Top 3 Recommended Names** with scoring (out of 50, converted from 80-point scale)
 - **Summary table** of 8 additional options
 - **Brand identity concepts** (logo, colors, voice) for each candidate
 - **Implementation roadmap** for rebranding
 - **15+ name options** with detailed rationale
-- **8-factor scoring methodology**: Clarity, Memorability, Brandability, Domain Availability, Target Fit, Scalability, Uniqueness, Professional Appeal
+- **8-factor scoring methodology** (each factor scored 1-10): Clarity, Memorability, Brandability, Domain Availability, Target Fit, Scalability, Uniqueness, Professional Appeal
 - **Competitive positioning** vs Buffer, Hootsuite, CoSchedule
 - **Rebranding guidelines** and cost estimates
 

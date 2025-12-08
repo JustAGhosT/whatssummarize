@@ -61,6 +61,8 @@ This document provides quick-reference naming recommendations for rebranding the
 | **ConvoKey**    | 34/50 | Unlock metaphor     | Discovery-focused   | Interesting      |
 
 > 📄 **Full Analysis:** See [PROGRAM_NAME_SUGGESTIONS.md](docs/PROGRAM_NAME_SUGGESTIONS.md) for detailed scoring methodology, competitive positioning, and implementation guidelines.
+>
+> **Note:** Scores are based on an 8-factor evaluation system (each factor scored 1-10, totaling 80 points max, converted to 50-point scale for easier comparison).
 
 ---
 
@@ -259,11 +261,13 @@ This document provides quick-reference naming recommendations for rebranding the
 **Goal:** Analyze impact and optimize strategy
 
 - [ ] **Metrics Tracking** (Ongoing)
-  - [ ] Monitor brand awareness metrics
-  - [ ] Track website traffic and engagement
-  - [ ] Analyze user feedback and sentiment
-  - [ ] Review conversion rate changes
-  - [ ] Assess social media growth
+  - [ ] Establish baseline metrics before rebrand (current traffic, conversion rates, brand awareness)
+  - [ ] Monitor brand awareness metrics (surveys, social mentions, search volume)
+  - [ ] Track website traffic and engagement (GA4, session duration, bounce rate)
+  - [ ] Analyze user feedback and sentiment (NPS scores, support tickets, social media)
+  - [ ] Review conversion rate changes (sign-ups, paid conversions, feature adoption)
+  - [ ] Assess social media growth (followers, engagement rate, reach)
+  - [ ] Set up data collection methods (user surveys, feedback forms, analytics dashboards)
 - [ ] **Optimization** (As needed)
   - [ ] Refine messaging based on feedback
   - [ ] Adjust visual assets if needed
