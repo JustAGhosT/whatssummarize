@@ -51,6 +51,7 @@ Welcome to the **ConvoLens** documentation (formerly WhatsSummarize). This direc
 ### 📌 Brand Resources
 
 - **[ConvoLens Brand Guide](../NAMING_RECOMMENDATIONS.md)** ⭐ - Complete brand identity and implementation guide
+- **[Brand Color Guidelines](BRAND_COLOR_GUIDELINES.md)** 🎨 - When to use ConvoLens colors vs WhatsApp colors
 - **[Name Selection Analysis](PROGRAM_NAME_SUGGESTIONS.md)** - Comprehensive evaluation of 18 name options
 
 ### Brand Identity
@@ -60,10 +61,12 @@ Welcome to the **ConvoLens** documentation (formerly WhatsSummarize). This direc
 The ConvoLens brand provides:
 
 - **Complete Brand Identity** - Colors, logo concepts, voice guidelines
+- **Color System** - ConvoLens brand colors + WhatsApp integration colors
 - **Implementation Roadmap** - 5-phase plan over 12 weeks
 - **Budget Guidance** - Three tiers from $3k to $100k+
 - **Tagline:** "See Your Conversations Clearly"
 - **Colors:** Deep Purple (#6B46C1) + Bright Cyan (#06B6D4) + Soft Lavender (#C4B5FD)
+- **WhatsApp Colors:** Preserved for WhatsApp-specific features only
 - **Philosophy:** Focus, clarity, and insight through data visualization
 - **Platform Strategy:** Multi-platform (WhatsApp, Telegram, Discord, etc.)
 

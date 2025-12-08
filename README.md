@@ -122,6 +122,7 @@ For deploying to Azure infrastructure:
 
 - [Documentation Index](docs/README.md): Complete guide to all documentation.
 - [**ConvoLens Brand Guide**](NAMING_RECOMMENDATIONS.md): Our new brand identity and implementation roadmap. ⭐
+- [**Brand Color Guidelines**](docs/BRAND_COLOR_GUIDELINES.md): How to use ConvoLens colors vs WhatsApp colors. 🎨
 - [Program Name Analysis](docs/PROGRAM_NAME_SUGGESTIONS.md): Comprehensive analysis of all name options evaluated.
 - [Azure Setup Guide](docs/AZURE_SETUP.md): Configure Azure credentials for GitHub Actions deployment.
 - [Implementation Plan](docs/IMPLEMENTATION_PLAN.md): Roadmap for upcoming refactors and features.
