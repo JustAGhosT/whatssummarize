@@ -3,11 +3,11 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import { json, urlencoded } from 'body-parser';
-import { initializeDatabase } from './config/database.js';
-import authRoutes from './routes/auth.routes.js';
-import groupRoutes from './routes/group.routes.js';
-import chatExportRoutes from './routes/chat-export.routes.js';
-import { logger } from './utils/logger.js';
+import { initializeDatabase } from './config/database';
+import authRoutes from './routes/auth.routes';
+import groupRoutes from './routes/group.routes';
+import chatExportRoutes from './routes/chat-export.routes';
+import { logger } from './utils/logger';
 
 export const createApp = (): Application => {
   const app = express();

@@ -1,8 +1,8 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import multer, { FileFilterCallback } from 'multer';
-import { authenticateToken } from '../middleware/auth.middleware.js';
-import { parseWhatsAppExport } from '../services/chat-export.service.js';
-import { logger } from '../utils/logger.js';
+import { authenticateToken } from '../middleware/auth.middleware';
+import { parseWhatsAppExport } from '../services/chat-export.service';
+import { logger } from '../utils/logger';
 
 declare global {
   namespace Express {

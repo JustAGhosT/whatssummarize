@@ -19,8 +19,8 @@
 
 import { promises as fs } from 'fs';
 import { join, dirname } from 'path';
-import { logger } from '../../utils/logger.js';
-import { getStorageProvider, getAzureBlobStorageConfig, type StorageProvider } from '../../config/azure/index.js';
+import { logger } from '../../utils/logger';
+import { getStorageProvider, getAzureBlobStorageConfig, type StorageProvider } from '../../config/azure/index';
 
 // =============================================================================
 // Types
