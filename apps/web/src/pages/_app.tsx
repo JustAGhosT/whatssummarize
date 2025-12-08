@@ -28,9 +28,10 @@ function MyApp({ Component, pageProps, router }: AppProps) {
     <ConfigProvider
       theme={{
         token: {
-          colorPrimary: '#25D366', // WhatsApp green
+          colorPrimary: '#6B46C1', // ConvoLens Deep Purple
           borderRadius: 8,
-          colorLink: '#25D366', // WhatsApp green for links
+          colorLink: '#6B46C1', // ConvoLens Purple for links
+          colorLinkHover: '#06B6D4', // ConvoLens Cyan on hover
         },
         components: {
           Button: {

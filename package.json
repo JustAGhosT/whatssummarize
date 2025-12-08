@@ -1,7 +1,8 @@
 {
-  "name": "whatsapp-conversation-summarizer",
+  "name": "convolens",
   "version": "0.1.0",
   "private": true,
+  "description": "ConvoLens - See Your Conversations Clearly. AI-powered conversation analysis platform.",
   "packageManager": "pnpm@8.15.4",
   "engines": {
     "node": ">=18.0.0",
