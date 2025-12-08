@@ -62,7 +62,7 @@ This document provides quick-reference naming recommendations for rebranding the
 
 > 📄 **Full Analysis:** See [PROGRAM_NAME_SUGGESTIONS.md](docs/PROGRAM_NAME_SUGGESTIONS.md) for detailed scoring methodology, competitive positioning, and implementation guidelines.
 >
-> **Note:** Scores are based on an 8-factor evaluation system (each factor scored 1-10, totaling 80 points max, converted to 50-point scale for easier comparison).
+> **Note:** Scores are based on an 8-factor evaluation system (each factor scored 1-10, totaling 80 points max, converted to 50-point scale using formula: `(Total / 80) × 50`).
 
 ---
 

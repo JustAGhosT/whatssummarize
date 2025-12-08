@@ -14,7 +14,11 @@ This document provides a comprehensive analysis of potential brand names for the
 
 ## Scoring Methodology
 
-Each name is evaluated across 8 factors (scale: 1-10), with a maximum total score of 80 points converted to a 50-point scale for comparison.
+Each name is evaluated across 8 factors (scale: 1-10), with a maximum total score of 80 points converted to a 50-point scale for easier comparison and benchmarking.
+
+**Conversion Formula:** `Final Score = (Total Points / 80) × 50`
+
+For example, a name scoring 74 out of 80 points would receive: `(74 / 80) × 50 = 46.25` (rounded to 46/50)
 
 ### Evaluation Factors
 
