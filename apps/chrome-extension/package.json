@@ -7,7 +7,7 @@
     "build": "tsc && npm run copy-assets",
     "build:prod": "NODE_ENV=production tsc && npm run copy-assets",
     "watch": "tsc --watch",
-    "copy-assets": "cp -r src/*.css dist/ 2>/dev/null || true",
+    "copy-assets": "node -e \"const fs=require('fs');const path=require('path');const glob=require('glob').globSync||require('glob').sync;try{fs.mkdirSync('dist',{recursive:true});glob('src/*.css').forEach(f=>fs.copyFileSync(f,path.join('dist',path.basename(f))))}catch(e){}\"",
     "package": "npm run build:prod && cd dist && zip -r ../whatssummarize-extension.zip .",
     "clean": "rm -rf dist",
     "typecheck": "tsc --noEmit"
